@@ -184,7 +184,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex-1 max-w-xl">
-            <h1 className="font-bold text-3xl md:text-4xl mb-4 leading-tight">
+            <h1 className="font-bold text-2xl md:text-3xl mb-4 leading-tight">
               Breaking Down Barriers to Education
             </h1>
 
