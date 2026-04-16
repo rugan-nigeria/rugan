@@ -30,7 +30,7 @@ export default function IconFeatureCard({
   const shadows = {
     default: 'var(--shadow-card)',
     'light-green': 'none',
-    outlined: 'none',
+    outlined: '0 4px 12px rgba(0, 0, 0, 0.06)',
   }
 
   return (
