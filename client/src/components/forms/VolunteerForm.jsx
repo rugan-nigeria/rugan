@@ -8,13 +8,14 @@ import api from '@/lib/api'
 const schema = z.object({
   firstName:    z.string().min(2, 'First name is required'),
   lastName:     z.string().min(2, 'Last name is required'),
+  email:        z.string().email('Valid email address required'),
   whatsapp:     z.string().min(10, 'Valid WhatsApp number required'),
   skills:       z.string().min(3, 'Please describe your skills'),
   availability: z.string().min(1, 'Please select your availability'),
   motivation:   z.string().min(20, 'Please tell us why you want to volunteer (min 20 chars)'),
 })
 
-const AVAILABILITY_OPTIONS = ['Weekdays', 'Weekends', 'Both', 'Flexible']
+const AVAILABILITY_OPTIONS = ['Weekdays', 'Weekends', 'Remote', 'Flexible']
 
 export default function VolunteerForm() {
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
@@ -32,38 +33,52 @@ export default function VolunteerForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
-      {/* Name row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }} noValidate>
+
+      {/* First Name + Last Name */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <div>
-          <label className="form-label text-white">First Name</label>
+          <label className="form-label">First Name</label>
           <input {...register('firstName')} className="form-input" placeholder="Your first name" />
           {errors.firstName && <p className="form-error">{errors.firstName.message}</p>}
         </div>
         <div>
-          <label className="form-label text-white">Last Name</label>
+          <label className="form-label">Last Name</label>
           <input {...register('lastName')} className="form-input" placeholder="Your last name" />
           {errors.lastName && <p className="form-error">{errors.lastName.message}</p>}
         </div>
       </div>
 
-      {/* WhatsApp */}
-      <div>
-        <label className="form-label text-white">WhatsApp Number</label>
-        <input {...register('whatsapp')} type="tel" className="form-input" placeholder="+234 800 000 0000" />
-        {errors.whatsapp && <p className="form-error">{errors.whatsapp.message}</p>}
+      {/* Email + WhatsApp */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div>
+          <label className="form-label">Email Address</label>
+          <input {...register('email')} type="email" className="form-input" placeholder="your@email.com" />
+          {errors.email && <p className="form-error">{errors.email.message}</p>}
+        </div>
+        <div>
+          <label className="form-label">WhatsApp Number</label>
+          <input {...register('whatsapp')} type="tel" className="form-input" placeholder="+234 800 000 0000" />
+          {errors.whatsapp && <p className="form-error">{errors.whatsapp.message}</p>}
+        </div>
       </div>
 
-      {/* Skills */}
+      {/* Skills — 2-row textarea */}
       <div>
-        <label className="form-label text-white">Skills &amp; Experience</label>
-        <input {...register('skills')} className="form-input" placeholder="e.g. Teaching, Social work, Photography..." />
+        <label className="form-label">Skills &amp; Experience</label>
+        <textarea
+          {...register('skills')}
+          rows={2}
+          className="form-input"
+          style={{ resize: 'none' }}
+          placeholder="e.g. Teaching, Social work, Photography..."
+        />
         {errors.skills && <p className="form-error">{errors.skills.message}</p>}
       </div>
 
       {/* Availability */}
       <div>
-        <label className="form-label text-white">Availability</label>
+        <label className="form-label">Availability</label>
         <select {...register('availability')} className="form-input">
           <option value="">Select availability</option>
           {AVAILABILITY_OPTIONS.map((opt) => (
@@ -75,11 +90,12 @@ export default function VolunteerForm() {
 
       {/* Motivation */}
       <div>
-        <label className="form-label text-white">Why do you want to volunteer with RUGAN?</label>
+        <label className="form-label">Why do you want to volunteer with RUGAN?</label>
         <textarea
           {...register('motivation')}
           rows={4}
-          className="form-input resize-none"
+          className="form-input"
+          style={{ resize: 'none' }}
           placeholder="Tell us about your motivation..."
         />
         {errors.motivation && <p className="form-error">{errors.motivation.message}</p>}
