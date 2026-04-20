@@ -11,6 +11,7 @@ const schema = z.object({
   phone:       z.string().min(10, 'Valid phone number required'),
   partnership: z.string().min(1, 'Please select a partnership type'),
   message:     z.string().min(20, 'Please describe your interests (min 20 chars)'),
+  otherPartnership: z.string().min(15, 'please tell us other partnership you are interested in'),
 })
 
 const PARTNERSHIP_TYPES = [
@@ -24,10 +25,13 @@ const PARTNERSHIP_TYPES = [
   'Corporate Social Responsibility',
 ]
 
+
 export default function PartnershipForm() {
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
+  const { register, watch, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
   })
+
+  const selectedPartnership = watch('partnership')
 
   const onSubmit = async (data) => {
     try {
@@ -73,6 +77,26 @@ export default function PartnershipForm() {
         </select>
         {errors.partnership && <p className="form-error">{errors.partnership.message}</p>}
       </div>
+      {selectedPartnership === 'Other' && (
+        <div className="mt-2">
+          <input
+            type="text"
+            {...register('otherPartnership', {
+              required:
+                selectedPartnership === 'Other'
+                  ? 'Please specify partnership'
+                  : false,
+            })}
+            placeholder="Please specify..."
+            className="form-input"
+          />
+          {errors.otherPartnership && (
+            <p className="form-error">
+              {errors.otherPartnership.message}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Message */}
       <div>

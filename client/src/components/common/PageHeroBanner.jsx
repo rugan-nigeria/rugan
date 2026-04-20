@@ -54,7 +54,7 @@ export default function PageHeroBanner({
           variants={fadeUp}
           style={{
             fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-            fontWeight: 700,
+            fontWeight: 900,
             color: 'white',
             maxWidth: '48rem',
             textWrap: 'balance',
