@@ -15,10 +15,14 @@ const schema = z.object({
 })
 
 const PARTNERSHIP_TYPES = [
-  'Corporate Partnership',
-  'Program Sponsorship',
-  'In-Kind Donations',
-  'Other',
+  'Strategic Impact Partnership',
+  'Program-Based Partnership',
+  'Financial Sponsorship Partnership',
+  'Technical and Knowledge Partnership',
+  'Community Outreach Partnership',
+  'Media and communications Partnership',
+  'Volunteer Engagement Partnership',
+  'Corporate Social Responsibility',
 ]
 
 
@@ -65,8 +69,8 @@ export default function PartnershipForm() {
       {/* Partnership type */}
       <div>
         <label className="form-label">Partnership</label>
-        <select {...register('partnership')} className="form-input">
-          <option value="">Partnership</option>
+        <select {...register('partnership')} className="form-input" defaultValue="">
+          <option value="" disabled>Partnership</option>
           {PARTNERSHIP_TYPES.map((t) => (
             <option key={t} value={t}>{t}</option>
           ))}
