@@ -20,35 +20,35 @@ export default function HomePage() {
       title: "RUGAN IDGC School Tours",
       description:
         "Empowerment sessions in rural secondary schools to build confidence, leadership skills, self-belief and personal development.",
-      image: "/images/program1.jpg",
+      image: "/images/programs/card-1.jpg",
       to: "/programs/idgc",
     },
     {
       title: "RUGAN Healthy Period Project",
       description:
         "Provides accurate menstrual and body health education, reduces stigma and distribute sanitary pads and essential resources.",
-      image: "/images/program2.jpg",
+      image: "/images/programs/card-2.jpg",
       to: "/programs/period",
     },
     {
       title: "Excellence Awards",
       description:
         "Recognizes and rewards outstanding academic performance among rural secondary school girls to motivate excellence.",
-      image: "/images/program3.jpg",
+      image: "/images/programs/card-3.jpg",
       to: "/programs/awards",
     },
     {
       title: "The RISE Project",
       description:
         "Provide SS3 girls with accurate information and guidance on life after secondary school, including educational vocational and career pathways.",
-      image: "/images/program4.jpg",
+      image: "/images/programs/card-4.jpg",
       to: "/programs/rise",
     },
     {
       title: "Rural-to-Global Programme",
       description:
         "Highlights real-life stories of women who rose from rural backgrounds, while proving mentorship, skill training, and exposure pathways.",
-      image: "/images/program5.jpg",
+      image: "/images/programs/card-5.jpg",
       to: "/programs/global",
     },
   ];
@@ -147,7 +147,8 @@ export default function HomePage() {
       <PageHeroBanner
         title="Empowering Rural Girls to Become Tomorrow's Leaders"
         subtitle="Breaking down barriers facing rural girl-children through quality education, life skills, mentorship, and practical resources."
-        backgroundImage="https://images.unsplash.com/photo-1596464716127-f2a82984de30?q=80&w=1200&auto=format&fit=crop"
+        backgroundImage="/images/homepage/Hero.jpg"
+        className="min-h-screen"
       >
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <Button
@@ -177,7 +178,7 @@ export default function HomePage() {
         <div className="container-rugan flex flex-col lg:flex-row items-center gap-10 lg:gap-12">
           <div className="flex-1 max-w-xl w-full">
             <img
-              src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?q=80&w=1200&auto=format&fit=crop"
+              src="/images/homepage/rural-girls-with-card.png"
               alt="Girls education and teaching"
               className="w-full h-[420px] sm:h-[550px] lg:h-[700px] object-cover rounded-2xl border border-[#e5e5e5] shadow-lg"
             />
@@ -298,11 +299,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex-1 max-w-xl w-full">
+          <div className="flex-1 max-w-xl w-full h-[350px] sm:h-[450px] lg:h-[500px]">
             <img
-              src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?q=80&w=1200&auto=format&fit=crop"
+              src="/images/homepage/group-of-girls.png"
               alt="Girls education and teaching"
-              className="w-full h-[350px] sm:h-[450px] lg:h-[500px] object-cover rounded-2xl border border-[#e5e5e5] shadow-lg"
+              className="w-full h-full object-cover rounded-2xl border border-[#e5e5e5] shadow-lg"
             />
           </div>
         </div>
