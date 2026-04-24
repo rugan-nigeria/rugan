@@ -13,6 +13,8 @@ import BlogPage from "@/pages/BlogPage";
 import ArticlePage from "@/pages/blog/ArticlePage";
 import DonationPage from "@/pages/DonationPage";
 import DonationSuccessPage from "@/pages/DonationSuccessPage";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import TermsPage from "@/pages/TermsPage";
 
 const router = createBrowserRouter([
   {
@@ -31,6 +33,8 @@ const router = createBrowserRouter([
       { path: "blog/:slug", element: <ArticlePage /> },
       { path: "donate", element: <DonationPage /> },
       { path: "donation/success", element: <DonationSuccessPage /> },
+      { path: "privacy", element: <PrivacyPolicyPage /> },
+      { path: "terms", element: <TermsPage /> },
       {
         path: "*",
         element: (

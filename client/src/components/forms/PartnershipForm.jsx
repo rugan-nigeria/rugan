@@ -44,7 +44,7 @@ export default function PartnershipForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 bg-white rounded-2xl p-8 shadow-card" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 rounded-2xl bg-white p-5 shadow-card sm:p-8" noValidate>
       {/* Org name */}
       <div>
         <label className="form-label">Organization Name / Name of Individual</label>

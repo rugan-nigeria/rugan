@@ -60,7 +60,7 @@ export default function BlogCard({ image, title, excerpt, author, date, to, clas
 
         {/* Meta */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '1rem',
+          display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap',
           fontSize: '0.8125rem', color: '#9CA3AF',
           marginBottom: '1rem',
         }}>

@@ -17,8 +17,10 @@ import {
   Leaf,
   Star,
   ShieldCheck,
+  Handshake,
   Lightbulb,
   CheckSquare,
+  UserRoundCheck,
   Heart,
   Package,
   ClipboardList,
@@ -31,7 +33,7 @@ const TIMELINE = [
   {
     year: "2022",
     side: "left",
-    title: 'RUGAN Founded as "The Girl & Nation STEAM"',
+    title: 'RUGAN Founded as "The Girl A Nation (TGAN)"',
     description:
       "The organization was officially established with a mission to empower young girls and women through education.",
   },
@@ -121,7 +123,7 @@ const FOCUS_AREAS = [
 /* ── Principles Data ── */
 const PRINCIPLES = [
   {
-    icon: Heart,
+    icon: UserRoundCheck,
     title: "Empowerment",
     description:
       "Every rural girl has the right to gain confidence, knowledge, and skills to shape her future. At Rugan, We run leadership and confidence-building sessions, provide mentorship, and support girls with information and resources that help them make informed decisions and take control of their lives.",
@@ -142,7 +144,7 @@ const PRINCIPLES = [
     color: "orange",
   },
   {
-    icon: Globe,
+    icon: Handshake,
     title: "Inclusion",
     description:
       "We are committed to reaching the most marginalized girls, ensuring that no girl is left behind because of her location, financial status, or social barriers. We prioritize rural communities, engage with schools and families, and design programmes that reach girls across all levels of secondary school.",
@@ -286,8 +288,14 @@ function AnimatedTimeline({ items }) {
   return (
     <div
       ref={containerRef}
-      style={{ position: "relative", maxWidth: "860px", margin: "0 auto" }}
+      className="relative mx-auto max-w-[860px]"
     >
+      <div className="absolute bottom-0 left-[6px] top-0 w-[2px] bg-[#E5E7EB] md:hidden" />
+      <div
+        className="absolute left-[6px] top-0 w-[2px] bg-[#D6670F] transition-[height] duration-100 ease-linear md:hidden"
+        style={{ height: `${fillPercent}%` }}
+      />
+
       {/* Grey track */}
       <div
         className="hidden md:block absolute"
@@ -317,116 +325,97 @@ function AnimatedTimeline({ items }) {
         }}
       />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+      <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
         {items.map((item, i) => {
           const isLeft = item.side === "left";
           const dotActivated = fillPercent >= (i / (items.length - 1)) * 100;
+          const content = (
+            <div
+              className="rounded-xl bg-white p-5"
+              style={{ border: "1px solid #E5E7EB" }}
+            >
+              <span
+                style={{
+                  fontSize: "1.125rem",
+                  fontWeight: 700,
+                  color: "#D6670F",
+                }}
+              >
+                {item.year}
+              </span>
+              <h3
+                style={{
+                  fontSize: "0.9375rem",
+                  fontWeight: 600,
+                  color: "#111827",
+                  margin: "0.35rem 0 0.5rem",
+                }}
+              >
+                {item.title}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.8125rem",
+                  color: "#6B7280",
+                  lineHeight: 1.6,
+                }}
+              >
+                {item.description}
+              </p>
+            </div>
+          );
 
           return (
-            <div
-              key={i}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                position: "relative",
-              }}
-            >
-              {/* Left content */}
-              <div style={{ paddingRight: "3rem" }}>
-                {isLeft && (
-                  <div
-                    className="rounded-xl p-5"
-                    style={{ border: "1px solid #E5E7EB", background: "white" }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "1.125rem",
-                        fontWeight: 700,
-                        color: "#D6670F",
-                      }}
-                    >
-                      {item.year}
-                    </span>
-                    <h3
-                      style={{
-                        fontSize: "0.9375rem",
-                        fontWeight: 600,
-                        color: "#111827",
-                        margin: "0.35rem 0 0.5rem",
-                      }}
-                    >
-                      {item.title}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "0.8125rem",
-                        color: "#6B7280",
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {item.description}
-                    </p>
-                  </div>
-                )}
+            <div key={i}>
+              <div className="relative pl-8 md:hidden">
+                <div
+                  className="absolute"
+                  style={{
+                    left: "7px",
+                    top: "1.25rem",
+                    transform: "translateX(-50%)",
+                    zIndex: 2,
+                    width: "14px",
+                    height: "14px",
+                    borderRadius: "50%",
+                    background: dotActivated ? "#D6670F" : "#D1D5DB",
+                    border: "3px solid #fff",
+                    boxShadow: dotActivated
+                      ? "0 0 0 2px #D6670F"
+                      : "0 0 0 2px #D1D5DB",
+                    transition: "background 300ms, box-shadow 300ms",
+                  }}
+                />
+                {content}
               </div>
 
-              {/* Dot */}
-              <div
-                className="hidden md:flex absolute"
-                style={{
-                  left: "50%",
-                  top: "1.25rem",
-                  transform: "translateX(-50%)",
-                  zIndex: 2,
-                  width: "14px",
-                  height: "14px",
-                  borderRadius: "50%",
-                  background: dotActivated ? "#D6670F" : "#D1D5DB",
-                  border: `3px solid ${dotActivated ? "#fff" : "#fff"}`,
-                  boxShadow: dotActivated
-                    ? "0 0 0 2px #D6670F"
-                    : "0 0 0 2px #D1D5DB",
-                  transition: "background 300ms, box-shadow 300ms",
-                }}
-              />
+              <div className="relative hidden md:grid md:grid-cols-2">
+                <div style={{ paddingRight: "3rem" }}>
+                  {isLeft && content}
+                </div>
 
-              {/* Right content */}
-              <div style={{ paddingLeft: "3rem" }}>
-                {!isLeft && (
-                  <div
-                    className="rounded-xl p-5"
-                    style={{ border: "1px solid #E5E7EB", background: "white" }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "1.125rem",
-                        fontWeight: 700,
-                        color: "#D6670F",
-                      }}
-                    >
-                      {item.year}
-                    </span>
-                    <h3
-                      style={{
-                        fontSize: "0.9375rem",
-                        fontWeight: 600,
-                        color: "#111827",
-                        margin: "0.35rem 0 0.5rem",
-                      }}
-                    >
-                      {item.title}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "0.8125rem",
-                        color: "#6B7280",
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {item.description}
-                    </p>
-                  </div>
-                )}
+                <div
+                  className="absolute hidden md:flex"
+                  style={{
+                    left: "50%",
+                    top: "1.25rem",
+                    transform: "translateX(-50%)",
+                    zIndex: 2,
+                    width: "14px",
+                    height: "14px",
+                    borderRadius: "50%",
+                    background: dotActivated ? "#D6670F" : "#D1D5DB",
+                    border: "3px solid #fff",
+                    boxShadow: dotActivated
+                      ? "0 0 0 2px #D6670F"
+                      : "0 0 0 2px #D1D5DB",
+                    transition: "background 300ms, box-shadow 300ms",
+                  }}
+                />
+
+                <div style={{ paddingLeft: "3rem" }}>
+                  {!isLeft && content}
+                </div>
               </div>
             </div>
           );
@@ -444,7 +433,7 @@ export default function AboutPage() {
       <section className="section-padding">
         <div className="container-rugan">
           <motion.div
-            className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center"
+            className="mx-auto grid max-w-[1060px] grid-cols-1 items-center gap-6 sm:gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:gap-10"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -452,8 +441,8 @@ export default function AboutPage() {
           >
             <motion.div
               variants={fadeLeft}
-              className="rounded-2xl overflow-hidden"
-              style={{ maxWidth: "420px", aspectRatio: "3/4" }}
+              className="mx-auto w-full max-w-[420px] overflow-hidden rounded-2xl lg:mx-0"
+              style={{ aspectRatio: "3/4" }}
             >
               <img
                 src="/images/about/founder.jpg"
@@ -461,7 +450,7 @@ export default function AboutPage() {
                 className="w-full h-full object-cover object-top"
               />
             </motion.div>
-            <div>
+            <div className="mx-auto max-w-[560px] lg:mx-0">
               <h1
                 style={{
                   fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
@@ -557,12 +546,7 @@ export default function AboutPage() {
             subtitle="We concentrate our efforts on six critical areas to ensure holistic development for the girl-child"
           />
           <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 624px))",
-              gap: "1.25rem",
-              justifyContent: "center",
-            }}
+            className="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 md:grid-cols-2 md:gap-5"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -585,12 +569,7 @@ export default function AboutPage() {
             subtitle="Our values shape every decision we make and every programme we deliver"
           />
           <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 624px))",
-              gap: "1.25rem",
-              justifyContent: "center",
-            }}
+            className="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 md:grid-cols-2 md:gap-5"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"

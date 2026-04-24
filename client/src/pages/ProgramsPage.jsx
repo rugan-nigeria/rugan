@@ -53,23 +53,16 @@ export default function ProgramsPage() {
         darkOverlay
       />
 
-      {/* Programmes Grid */}
       <section className="section-padding">
         <div className="container-rugan">
-          {/* Row 1 — 3 cards */}
           <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "1.5rem",
-              marginBottom: "1.5rem",
-            }}
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
           >
-            {PROGRAMS.slice(0, 3).map((programme) => (
+            {PROGRAMS.map((programme) => (
               <motion.div
                 key={programme.slug}
                 variants={fadeUp}
@@ -80,41 +73,6 @@ export default function ProgramsPage() {
                 }}
               >
                 <ProgramCard
-                  key={programme.slug}
-                  image={programme.image}
-                  title={programme.title}
-                  description={programme.description}
-                  to={`/programmes/${programme.slug}`}
-                  variant="plain"
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Row 2 — 2 cards, left-aligned */}
-          <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "1.5rem",
-            }}
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-          >
-            {PROGRAMS.slice(3).map((programme) => (
-              <motion.div
-                key={programme.slug}
-                variants={fadeUp}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                }}
-              >
-                <ProgramCard
-                  key={programme.slug}
                   image={programme.image}
                   title={programme.title}
                   description={programme.description}

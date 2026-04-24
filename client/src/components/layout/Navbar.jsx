@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router'
-import { Menu, X, ChevronDown } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Menu, X, ChevronDown, ArrowRight } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
 
 const NAV_LINKS = [
-  { label: 'Home',        to: '/' },
+  { label: 'Home', to: '/' },
   {
     label: 'About',
     to: '/about',
@@ -15,26 +15,29 @@ const NAV_LINKS = [
       { label: 'Our Team', to: '/team' },
     ],
   },
-  { label: 'Programmes',    to: '/programmes' },
-  { label: 'Impact',      to: '/impact' },
-  { label: 'Volunteers',  to: '/volunteers' },
+  { label: 'Programmes', to: '/programmes' },
+  { label: 'Impact', to: '/impact' },
+  { label: 'Volunteers', to: '/volunteers' },
   { label: 'Partnership', to: '/partnership' },
-  { label: 'Blog',        to: '/blog' },
+  { label: 'Blog', to: '/blog' },
 ]
 
-const base   = 'block px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200'
-const idle   = 'text-gray-700'
-const hover  = 'hover:bg-[#F0FDF4] hover:text-[#4F7B44]'
+const base = 'block px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200'
+const idle = 'text-gray-700'
+const hover = 'hover:bg-[#F0FDF4] hover:text-[#4F7B44]'
 const active = 'bg-[#F0FDF4] text-[#4F7B44]'
 
 export default function Navbar() {
-  const [isOpen,       setIsOpen]       = useState(false)
-  const [scrolled,     setScrolled]     = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(null)
-  const { pathname }                    = useLocation()
-  const closeTimer                      = useRef(null)
+  const { pathname } = useLocation()
+  const closeTimer = useRef(null)
 
-  useEffect(() => { setIsOpen(false); setDropdownOpen(null) }, [pathname])
+  useEffect(() => {
+    setIsOpen(false)
+    setDropdownOpen(null)
+  }, [pathname])
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20)
@@ -42,35 +45,81 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handler)
   }, [])
 
-  /* Hover with a small delay on close so the user can move into the dropdown */
-  const openDropdown  = (label) => { clearTimeout(closeTimer.current); setDropdownOpen(label) }
-  const closeDropdown = ()      => { closeTimer.current = setTimeout(() => setDropdownOpen(null), 120) }
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isOpen])
+
+  const openDropdown = (label) => {
+    clearTimeout(closeTimer.current)
+    setDropdownOpen(label)
+  }
+
+  const closeDropdown = () => {
+    closeTimer.current = setTimeout(() => setDropdownOpen(null), 120)
+  }
+
+  const closeMenu = () => setIsOpen(false)
+
+  const isLinkActive = (link) => {
+    if (link.to === '/') {
+      return pathname === '/'
+    }
+
+    const childPaths = link.children?.map((child) => child.to) ?? []
+
+    return (
+      pathname === link.to ||
+      pathname.startsWith(link.to + '/') ||
+      childPaths.some((childPath) => pathname === childPath || pathname.startsWith(childPath + '/'))
+    )
+  }
 
   return (
-    <header className={cn('sticky top-0 z-50 w-full bg-white transition-shadow duration-300', scrolled ? 'shadow-md' : 'shadow-sm')}>
-      <nav className="container-rugan flex items-center justify-between h-16 lg:h-[4.5rem]">
-
-        {/* Logo */}
-        <motion.div initial={{ opacity:0, x:-16 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.45, ease:[0.22,1,0.36,1] }}>
-          <Link to="/" className="flex items-center gap-2 shrink-0">
+    <header
+      className={cn(
+        'sticky top-0 z-50 w-full bg-white transition-shadow duration-300',
+        scrolled ? 'shadow-md' : 'shadow-sm',
+      )}
+    >
+      <nav className="container-rugan flex h-16 items-center justify-between lg:h-[4.5rem]">
+        <motion.div
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Link to="/" className="flex shrink-0 items-center gap-2">
             <img
               src="/icons/rugan-logo.jpg"
               alt="RUGAN"
               style={{ height: '2rem', width: 'auto', borderRadius: '4px' }}
-              onError={(e) => { e.target.style.display = 'none' }}
+              onError={(e) => {
+                e.target.style.display = 'none'
+              }}
             />
-            <span className="font-bold text-lg tracking-tight" style={{ color: 'var(--color-primary)' }}>
+            <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--color-primary)' }}>
               RUGAN
             </span>
           </Link>
         </motion.div>
 
-        {/* Desktop nav */}
-        <motion.ul className="hidden lg:flex items-center gap-0.5" initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.45, delay:0.1, ease:[0.22,1,0.36,1] }}>
+        <motion.ul
+          className="hidden items-center gap-0.5 lg:flex"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        >
           {NAV_LINKS.map((link) => {
             if (link.children) {
-              const childPaths   = link.children.map((c) => c.to)
-              const parentActive = childPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
+              const childPaths = link.children.map((child) => child.to)
+              const parentActive = childPaths.some((path) => pathname === path || pathname.startsWith(path + '/'))
 
               return (
                 <li key={link.label} className="relative">
@@ -82,14 +131,21 @@ export default function Navbar() {
                     {link.label}
                     <ChevronDown
                       size={14}
-                      className={cn('transition-transform duration-200', dropdownOpen === link.label && 'rotate-180')}
+                      className={cn(
+                        'transition-transform duration-200',
+                        dropdownOpen === link.label && 'rotate-180',
+                      )}
                     />
                   </button>
 
                   {dropdownOpen === link.label && (
                     <div
-                      className="absolute top-full left-0 bg-white rounded-xl py-2 min-w-[160px]"
-                      style={{ boxShadow: 'var(--shadow-card-hover)', border: '1px solid #F3F4F6', marginTop: '2px' }}
+                      className="absolute left-0 top-full min-w-[160px] rounded-xl bg-white py-2"
+                      style={{
+                        boxShadow: 'var(--shadow-card-hover)',
+                        border: '1px solid #F3F4F6',
+                        marginTop: '2px',
+                      }}
                       onMouseEnter={() => openDropdown(link.label)}
                       onMouseLeave={closeDropdown}
                     >
@@ -98,11 +154,13 @@ export default function Navbar() {
                           key={child.to}
                           to={child.to}
                           end
-                          className={({ isActive }) =>
-                            cn('block px-4 py-2 text-sm transition-colors duration-200',
-                              isActive
-                                ? 'text-[#4F7B44] font-medium bg-[#F0FDF4]'
-                                : 'text-gray-700 hover:bg-[#F0FDF4] hover:text-[#4F7B44]')
+                          className={({ isActive: childIsActive }) =>
+                            cn(
+                              'block px-4 py-2 text-sm transition-colors duration-200',
+                              childIsActive
+                                ? 'bg-[#F0FDF4] font-medium text-[#4F7B44]'
+                                : 'text-gray-700 hover:bg-[#F0FDF4] hover:text-[#4F7B44]',
+                            )
                           }
                         >
                           {child.label}
@@ -119,7 +177,7 @@ export default function Navbar() {
                 <NavLink
                   to={link.to}
                   end={link.to === '/'}
-                  className={({ isActive }) => cn(base, isActive ? active : cn(idle, hover))}
+                  className={({ isActive: linkIsActive }) => cn(base, linkIsActive ? active : cn(idle, hover))}
                 >
                   {link.label}
                 </NavLink>
@@ -128,67 +186,176 @@ export default function Navbar() {
           })}
         </motion.ul>
 
-        {/* CTA + hamburger */}
-        <motion.div className="flex items-center gap-3" initial={{ opacity:0, x:16 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.45, delay:0.15, ease:[0.22,1,0.36,1] }}>
+        <motion.div
+          className="flex items-center gap-3"
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.45, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        >
           <Button as={Link} to="/donate" variant="primary" size="sm" className="hidden sm:inline-flex">
             Make a Donation
           </Button>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+            className={cn(
+              'flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300 lg:hidden',
+              isOpen
+                ? 'border-[#D8E6D4] bg-[#F0FDF4] text-[#4F7B44] shadow-[0_10px_24px_rgba(79,123,68,0.15)]'
+                : 'border-[#E5E7EB] bg-white text-gray-600 hover:border-[#D8E6D4] hover:bg-[#F9FAFB]',
+            )}
             aria-label="Toggle menu"
+            aria-expanded={isOpen}
           >
             {isOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </motion.div>
       </nav>
 
-      {/* Mobile menu */}
-      {isOpen && (
-        <div className="lg:hidden bg-white px-4 pb-6 pt-4" style={{ borderTop: '1px solid #F3F4F6' }}>
-          <ul className="flex flex-col gap-0.5">
-            {NAV_LINKS.map((link) => {
-              const childPaths   = link.children?.map((c) => c.to) ?? []
-              const parentActive = childPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.button
+              type="button"
+              className="fixed inset-x-0 bottom-0 top-16 z-40 bg-[#101828]/40 backdrop-blur-[3px] lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              onClick={closeMenu}
+              aria-label="Close mobile menu"
+            />
 
-              return (
-                <li key={link.label}>
-                  <NavLink
-                    to={link.to}
-                    end={link.to === '/' || !link.children}
-                    className={({ isActive }) =>
-                      cn('block px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200',
-                        (isActive || parentActive)
-                          ? 'bg-[#F0FDF4] text-[#4F7B44]'
-                          : 'text-gray-700 hover:bg-[#F0FDF4] hover:text-[#4F7B44]')
-                    }
-                  >
-                    {link.label}
-                  </NavLink>
-                  {link.children?.map((child) => (
-                    <NavLink
-                      key={child.to}
-                      to={child.to}
-                      end
-                      className={({ isActive }) =>
-                        cn('block px-8 py-2.5 rounded-xl text-sm transition-colors duration-200',
-                          isActive
-                            ? 'text-[#4F7B44] font-medium'
-                            : 'text-gray-500 hover:bg-[#F0FDF4] hover:text-[#4F7B44]')
-                      }
+            <motion.div
+              className="fixed inset-x-3 bottom-3 top-[4.5rem] z-40 overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-[0_24px_70px_rgba(16,24,40,0.22)] lg:hidden"
+              initial={{ opacity: 0, y: -18, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, scale: 0.98 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="flex h-full flex-col overflow-hidden bg-[linear-gradient(to_bottom,#F8FBF8_0%,#FFFFFF_42%,#FAFAFA_100%)]">
+                <motion.ul
+                  className="flex-1 overflow-y-auto px-4 pb-4 pt-4"
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  variants={{
+                    hidden: { transition: { staggerChildren: 0.04, staggerDirection: -1 } },
+                    visible: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
+                  }}
+                >
+                  {NAV_LINKS.map((link, index) => {
+                    const linkActive = isLinkActive(link)
+
+                    return (
+                      <motion.li
+                        key={link.label}
+                        className="mb-3 last:mb-0"
+                        variants={{
+                          hidden: { opacity: 0, y: 12 },
+                          visible: { opacity: 1, y: 0 },
+                        }}
+                      >
+                        <div
+                          className={cn(
+                            'rounded-[22px] border p-2.5 transition-all duration-300',
+                            linkActive
+                              ? 'border-[#D8E6D4] bg-white shadow-[0_14px_30px_rgba(79,123,68,0.12)]'
+                              : 'border-[#E7ECE9] bg-white/72 backdrop-blur-sm',
+                          )}
+                        >
+                          <NavLink
+                            to={link.to}
+                            end={link.to === '/'}
+                            onClick={closeMenu}
+                            className="group block rounded-[18px] p-2.5"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className={cn(
+                                    'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-[0.75rem] font-bold',
+                                    linkActive
+                                      ? 'bg-[#4F7B44] text-white'
+                                      : 'bg-[#E8F2E6] text-[#4F7B44]',
+                                  )}
+                                >
+                                  {String(index + 1).padStart(2, '0')}
+                                </span>
+                                <span className="block text-[1rem] font-semibold text-[#111827]">
+                                  {link.label}
+                                </span>
+                              </div>
+                              <ArrowRight
+                                size={16}
+                                className={cn(
+                                  'shrink-0 transition-transform duration-300',
+                                  linkActive ? 'text-[#4F7B44]' : 'text-[#98A2B3]',
+                                  'group-hover:translate-x-1',
+                                )}
+                              />
+                            </div>
+                          </NavLink>
+
+                          {link.children && (
+                            <div className="mt-1 flex flex-wrap gap-2 pl-[3.9rem]">
+                              {link.children.map((child) => {
+                                const childActive =
+                                  pathname === child.to || pathname.startsWith(child.to + '/')
+
+                                return (
+                                  <NavLink
+                                    key={child.to}
+                                    to={child.to}
+                                    end
+                                    onClick={closeMenu}
+                                    className={cn(
+                                      'inline-flex items-center rounded-full border px-3 py-2 text-[0.75rem] font-medium transition-colors duration-200',
+                                      childActive
+                                        ? 'border-[#4F7B44] bg-[#F0FDF4] text-[#4F7B44]'
+                                        : 'border-[#E5E7EB] bg-white text-[#667085] hover:border-[#D8E6D4] hover:text-[#4F7B44]',
+                                    )}
+                                  >
+                                    {child.label}
+                                  </NavLink>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </motion.li>
+                    )
+                  })}
+                </motion.ul>
+
+                <div className="border-t border-[#E9EEEA] bg-white/92 px-4 pb-4 pt-3 backdrop-blur-sm">
+                  <div className="grid grid-cols-1 gap-3">
+                    <Button
+                      as={Link}
+                      to="/donate"
+                      variant="primary"
+                      size="lg"
+                      className="w-full"
+                      onClick={closeMenu}
                     >
-                      {child.label}
-                    </NavLink>
-                  ))}
-                </li>
-              )
-            })}
-          </ul>
-          <Button as={Link} to="/donate" variant="primary" className="w-full mt-4">
-            Make a Donation
-          </Button>
-        </div>
-      )}
+                      Make a Donation
+                    </Button>
+                    <Button
+                      as={Link}
+                      to="/volunteers"
+                      variant="outline-green"
+                      size="lg"
+                      className="w-full"
+                      onClick={closeMenu}
+                    >
+                      Volunteer With Us
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

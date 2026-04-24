@@ -53,7 +53,7 @@ export default function PageHeroBanner({
         <motion.h1
           variants={fadeUp}
           style={{
-            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+            fontSize: 'clamp(1.625rem, 7vw, 2.5rem)',
             fontWeight: 900,
             color: 'white',
             maxWidth: '48rem',
@@ -72,7 +72,7 @@ export default function PageHeroBanner({
             style={{
               marginTop: '0.75rem',
               color: 'rgba(255,255,255,0.82)',
-              fontSize: '1rem',
+              fontSize: 'clamp(0.9375rem, 4vw, 1rem)',
               maxWidth: '40rem',
               lineHeight: 1.65,
               textAlign: centerText ? 'center' : 'left',
@@ -84,7 +84,7 @@ export default function PageHeroBanner({
         )}
 
         {children && (
-          <motion.div variants={fadeUp} style={{ marginTop: '1.5rem' }}>
+          <motion.div variants={fadeUp} style={{ marginTop: '1.25rem' }}>
             {children}
           </motion.div>
         )}

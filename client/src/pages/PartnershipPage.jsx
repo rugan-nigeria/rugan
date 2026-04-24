@@ -17,8 +17,130 @@ import PartnershipForm from "../components/forms/PartnershipForm";
 import PartnerLogo from "../components/common/PartnerLogo";
 import SectionHeader from "../components/ui/SectionHeader";
 
-export default function PartnershipPage() {
+function DetailGroup({
+  title,
+  items,
+  dotColor,
+  background = "#FAFAFA",
+  className = "",
+}) {
+  return (
+    <div
+      className={className}
+      style={{ background, borderRadius: "1rem", padding: "1.25rem" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          marginBottom: "0.875rem",
+        }}
+      >
+        <span style={{ color: dotColor, fontSize: "1rem", lineHeight: 1 }}>
+          <span
+            style={{
+              display: "block",
+              width: "0.375rem",
+              height: "0.375rem",
+              borderRadius: "9999px",
+              background: dotColor,
+            }}
+          />
+        </span>
+        <h2
+          style={{ fontSize: "0.9375rem", fontWeight: 600, color: "#111827" }}
+        >
+          {title}
+        </h2>
+      </div>
 
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.75rem",
+          marginLeft: "0.875rem",
+        }}
+      >
+        {items.map((item, i) => (
+          <p
+            key={i}
+            style={{ fontSize: "0.875rem", color: "#4B5563", lineHeight: 1.65 }}
+          >
+            {item}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PartnershipItems({ title, description, icon: Icon, details }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-card">
+      <div
+        className={`px-6 py-5 md:px-7 ${
+          !open ? "bg-[#FAFAFA] hover:bg-[#EAF4EE]" : "bg-white"
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="flex w-full cursor-pointer items-start justify-between gap-4 border-0 bg-transparent p-0 text-left"
+        >
+          <div className="flex items-start gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#4F7B441A]">
+              <Icon size={22} color="#4F7B44" />
+            </div>
+
+            <div>
+              <h3 className="m-0 text-[1rem] font-semibold text-[#111827]">
+                {title}
+              </h3>
+              <p className="mt-2 text-[14px] leading-6 text-[#6B7280]">
+                {description}
+              </p>
+            </div>
+          </div>
+
+          <span className="mt-1 shrink-0 text-[#6B7280]">
+            {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </span>
+        </button>
+      </div>
+
+      {open && (
+        <div className="px-6 pb-6 pt-1 md:px-7 md:pb-7">
+          <div className="grid gap-5 md:grid-cols-2">
+            <DetailGroup
+              title="What they contribute"
+              items={details.contribute}
+              dotColor="#4F7B44"
+            />
+            <DetailGroup
+              title="What RUGAN expects"
+              items={details.expects}
+              dotColor="#D6670F"
+            />
+          </div>
+
+          <DetailGroup
+            title="What they receive"
+            items={details.receive}
+            dotColor="#4F7B44"
+            background="#EAF4EE"
+            className="mt-5"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function PartnershipPage() {
   const partners = [
     {
       logo: "/images/partners/Ellipse 1.png",
@@ -47,7 +169,7 @@ export default function PartnershipPage() {
           "Access to networks, tools, or infrastructure",
         ],
         expects: [
-          "Long-term commitment (6–12 months minimum)",
+          "Long-term commitment (6-12 months minimum)",
           "Active participation in planning",
           "Strong alignment with mission",
         ],
@@ -227,83 +349,6 @@ export default function PartnershipPage() {
     },
   ];
 
-  function PartnershipItems({ title, description, icon: Icon, details }) {
-    const [open, setOpen] = useState(false);
-
-    return (
-      <div className="border border-[#E5E7EB] rounded-[12px] bg-white overflow-hidden">
-        <div
-          className={`bg-[#FAFAFA] px-[30px] py-[20px] ${
-            !open ? "hover:bg-[#EAF4EE]" : ""
-          }`}
-        >
-          <button
-            type="button"
-            onClick={() => setOpen(!open)}
-            className="w-full flex justify-between items-center bg-transparent border-0 cursor-pointer text-left p-0"
-          >
-            <div className="flex gap-[12px] items-start">
-              <div className="bg-[#4F7B441A] p-[10px] rounded-[8px]">
-                <Icon size={24} color="#4F7B44" />
-              </div>
-
-              <div>
-                <h3 className="m-0 font-semibold">{title}</h3>
-                <p className="m-0 text-[14px] text-[#6B7280]">
-                  {description}
-                </p>
-              </div>
-            </div>
-
-            {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-          </button>
-        </div>
-
-        {open && (
-          <div className="p-[30px]">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="p-[16px]">
-                <div className="flex gap-2 items-center"> 
-                  <span className="text-[#4F7B44]">•</span> 
-                  <h2 className="mb-[8px]">What they contribute</h2>
-                </div>
-                {details.contribute.map((item, i) => (
-                  <p key={i} className="my-[4px] text-[14px] px-5">
-                    {item}
-                  </p>
-                ))}
-              </div>
-
-              <div className="p-[16px]">
-                <div className="flex gap-2"> 
-                  <span className="text-red-500">•</span> 
-                  <h2 className="mb-[8px]">What RUGAN expects</h2>
-                </div>
-                {details.expects.map((item, i) => (
-                  <p key={i} className="my-[4px] text-[14px] px-5">
-                    {item}
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-[20px] p-[16px] bg-[#EAF4EE] rounded-[10px]">
-              <div className="flex gap-2"> 
-                <span className="text-[#4F7B44]">•</span> 
-                <h2 className="mb-[8px]">What they receive</h2> 
-              </div>
-              {details.receive.map((item, i) => (
-                <p key={i} className="my-[4px] text-[14px] px-5">
-                  {item}
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <>
       {/* HERO */}
@@ -315,12 +360,11 @@ export default function PartnershipPage() {
           `,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          padding: "3.5rem 0",
           textAlign: "center",
         }}
       >
         <motion.div
-          className="container-rugan"
+          className="container-rugan py-12 sm:py-14 lg:py-16"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -338,10 +382,10 @@ export default function PartnershipPage() {
           >
             <Heart size={24} color="white" fill="white" />
           </div>
-          <h1 className="text-white font-bold text-[clamp(2rem,4vw,2.75rem)]">
+          <h1 className="text-[clamp(2rem,4vw,2.75rem)] font-bold leading-[1.15] text-white">
             Make a Difference Today
           </h1>
-          <p className="text-[1rem] text-[rgba(255,255,255,0.82)] max-w-[36rem] mx-auto">
+          <p className="mx-auto mt-3 max-w-[36rem] text-[1rem] text-[rgba(255,255,255,0.82)]">
             Your donation directly empowers girls and transforms communities.
             Every contribution counts.
           </p>
@@ -353,10 +397,11 @@ export default function PartnershipPage() {
         <div className="container-rugan">
           <SectionHeader
             title="Partnership Framework"
-            subtitle="Explore our structured partnership opportunities and find the perfect wat to collaborate with RUGAN"
+            subtitle="Explore our structured partnership opportunities and find the perfect way to collaborate with RUGAN"
+            className="mx-auto max-w-2xl"
           />
 
-          <div className="flex flex-col gap-8">
+          <div className="mx-auto flex max-w-5xl flex-col gap-5">
             {partnerships.map((item, i) => (
               <PartnershipItems key={i} {...item} />
             ))}
@@ -364,42 +409,40 @@ export default function PartnershipPage() {
         </div>
       </section>
 
-      {/* OUR PARTNERS */} 
-      <section className="section-padding" style={{ background: "var(--color-teal)" }} > 
-        <div className="container-rugan"> 
-          <div style={{ textAlign: "center"}}> 
-            <h1 
-              style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 700, color: "white", }} 
-            > 
-              Our Partners 
-            </h1> 
-            <p 
-              style={{ marginTop: "0.5rem", color: "rgba(255,255,255,0.8)", fontSize: "1rem", }} 
-            > 
-              Trusted organization making a difference with us. 
-            </p> 
-            <div 
-              style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "32px", marginTop: "32px", justifyItems: "center", alignItems: "center", }} 
-            > 
-              {partners.slice(0, 3).map((partners, i ) => ( 
-                <PartnerLogo key={i} {...partners} variant="overlay" /> 
-              ))} 
-            </div> 
-          </div> 
-        </div> 
-      </section>
-
       {/* FORM */}
       <section className="section-padding bg-[#F0FDF4]">
-        <div className="container-rugan" style={{ maxWidth: "720px" }}>
-          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-              <SectionHeader
-                title="Let's Collaborate"
-                subtitle="Get in touch to discuss partnership opportunities."              
-              />
-          </div>
-          <div>
+        <div className="container-rugan">
+          <div className="mx-auto max-w-[720px]">
+            <SectionHeader
+              title="Let's Collaborate"
+              subtitle="Get in touch to discuss partnership opportunities."
+              className="mx-auto max-w-xl"
+            />
+
+            <div>
               <PartnershipForm />
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* OUR PARTNERS */}
+      <section
+        className="section-padding"
+        style={{ background: "var(--color-teal)" }}
+      >
+        <div className="container-rugan">
+          <SectionHeader
+            title="Our Partners"
+            subtitle="Trusted organisations making a difference with us."
+            theme="light"
+            className="mx-auto max-w-2xl"
+          />
+
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2 md:gap-10 lg:grid-cols-3">
+            {partners.slice(0, 3).map((partner, i) => (
+              <PartnerLogo key={i} {...partner} />
+            ))}
           </div>
         </div>
       </section>

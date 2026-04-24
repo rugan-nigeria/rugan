@@ -3,7 +3,7 @@ import { fadeUp, staggerContainer, scaleIn, viewportOnce } from "@/lib/motion";
 import { useState } from "react";
 import {
   Users,
-  CheckCircle2,
+  CheckCircle,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -114,7 +114,7 @@ const FAQS = [
   {
     question: "What is the application process?",
     answer:
-      "Our application process is simple: Complete the volunteer application form, shortlisting and review by our team, a brief virtual interview (if required), onboarding and orientation session, role assignment and project briefing. We aim to make the process smooth and transparent while ensuring volunteers are placed in roles that align with their skills and interests.",
+      "Our application process is simple: first, complete the volunteer application form. Our team will then review submissions and shortlist candidates. If needed, a brief virtual interview will follow, after which selected volunteers will go through onboarding and an orientation session before receiving their role assignments and project briefings. We strive to keep the process smooth and transparent while matching volunteers with roles that align with their skills and interests.",
   },
   {
     question: "Are there age requirements for volunteers?",
@@ -217,12 +217,7 @@ function OpportunityCard({
       }}
     >
       <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: "0.75rem",
-        }}
+        className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
       >
         <h3
           style={{ fontSize: "0.9375rem", fontWeight: 700, color: "#111827" }}
@@ -231,6 +226,7 @@ function OpportunityCard({
         </h3>
         <span
           style={{
+            alignSelf: "flex-start",
             flexShrink: 0,
             display: "inline-flex",
             alignItems: "center",
@@ -279,7 +275,7 @@ function OpportunityCard({
                 color: "#374151",
               }}
             >
-              <CheckCircle2
+              <CheckCircle
                 size={14}
                 style={{ color: "var(--color-primary)", flexShrink: 0 }}
               />
@@ -305,7 +301,7 @@ function BenefitItem({ text, variant = "green" }) {
         color: "#374151",
       }}
     >
-      <CheckCircle2
+      <CheckCircle
         size={16}
         style={{ color, flexShrink: 0, marginTop: "2px" }}
       />
@@ -318,14 +314,7 @@ function FAQItem({ question, answer }) {
   const [open, setOpen] = useState(false);
   return (
     <div
-      style={{
-        width: "720px",
-        maxWidth: "100%",
-        background: "white",
-        borderRadius: "0.75rem",
-        padding: "1rem 1.25rem",
-        margin: "0 auto",
-      }}
+      className="mx-auto w-full rounded-xl bg-white px-4 py-4 sm:px-5"
     >
       <button
         onClick={() => setOpen(!open)}
@@ -427,13 +416,7 @@ export default function VolunteerPage() {
             subtitle="Everyone with a passion for girl-child empowerment"
           />
           <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "0.875rem",
-              maxWidth: "860px",
-              margin: "0 auto",
-            }}
+            className="mx-auto grid max-w-[860px] grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -455,15 +438,7 @@ export default function VolunteerPage() {
             title="Volunteer Stories"
             subtitle="Hear from those making a difference"
           />
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr",
-              gap: "1.25rem",
-              maxWidth: "860px",
-              margin: "0 auto",
-            }}
-          >
+          <div className="mx-auto grid max-w-[860px] grid-cols-1 gap-5">
             {STORIES.map((s, i) => (
               <StoryCard key={i} {...s} />
             ))}
@@ -479,11 +454,7 @@ export default function VolunteerPage() {
             subtitle="Dedicated individuals from all walks of life, united by one mission: empowering girls"
           />
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "0.875rem",
-            }}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
           >
             {VOLUNTEER_PHOTOS.map((photo, i) => (
               <div
@@ -524,11 +495,7 @@ export default function VolunteerPage() {
             subtitle="Find a role that matches your skills and interests."
           />
           <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "1rem",
-            }}
+            className="grid grid-cols-1 gap-4 xl:grid-cols-2"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -546,22 +513,13 @@ export default function VolunteerPage() {
       {/* Benefits & Expectations */}
       <section className="section-padding">
         <div className="container-rugan">
-          <div
-            style={{
-              display: "flex",
-              gap: "1.5rem",
-              justifyContent: "center",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
             {/* Benefits */}
             <div
               style={{
-                width: "480px",
-                maxWidth: "100%",
                 background: "#F0FDF4",
                 borderRadius: "1rem",
-                padding: "1.75rem 2rem",
+                padding: "clamp(1.25rem, 4vw, 2rem)",
               }}
             >
               <h3
@@ -589,11 +547,9 @@ export default function VolunteerPage() {
             {/* Expectations */}
             <div
               style={{
-                width: "480px",
-                maxWidth: "100%",
                 background: "#FFF7ED",
                 borderRadius: "1rem",
-                padding: "1.75rem 2rem",
+                padding: "clamp(1.25rem, 4vw, 2rem)",
               }}
             >
               <h3
@@ -627,7 +583,8 @@ export default function VolunteerPage() {
         className="section-padding"
         style={{ background: "var(--color-primary)" }}
       >
-        <div className="container-rugan" style={{ maxWidth: "720px" }}>
+        <div className="container-rugan">
+          <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
             <h2
               style={{
@@ -652,10 +609,11 @@ export default function VolunteerPage() {
             style={{
               background: "white",
               borderRadius: "1rem",
-              padding: "2rem",
+              padding: "clamp(1.25rem, 4vw, 2rem)",
             }}
           >
             <VolunteerForm />
+          </div>
           </div>
         </div>
       </section>
@@ -664,17 +622,7 @@ export default function VolunteerPage() {
       <section id="faq" className="section-padding">
         <div className="container-rugan">
           <div
-            style={{
-              width: "768px",
-              maxWidth: "100%",
-              margin: "0 auto",
-              background: "#F9FAFB",
-              borderRadius: "1rem",
-              padding: "2rem 1.5rem 1.5rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.75rem",
-            }}
+            className="mx-auto flex w-full max-w-[768px] flex-col gap-3 rounded-2xl bg-[#F9FAFB] px-4 py-6 sm:px-6 sm:py-8"
           >
             <SectionHeader
               title="Frequently Asked Questions"

@@ -48,7 +48,7 @@ export default function ProgramCard({
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-            <h3 className="text-heading-sm font-semibold">{title}</h3>
+            <h3 className="text-heading-sm font-semibold text-white">{title}</h3>
             {description && (
               <p className="text-white/80 text-body-sm mt-1 line-clamp-2">
                 {description}

@@ -78,14 +78,8 @@ export default function DonationForm() {
 
   return (
     <div
-      style={{
-        background: "white",
-        borderRadius: "1rem",
-        boxShadow: "0 2px 20px rgba(0,0,0,0.08)",
-        padding: "2rem",
-        maxWidth: "580px",
-        margin: "0 auto",
-      }}
+      className="mx-auto max-w-[580px] rounded-2xl bg-white p-5 sm:p-8"
+      style={{ boxShadow: "0 2px 20px rgba(0,0,0,0.08)" }}
     >
       <h2
         style={{
@@ -111,16 +105,11 @@ export default function DonationForm() {
         >
           Donation Frequency
         </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "0.75rem",
-          }}
-        >
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {FREQUENCY_OPTIONS.map((opt) => (
             <button
               key={opt.id}
+              type="button"
               onClick={() => setFrequency(opt.id)}
               style={{
                 padding: "0.875rem 1rem",
@@ -166,16 +155,11 @@ export default function DonationForm() {
         >
           Donation Amount (₦)
         </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "0.625rem",
-          }}
-        >
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {PRESET_AMOUNTS.map((amount) => (
             <button
               key={amount}
+              type="button"
               onClick={() => setSelectedAmount(amount)}
               style={{
                 padding: "0.75rem 0.5rem",
@@ -197,6 +181,7 @@ export default function DonationForm() {
             </button>
           ))}
           <button
+            type="button"
             onClick={() => setSelectedAmount("custom")}
             style={{
               padding: "0.75rem 0.5rem",
@@ -245,6 +230,7 @@ export default function DonationForm() {
           {PAYMENT_METHODS.map(({ id, label, sub, icon: Icon }) => (
             <button
               key={id}
+              type="button"
               onClick={() => {
                 setPaymentMethod(id);
                 if (id === "transfer") {

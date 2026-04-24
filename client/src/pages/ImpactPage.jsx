@@ -1,54 +1,52 @@
-import { useRef } from "react"
-import PageHeroBanner from "../components/common/PageHeroBanner"
-import CTABanner from "../components/common/CTABanner"
-import { Users, Award, BarChart3, Target} from "lucide-react"
-import SuccessStoryCard from "../components/common/SuccessStoryCard"
-import PhotoGallery from "../components/common/PhotoGallery"
-import AnimatedCount from "../components/common/AnimatedCount"
-import { motion, useInView } from 'framer-motion'
-import { fadeUp, staggerContainer, viewportOnce } from '@/lib/motion'
-import SectionHeader from "../components/ui/SectionHeader"
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { Award, BarChart3, Heart, Target, Users } from "lucide-react";
+import CTABanner from "../components/common/CTABanner";
+import SuccessStoryCard from "../components/common/SuccessStoryCard";
+import AnimatedCount from "../components/common/AnimatedCount";
+import PageHeroBanner from "../components/common/PageHeroBanner";
+import SectionHeader from "../components/ui/SectionHeader";
+import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
 
-export default function ImpactPage() {
-  const growthSectionRef = useRef(null)
-  const highlightSectionRef = useRef(null)
-  const isGrowthSectionInView = useInView(growthSectionRef, { once: true, amount: 0.2 })
-  const isHighlightSectionInView = useInView(highlightSectionRef, { once: true, amount: 0.2 })
+const IMAGES = [
+  {
+    src: "/images/impact/Image (Impact 2).png",
+    alt: "Outreach team with community members",
+  },
+  { src: "/images/impact/Image (Impact 3).png" },
+  { src: "/images/impact/Image (Impact 4).png" },
+  { src: "/images/impact/Image (Impact 6).png" },
+  { src: "/images/impact/Image (Impact 7).png" },
+  { src: "/images/impact/Image (Impact 8).png" },
+];
 
-  const images = [
-    { src: "/images/impact/Image (Impact 2).png", alt: 'Outreach team with community members' },
-    { src: "/images/impact/Image (Impact 3).png" },
-    { src: "/images/impact/Image (Impact 4).png"},
-    { src: "/images/impact/Image (Impact 6).png" },
-    { src: "/images/impact/Image (Impact 7).png"},
-    { src: "/images/impact/Image (Impact 8).png"},
-  ]
+const STORIES = [
+  {
+    image: "/images/impact/Image (Grace).png",
+    name: "Grace",
+    description: "SS3 Student - Enugu State",
+    quote:
+      "I now know I have choices, and I feel confident planning my future.",
+    program: "The Rise Project",
+  },
+  {
+    image: "/images/impact/Image (Amina) (1).png",
+    name: "Amina",
+    description: "Junior Secondary Student - Abuja",
+    quote: "They made me believe my voice matters and I can.",
+    program: "IDGC Outreach",
+  },
+  {
+    image: "/images/impact/Image (Chiamaka).png",
+    name: "Chiamaka",
+    description: "Secondary School Student - Anambra State",
+    quote:
+      "I learned that leadership starts with confidence and speaking up, and it is not a must that I have a leadership position before.",
+    program: "IDGC Outreach",
+  },
+];
 
-  const stories = [
-    {
-      image: "/images/impact/Image (Grace).png",
-      name: 'Grace',
-      description: 'SS3 Student – Enugu State',
-      quote: 'I now know I have choices, and I feel confident planning my future.',
-      program: 'The RISE Project',
-    },
-    {
-      image: "/images/impact/Image (Amina) (1).png",
-      name: 'Amina',
-      description: 'Junior Secondary Student – Abuja',
-      quote: 'They made me believe my voice matters and I can.',
-      program: 'IDGC Outreach',
-    },
-    {
-      image: "/images/impact/Image (Chiamaka).png",
-      name: 'Chiamaka',
-      description: 'Secondary School Student – Anambra State',
-      quote: 'I learned that leadership starts with confidence and speaking up, and it is not a must that I have a leadership position before.',
-      program: 'IDGC Outreach',
-    },
-  ]
-
-  const Growth = [
+const GROWTH = [
   {
     icon: Users,
     title: "4,750+",
@@ -69,121 +67,142 @@ export default function ImpactPage() {
     title: "70+",
     description: "Active Volunteers",
   },
-]
-  const Highlight = [
+];
+
+const HIGHLIGHTS = [
+  {
+    icon: Heart,
+    title: "RUGAN Healthy Period Project",
+    stat: "1,005+",
+    description: "Girls empowered with menstrual health education",
+    iconShape: "circle",
+  },
   {
     icon: Users,
     title: "IDGC Outreaches",
-    stat:"1,465",
-    description:"Girls reached across",
-    bottomText:"six Nigeria States"
+    stat: "2153+",
+    description: "Girls reached across Nigerian States",
+    iconShape: "circle",
   },
   {
-    icon:Target,
-    title:"RISE Project",
-    stat:"250+",
-    description:"Students engaged", 
-    bottomText:"(WAEC School Tour)"
+    icon: Award,
+    title: "Excellence Award Project",
+    stat: "157+",
+    description: "Students recognized for academic excellence",
+    iconShape: "circle",
   },
-]
+  {
+    icon: Target,
+    title: "RISE Project",
+    stat: "501+",
+    description: "Students engaged in career development",
+    iconShape: "circle",
+  },
+];
 
- function StatCard({ icon: Icon, title, description, isCountActive }) {
+function StatCard({ icon: Icon, title, description, isCountActive }) {
   return (
-    <div className="bg-white rounded-[16px] px-6 py-6 border border-[#ffffff] border-t-[4px] border-b-[4px] border-t-[#548349] border-b-[#548349] flex flex-col gap-3 w-[256px] h-[174px]">
-      
-      {/* Icon */}
-      <div className="text-[#4F7B44]">
-        <Icon size={28} strokeWidth={1.8} />
+    <div className="relative flex h-full min-h-[150px] flex-col gap-2.5 overflow-hidden rounded-[22px] bg-white px-5 py-5 sm:min-h-[168px] sm:gap-3 sm:px-7 sm:py-6">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[16px]">
+        <div className="h-full w-full rounded-t-[22px] border-t-[4px] border-[#5A8A50]" />
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[16px]">
+        <div className="h-full w-full rounded-b-[22px] border-b-[4px] border-[#5A8A50]" />
       </div>
 
-      {/* Number */}
+      <div className="pt-1 text-[#4F7B44]">
+        <Icon size={30} strokeWidth={1.8} />
+      </div>
+
       <AnimatedCount
         as="h2"
         value={title}
         isActive={isCountActive}
-        className="text-[32px] font-semibold text-[#111827] leading-[1.1]"
+        className="text-[32px] font-semibold leading-[1.1] text-[#111827]"
       />
 
-      {/* Description */}
-      <p className="text-[14px] text-[#6B7280] leading-[1.4]">
-        {description}
-      </p>
+      <p className="text-[15px] leading-[1.45] text-[#4B5563]">{description}</p>
     </div>
   );
 }
 
+function ImpactHighlight({
+  icon: Icon,
+  title,
+  stat,
+  description,
+  iconShape = "circle",
+  isCountActive,
+}) {
+  const isSquare = iconShape === "square";
 
-function ImpactHighlight({ icon: Icon, title, stat, description, bottomText, isCountActive}) {
   return (
-    <div className="flex min-h-[200px] items-center gap-5 border border-[#E5E7EB] rounded-[16px] bg-white px-8 py-7">
-      
-      {/* ICON */}
-      <div className="w-16 h-16 flex items-center justify-center rounded-full bg-[#DCFCE7]">
-        <Icon size={32} color="#4F7B44" />
+    <div className="flex h-full flex-col items-start gap-4 rounded-[16px] border border-[#98A2B3] bg-white px-5 py-5 sm:min-h-[146px] sm:flex-row sm:items-center sm:gap-5 sm:px-6 sm:py-7">
+      <div
+        className={`flex shrink-0 items-center justify-center bg-[#DCFCE7] ${
+          isSquare ? "h-[58px] w-[58px] rounded-[16px]" : "h-[58px] w-[58px] rounded-full"
+        }`}
+      >
+        <Icon size={30} color="#4F7B44" strokeWidth={1.9} />
       </div>
 
-      {/* TEXT */}
-      <div className="flex flex-col gap-[2px]">
-        
-        {/* TITLE */}
-        <h3 className="text-[24px] leading-[28px] font-bold text-[#4F7B44] py-2">
+      <div className="flex flex-col gap-1.5">
+        <h3 className="text-[20px] font-bold leading-[1.2] text-[#4F7B44] sm:text-[22px]">
           {title}
         </h3>
 
-        {/* DESCRIPTION */}
-        <p className="text-[15px] leading-[22px] text-[#6B7280] lineHeight-1.6">
+        <p className="text-[14px] leading-[1.55] text-[#4B5563] sm:text-[15px]">
           <AnimatedCount
             value={stat}
             isActive={isCountActive}
-            className="font-bold text-[#111827] inline-block"
+            className="inline-block text-[16px] font-bold text-[#111827] sm:text-[17px]"
           />{" "}
           {description}
         </p>
-        <p>
-          {bottomText}
-        </p>
-
       </div>
     </div>
   );
 }
+
+export default function ImpactPage() {
+  const growthSectionRef = useRef(null);
+  const highlightSectionRef = useRef(null);
+  const isGrowthSectionInView = useInView(growthSectionRef, {
+    once: true,
+    amount: 0.2,
+  });
+  const isHighlightSectionInView = useInView(highlightSectionRef, {
+    once: true,
+    amount: 0.2,
+  });
 
   return (
     <div>
       <PageHeroBanner
-        title="Our  Impact"
+        title="Our Impact"
         subtitle="Measuring change, celebrating progress, and transforming lives one girl at a time."
         backgroundImage="/images/impact/Impact-hero.jpg"
         centerText
         darkOverlay
       />
 
-      {/* IMPACT AT A GLANCE */}
       <section ref={growthSectionRef} className="section-padding bg-white">
         <div className="container-rugan">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Impact at a Glance
-            </h2>
-            <p className="text-gray-500 mt-3">
-              Year-over-year growth and achievements
-            </p>
-          </div>
+          <SectionHeader
+            title="Impact at a Glance"
+            subtitle="Year-over-year growth and achievements"
+            className="mx-auto max-w-2xl"
+          />
 
           <motion.div
-            className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto"
+            className="mx-auto grid max-w-6xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
           >
-            {Growth.map((growth, i) => (
-              <motion.div
-                key={growth.id || i}
-                variants={fadeUp}
-                whileHover={{ y: -6, scale: 1.03 }}
-                transition={{ duration: 0.3 }}
-              >
+            {GROWTH.map((growth, i) => (
+              <motion.div key={i} variants={fadeUp}>
                 <StatCard {...growth} isCountActive={isGrowthSectionInView} />
               </motion.div>
             ))}
@@ -191,16 +210,19 @@ function ImpactHighlight({ icon: Icon, title, stat, description, bottomText, isC
         </div>
       </section>
 
-        {/* HIGHLIGHTS */}
-      <section ref={highlightSectionRef} className=" section-padding py-20 px-4 bg-[#FAFAFA]">
+      <section
+        ref={highlightSectionRef}
+        className="section-padding bg-[#FAFAFA]"
+      >
         <div className="container-rugan">
           <SectionHeader
-            title="2025 Impact Highlights"
+            title="Impact Highlights"
             subtitle="Milestones from our recent initiatives"
+            className="mx-auto max-w-2xl"
           />
 
-          <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-            {Highlight.map((highlight, i) => (
+          <div className="mx-auto grid max-w-6xl gap-7 md:grid-cols-2">
+            {HIGHLIGHTS.map((highlight, i) => (
               <ImpactHighlight
                 key={i}
                 {...highlight}
@@ -210,66 +232,71 @@ function ImpactHighlight({ icon: Icon, title, stat, description, bottomText, isC
           </div>
         </div>
       </section>
-            
-            {/* SUCCESS STORY */}
-      <section className=" section-padding py-20 px-4 bg-white">
-        <div className=" container-rugan ma x-w-6xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-             Success Stories
-            </h2>
-            <p className="text-gray-500 mt-3">
-              Real girls, real transformations
-            </p>
-          </div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {stories.map((story, index) => (
+      <section className="section-padding bg-white">
+        <div className="container-rugan">
+          <SectionHeader
+            title="Success Stories"
+            subtitle="Real girls, real transformations"
+            className="mx-auto max-w-2xl"
+          />
+
+          <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {STORIES.map((story, index) => (
               <SuccessStoryCard key={index} {...story} />
             ))}
           </div>
         </div>
       </section>
 
-            {/* IMPACT IN ACTION */}
-      <section className="bg-[#F0FDF4] section-padding">
+      <section className="section-padding bg-[#F0FDF4]">
         <div className="container-rugan">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Impact in Action
-            </h2>
-            <p className="text-gray-600 mt-3">
-              Visual stories from the field
-            </p>
-          </div>
-
-          <PhotoGallery
-            images={images}
-            bgColor="light-green"
-            className="!p-0"
+          <SectionHeader
+            title="Impact in Action"
+            subtitle="Visual stories from the field"
+            className="mx-auto max-w-2xl"
           />
+
+          <motion.div
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+          >
+            {IMAGES.map((image, index) => (
+              <motion.div
+                key={index}
+                variants={fadeUp}
+                className="aspect-square overflow-hidden rounded-2xl"
+              >
+                <img
+                  src={image.src}
+                  alt={image.alt || `Impact gallery image ${index + 1}`}
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                />
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
-
-      <div>
-        <CTABanner
-          title="Be Part of Our Impact Story"
-          subtitle="Your support helps us create more success stories and reach more girls"
-          buttons={[
-            {
-              label: 'Volunteer With Us',
-              to: '/volunteers',
-              variant: 'volunteer',
-            },
-            {
-              label: 'Make a Donation',
-              to: '/donate',
-              variant: 'primary',
-            },
-          ]} 
-        />
-      </div>
+      <CTABanner
+        title="Be Part of Our Impact Story"
+        subtitle="Your support helps us create more success stories and reach more girls"
+        buttons={[
+          {
+            label: "Volunteer With Us",
+            to: "/volunteers",
+            variant: "volunteer",
+          },
+          {
+            label: "Make a Donation",
+            to: "/donate",
+            variant: "primary",
+          },
+        ]}
+      />
     </div>
-  )
+  );
 }

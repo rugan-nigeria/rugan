@@ -180,13 +180,7 @@ function BlogList() {
 
   return (
     <motion.div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(2, minmax(0, 600px))",
-        gap: "1.5rem",
-        justifyContent: "center",
-        alignItems: "stretch",
-      }}
+      className="mx-auto grid max-w-[1220px] grid-cols-1 items-stretch gap-5 md:grid-cols-2 lg:gap-6"
       variants={staggerContainer}
       initial="hidden"
       whileInView="visible"

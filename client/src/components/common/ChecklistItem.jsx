@@ -1,23 +1,47 @@
 import { motion } from 'framer-motion'
 import { fadeUp, viewportOnce } from '@/lib/motion'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 /**
  * ChecklistItem
  * variant: 'card' | 'plain'
  */
-export default function ChecklistItem({ text, variant = 'card', className }) {
+export default function ChecklistItem({
+  text,
+  variant = 'card',
+  className,
+  iconColor = 'var(--color-primary)',
+  iconFill = 'none',
+  iconWrapperBg,
+}) {
+  const isPlain = variant === 'plain'
   const icon = (
-    <CheckCircle2
-      size={18}
-      style={{ color: 'var(--color-primary)', flexShrink: 0, marginTop: '1px' }}
-    />
+    <span
+      style={{
+        flexShrink: 0,
+        marginTop: isPlain ? 0 : '1px',
+        width: '1.625rem',
+        height: '1.625rem',
+        borderRadius: '9999px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: iconWrapperBg || 'transparent',
+      }}
+    >
+      <CheckCircle
+        size={18}
+        color={iconColor}
+        fill={iconFill}
+        strokeWidth={2}
+      />
+    </span>
   )
 
-  if (variant === 'plain') {
+  if (isPlain) {
     return (
-      <li className={cn('flex items-start gap-2.5', className)} style={{ fontSize: '0.875rem', color: '#374151' }}>
+      <li className={cn('flex items-center gap-2.5', className)} style={{ fontSize: '0.875rem', color: '#374151' }}>
         {icon}
         <span>{text}</span>
       </li>

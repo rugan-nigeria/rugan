@@ -3,32 +3,12 @@ import { motion } from "framer-motion";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
 import { Facebook, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
 
-const QUICK_LINKS = [
+const FOOTER_LINKS = [
   { label: "About Us", to: "/about" },
+  { label: "Programmes", to: "/programmes" },
   { label: "Our Impact", to: "/impact" },
-  { label: "Our Team", to: "/team" },
+  { label: "Volunteers", to: "/volunteers" },
   { label: "Blog", to: "/blog" },
-  { label: "FAQ", to: "/volunteers#faq" },
-];
-
-const PROGRAMS = [
-  {
-    label: "RUGAN IDGC School Tours",
-    to: "/programmes/rugan-idgc-school-tours",
-  },
-  {
-    label: "RUGAN Healthy Period Project",
-    to: "/programmes/rugan-healthy-period-project",
-  },
-  { label: "The RISE Project", to: "/programmes/the-rise-project" },
-  {
-    label: "Excellence Award Project",
-    to: "/programmes/excellence-award-project",
-  },
-  {
-    label: "Rural to Global Programme",
-    to: "/programmes/rural-to-global-programme",
-  },
 ];
 
 const SOCIALS = [
@@ -57,7 +37,6 @@ const SOCIALS = [
 const mutedWhite = { color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" };
 const contactIconStyle = { color: "var(--color-primary)", flexShrink: 0 };
 
-/* ── WhatsApp SVG logo (official brand icon) ── */
 function WhatsAppIcon({ size = 15 }) {
   return (
     <svg
@@ -76,17 +55,16 @@ function WhatsAppIcon({ size = 15 }) {
 export default function Footer() {
   return (
     <footer className="section-footer">
-      <div className="container-rugan py-14 lg:py-16">
+      <div className="container-rugan py-12 lg:py-14">
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-12 gap-10"
+          className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between"
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
         >
-          {/* Brand */}
-          <motion.div variants={fadeUp} className="md:col-span-4">
-            <Link to="/" className="inline-flex items-center gap-2 mb-4">
+          <motion.div variants={fadeUp} className="max-w-md">
+            <Link to="/" className="mb-4 inline-flex items-center gap-2">
               <img
                 src="/icons/rugan-logo.jpg"
                 alt="RUGAN"
@@ -96,7 +74,7 @@ export default function Footer() {
                   e.target.style.display = "none";
                 }}
               />
-              <span className="font-bold text-lg tracking-tight text-white">
+              <span className="text-lg font-bold tracking-tight text-white">
                 RUGAN
               </span>
             </Link>
@@ -106,79 +84,46 @@ export default function Footer() {
             </p>
           </motion.div>
 
-          {/* Quick Links */}
-          <motion.div variants={fadeUp} className="md:col-span-2">
-            <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wide">
-              Quick Links
-            </h4>
-            <ul className="flex flex-col gap-2.5">
-              {QUICK_LINKS.map((link) => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    style={mutedWhite}
-                    className="hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Programmes */}
-          <motion.div variants={fadeUp} className="md:col-span-3">
-            <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wide">
-              Programmes
-            </h4>
-            <ul className="flex flex-col gap-2.5">
-              {PROGRAMS.map((p) => (
-                <li key={p.to}>
-                  <Link
-                    to={p.to}
-                    style={mutedWhite}
-                    className="hover:text-white transition-colors"
-                  >
-                    {p.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Contact Us */}
-          <motion.div variants={fadeUp} className="md:col-span-3">
-            <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wide">
-              Contact Us
-            </h4>
-            <ul className="flex flex-col gap-3 mb-6">
-              <li>
-                <a
-                  href="mailto:rugan.ng@gmail.com"
+          <motion.div
+            variants={fadeUp}
+            className="flex flex-col gap-6 md:items-end"
+          >
+            <div className="flex flex-wrap gap-x-5 gap-y-2 md:justify-end">
+              {FOOTER_LINKS.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
                   style={mutedWhite}
-                  className="flex items-center gap-2.5 hover:text-white transition-colors"
+                  className="transition-colors hover:text-white"
                 >
-                  <Mail size={15} style={contactIconStyle} />
-                  <span>rugan.ng@gmail.com</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://wa.me/2348143158700"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={mutedWhite}
-                  className="flex items-center gap-2.5 hover:text-white transition-colors"
-                >
-                  <span style={contactIconStyle}>
-                    <WhatsAppIcon size={15} />
-                  </span>
-                  <span>+234 814 315 8700</span>
-                </a>
-              </li>
-            </ul>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
-            {/* Social Icons */}
+            <div className="flex flex-col gap-3 md:items-end">
+              <a
+                href="mailto:rugan.ng@gmail.com"
+                style={mutedWhite}
+                className="flex items-center gap-2.5 transition-colors hover:text-white"
+              >
+                <Mail size={15} style={contactIconStyle} />
+                <span>rugan.ng@gmail.com</span>
+              </a>
+              <a
+                href="https://wa.me/2348143158700"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={mutedWhite}
+                className="flex items-center gap-2.5 transition-colors hover:text-white"
+              >
+                <span style={contactIconStyle}>
+                  <WhatsAppIcon size={15} />
+                </span>
+                <span>+234 814 315 8700</span>
+              </a>
+            </div>
+
             <div className="flex items-center gap-2">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
                 <a
@@ -213,18 +158,17 @@ export default function Footer() {
         </motion.div>
       </div>
 
-      {/* Bottom bar */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <div
-          className="container-rugan py-5 flex flex-col sm:flex-row items-center justify-between gap-3"
+          className="container-rugan flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between"
           style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem" }}
         >
           <p>© {new Date().getFullYear()} RUGAN. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link to="/privacy" className="hover:text-white transition-colors">
+          <div className="flex flex-wrap items-center gap-4">
+            <Link to="/privacy" className="transition-colors hover:text-white">
               Privacy Policy
             </Link>
-            <Link to="/terms" className="hover:text-white transition-colors">
+            <Link to="/terms" className="transition-colors hover:text-white">
               Terms of Service
             </Link>
           </div>

@@ -104,8 +104,17 @@ function MemberCard({ name, role, bio, image, linkedin, email }) {
   };
 
   const handleCopyEmail = () => {
-    console.log("Copy email clicked:", email);
     if (!email) return;
+
+    const isMobileDevice =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(hover: none)").matches);
+
+    if (isMobileDevice) {
+      window.location.href = `mailto:${email}`;
+      return;
+    }
 
     const copyPromise = navigator.clipboard
       ? navigator.clipboard.writeText(email)
@@ -115,15 +124,11 @@ function MemberCard({ name, role, bio, image, linkedin, email }) {
       .then((result) => {
         const success = typeof result === "boolean" ? result : true;
         if (success) {
-          console.log("Email copied to clipboard:", email);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
-        } else {
-          console.error("Clipboard copy returned false");
         }
       })
       .catch((err) => {
-        console.error("Clipboard write failed:", err);
         fallbackCopy(email) && setCopied(true);
       });
   };
@@ -214,7 +219,7 @@ function MemberCard({ name, role, bio, image, linkedin, email }) {
                 <SocialLink
                   href={email}
                   icon={Mail}
-                  label={`Copy email for ${name}`}
+                  label={`Email ${name}`}
                   onClick={handleCopyEmail}
                 />
                 {copied && (
@@ -253,9 +258,9 @@ export default function TeamPage() {
   return (
     <>
       <section
+        className="py-12 sm:py-16"
         style={{
           background: "var(--color-primary)",
-          padding: "4rem 0",
           textAlign: "center",
         }}
       >
@@ -303,7 +308,7 @@ export default function TeamPage() {
 
           {/* Row 1 — 2 cards centred */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
+            className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6"
             style={{ maxWidth: "860px", margin: "0 auto 1.5rem" }}
             variants={staggerContainer}
             initial="hidden"
@@ -323,7 +328,7 @@ export default function TeamPage() {
 
           {/* Row 2 — 3 cards full width */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 md:gap-6"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"

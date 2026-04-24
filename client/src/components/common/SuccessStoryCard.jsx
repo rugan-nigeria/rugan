@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import { scaleIn, viewportOnce } from '@/lib/motion'
-import Badge from '@/components/ui/Badge'
 import { cn } from '@/lib/cn'
 
 /**
@@ -14,7 +13,17 @@ import { cn } from '@/lib/cn'
  *   quote       — testimonial quote
  *   programme     — related programme name (shown as badge)
  */
-export default function SuccessStoryCard({ image, name, description, quote, programme, className }) {
+export default function SuccessStoryCard({
+  image,
+  name,
+  description,
+  quote,
+  programme,
+  program,
+  className,
+}) {
+  const label = programme || program
+
   return (
     <motion.div variants={scaleIn} initial='hidden' whileInView='visible' viewport={viewportOnce} className={cn('card flex flex-col', className)}>
       {/* Photo */}
@@ -33,9 +42,14 @@ export default function SuccessStoryCard({ image, name, description, quote, prog
             "{quote}"
           </blockquote>
         )}
-        {programme && (
+        {label && (
           <div className="mt-4">
-            <Badge variant="green">{programme}</Badge>
+            <span
+              className="inline-flex items-center rounded-[10px] px-3 py-1.5 text-[0.8125rem] font-semibold"
+              style={{ background: '#DCFCE7', color: '#4F7B44' }}
+            >
+              {label}
+            </span>
           </div>
         )}
       </div>

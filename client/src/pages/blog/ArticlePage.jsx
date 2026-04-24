@@ -7,7 +7,7 @@ import {
   Calendar,
   Clock,
   Share2,
-  CheckCircle2,
+  CheckCircle,
 } from "lucide-react";
 import { fadeUp, fadeIn, staggerContainer, viewportOnce } from "@/lib/motion";
 import NewsletterForm from "@/components/forms/NewsletterForm";
@@ -33,6 +33,38 @@ function readingTime(content) {
     .join(" ")
     .split(/\s+/).length;
   return Math.max(1, Math.round(words / 200));
+}
+
+function getArticleAuthor(article) {
+  if (!article) return "";
+
+  if (typeof article.author === "string") {
+    return article.author;
+  }
+
+  if (article.author && typeof article.author === "object") {
+    return article.author.name || article.author.fullName || "";
+  }
+
+  return article.authorName || "";
+}
+
+function formatArticleDate(article) {
+  if (!article) return "";
+
+  const rawDate = article.publishedAt || article.createdAt || article.date;
+  if (!rawDate) return "";
+
+  const parsedDate = new Date(rawDate);
+  if (!Number.isNaN(parsedDate.getTime())) {
+    return parsedDate.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  return typeof rawDate === "string" ? rawDate : "";
 }
 
 /* ── Content block renderers ── */
@@ -86,7 +118,7 @@ function BulletList({ items }) {
           key={i}
           style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}
         >
-          <CheckCircle2
+          <CheckCircle
             size={16}
             style={{
               color: "var(--color-primary)",
@@ -357,7 +389,7 @@ function RelatedCard({ article }) {
               marginBottom: "0.375rem",
             }}
           >
-            {article.date}
+            {formatArticleDate(article)}
           </p>
           <p
             style={{
@@ -557,29 +589,30 @@ export default function ArticlePage() {
             }}
           >
             {[
-              { icon: User, text: article.author?.name || article.authorName },
+              { key: "author", icon: User, text: getArticleAuthor(article) },
               {
+                key: "date",
                 icon: Calendar,
-                text: new Date(
-                  article.publishedAt || article.createdAt,
-                ).toLocaleDateString(),
+                text: formatArticleDate(article),
               },
-              { icon: Clock, text: `${minutes} min read` },
-            ].map(({ icon: Icon, text }) => (
-              <span
-                key={text}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.375rem",
-                  color: "rgba(255,255,255,0.8)",
-                  fontSize: "0.875rem",
-                }}
-              >
-                <Icon size={14} />
-                {text}
-              </span>
-            ))}
+              { key: "reading-time", icon: Clock, text: `${minutes} min read` },
+            ]
+              .filter(({ text }) => Boolean(text))
+              .map(({ key, icon: Icon, text }) => (
+                <span
+                  key={key}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.375rem",
+                    color: "rgba(255,255,255,0.8)",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  <Icon size={14} />
+                  {text}
+                </span>
+              ))}
           </motion.div>
         </motion.div>
       </section>
@@ -598,22 +631,6 @@ export default function ArticlePage() {
             initial="hidden"
             animate="visible"
           >
-            {/* Lead excerpt */}
-            <motion.p
-              variants={fadeUp}
-              style={{
-                fontSize: "1.125rem",
-                color: "#374151",
-                lineHeight: 1.8,
-                fontWeight: 500,
-                marginBottom: "2rem",
-                paddingBottom: "1.5rem",
-                borderBottom: "1px solid #E5E7EB",
-              }}
-            >
-              {article.excerpt}
-            </motion.p>
-
             {/* Content blocks */}
             <motion.div variants={staggerContainer}>
               {renderBody(article.content)}
@@ -694,33 +711,31 @@ export default function ArticlePage() {
       {/* Related articles */}
       {related.length > 0 && (
         <section className="section-padding" style={{ background: "white" }}>
-          <div className="container-rugan" style={{ maxWidth: "860px" }}>
-            <h2
+          <div className="container-rugan">
+            <div style={{ maxWidth: "860px", margin: "0 auto" }}>
+              <h2
               style={{
                 fontSize: "1.375rem",
                 fontWeight: 700,
                 color: "#111827",
                 marginBottom: "1.5rem",
               }}
-            >
-              You may also like
-            </h2>
-            <motion.div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "1.25rem",
-              }}
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-            >
-              {related.map((a) => (
-                <motion.div key={a.slug} variants={fadeUp}>
-                  <RelatedCard article={a} />
-                </motion.div>
-              ))}
-            </motion.div>
+              >
+                You may also like
+              </h2>
+              <motion.div
+                className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5"
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+              >
+                {related.map((a) => (
+                  <motion.div key={a.slug} variants={fadeUp}>
+                    <RelatedCard article={a} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
           </div>
         </section>
       )}

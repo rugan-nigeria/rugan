@@ -16,7 +16,7 @@ export default function PhotoGallery({ images = [], bgColor = 'light-green', cla
   return (
     <section className={cn(bg, 'section-padding', className)}>
       <div className="container-rugan">
-        <motion.div className="grid grid-cols-2 md:grid-cols-3 gap-4" variants={staggerContainer} initial='hidden' whileInView='visible' viewport={viewportOnce}>
+        <motion.div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3" variants={staggerContainer} initial='hidden' whileInView='visible' viewport={viewportOnce}>
           {images.map((img, i) => (
             <motion.div key={i} variants={scaleIn} className="aspect-square rounded-2xl overflow-hidden">
               <img
