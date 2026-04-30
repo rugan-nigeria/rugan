@@ -1,52 +1,53 @@
-import nodemailer from 'nodemailer'
 import { isEmailConfigured } from '../config/env.js'
 
-let transporter = null
-
-function getTransporter() {
-  if (transporter) return transporter
-
-  if (!isEmailConfigured()) {
-    throw new Error('Email service is not fully configured.')
-  }
-
-  transporter = nodemailer.createTransport({
-    host:   process.env.SMTP_HOST,
-    port:   Number(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_PORT === '465',
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 15_000,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  })
-
-  return transporter
-}
-
 /**
- * sendEmail
+ * sendEmail — uses Brevo HTTP API (avoids SMTP port restrictions)
  * @param {{ to, subject, html, replyTo? }} options
  */
 export async function sendEmail({ to, subject, html, replyTo }) {
   if (process.env.NODE_ENV === 'test') return
 
-  const transport = getTransporter()
+  if (!process.env.BREVO_API_KEY) {
+    throw new Error('BREVO_API_KEY is not configured.')
+  }
 
-  return transport.sendMail({
-    from:    process.env.EMAIL_FROM || 'RUGAN <noreply@rugan.org>',
-    to,
+  const senderEmail = process.env.EMAIL_FROM
+    ? process.env.EMAIL_FROM.match(/<([^>]+)>/)?.[1] || process.env.EMAIL_FROM
+    : 'admin@rugan.org'
+
+  const senderName = process.env.EMAIL_FROM
+    ? process.env.EMAIL_FROM.match(/^([^<]+)</)?.[1]?.trim() || 'RUGAN'
+    : 'RUGAN'
+
+  const body = {
+    sender: { name: senderName, email: senderEmail },
+    to: [{ email: to }],
     subject,
-    html,
-    ...(replyTo && { replyTo }),
+    htmlContent: html,
+  }
+
+  if (replyTo) body.replyTo = { email: replyTo }
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify(body),
   })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(`Brevo API error: ${JSON.stringify(error)}`)
+  }
+
+  return response.json()
 }
 
 export async function sendEmailSafely(options, label = 'email notification') {
   if (!isEmailConfigured()) {
-    console.warn(`Email skipped: ${label}. SMTP configuration is incomplete.`)
+    console.warn(`Email skipped: ${label}. Email configuration is incomplete.`)
     return { ok: false, skipped: true }
   }
 
@@ -65,7 +66,7 @@ export async function sendBulkEmailSafely(messages, label = 'bulk email notifica
   }
 
   if (!isEmailConfigured()) {
-    console.warn(`Email skipped: ${label}. SMTP configuration is incomplete.`)
+    console.warn(`Email skipped: ${label}. Email configuration is incomplete.`)
     return {
       ok: false,
       skipped: true,

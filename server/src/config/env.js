@@ -61,13 +61,7 @@ export function getAllowedOrigins() {
 }
 
 export function isEmailConfigured() {
-  return [
-    "SMTP_HOST",
-    "SMTP_PORT",
-    "SMTP_USER",
-    "SMTP_PASS",
-    "EMAIL_FROM",
-  ].every((name) => Boolean(getEnvValue(name)));
+  return Boolean(getEnvValue("BREVO_API_KEY") && getEnvValue("EMAIL_FROM"));
 }
 
 export function isPaystackConfigured() {
