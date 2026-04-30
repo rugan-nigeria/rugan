@@ -21,7 +21,7 @@ function DetailGroup({
   title,
   items,
   dotColor,
-  background = "#FAFAFA",
+  background = "#FFFFFFF",
   className = "",
 }) {
   return (
@@ -76,20 +76,20 @@ function DetailGroup({
   );
 }
 
-function PartnershipItems({ title, description, icon: Icon, details }) {
-  const [open, setOpen] = useState(false);
-
+function PartnershipItems({ title, description, icon: Icon, details, open, onToggle }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-card">
       <div
-        className={`px-6 py-5 md:px-7 ${
-          !open ? "bg-[#FAFAFA] hover:bg-[#EAF4EE]" : "bg-white"
+        className={`px-6 py-5 md:px-7 bg-[#FAFAFA] ${
+          !open ? "hover:bg-[#EAF4EE]" : ""
         }`}
       >
+
         <button
           type="button"
-          onClick={() => setOpen(!open)}
-          className="flex w-full cursor-pointer items-start justify-between gap-4 border-0 bg-transparent p-0 text-left"
+          onClick={onToggle}
+          className="flex w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent p-0 text-left"
+          aria-expanded={open}
         >
           <div className="grid min-w-0 flex-1 grid-cols-[auto,1fr] gap-x-4 gap-y-2 sm:gap-y-0">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#4F7B441A]">
@@ -104,7 +104,7 @@ function PartnershipItems({ title, description, icon: Icon, details }) {
             </p>
           </div>
 
-          <span className="mt-1 shrink-0 text-[#6B7280]">
+          <span className="mt-1 shrink-0 items-center text-[#6B7280]">
             {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </span>
         </button>
@@ -139,6 +139,8 @@ function PartnershipItems({ title, description, icon: Icon, details }) {
 }
 
 export default function PartnershipPage() {
+  const [openPartnershipIndex, setOpenPartnershipIndex] = useState(null);
+
   const partners = [
     {
       logo: "/images/partners/Ellipse 1.png",
@@ -306,7 +308,7 @@ export default function PartnershipPage() {
       details: {
         contribute: [
           "Event and outreach support",
-          "Mentorship and faacilitation",
+          "Mentorship and facilitation",
           "Administrative or operational assistance",
         ],
         expects: [
@@ -401,7 +403,14 @@ export default function PartnershipPage() {
 
           <div className="mx-auto flex max-w-5xl flex-col gap-5">
             {partnerships.map((item, i) => (
-              <PartnershipItems key={i} {...item} />
+              <PartnershipItems
+                key={i}
+                {...item}
+                open={openPartnershipIndex === i}
+                onToggle={() =>
+                  setOpenPartnershipIndex(openPartnershipIndex === i ? null : i)
+                }
+              />
             ))}
           </div>
         </div>

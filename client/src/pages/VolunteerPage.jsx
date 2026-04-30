@@ -310,14 +310,14 @@ function BenefitItem({ text, variant = "green" }) {
   );
 }
 
-function FAQItem({ question, answer }) {
-  const [open, setOpen] = useState(false);
+function FAQItem({ question, answer, open, onToggle }) {
   return (
     <div
       className="mx-auto w-full rounded-xl bg-white px-4 py-4 sm:px-5"
     >
       <button
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
+        aria-expanded={open}
         style={{
           width: "100%",
           display: "flex",
@@ -363,6 +363,8 @@ function FAQItem({ question, answer }) {
 
 /* ── Page ── */
 export default function VolunteerPage() {
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
+
   return (
     <>
       {/* Hero */}
@@ -629,7 +631,12 @@ export default function VolunteerPage() {
               subtitle="Everything you need to know about volunteering with RUGAN"
             />
             {FAQS.map((faq, i) => (
-              <FAQItem key={i} {...faq} />
+              <FAQItem
+                key={i}
+                {...faq}
+                open={openFaqIndex === i}
+                onToggle={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
+              />
             ))}
           </div>
         </div>
