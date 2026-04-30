@@ -151,7 +151,7 @@ export default function HomePage() {
       {/* HERO */}
       <PageHeroBanner
         title={
-          <span className="block max-w-[700px] text-[clamp(2.25rem,11vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.03em] text-white sm:leading-[1.08] sm:tracking-[-0.04em]">
+          <span className="block max-w-[700px] text-[clamp(1.75rem,8vw,3rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-white sm:leading-[1.08] sm:tracking-[-0.04em]">
             Empowering Rural Girls <br />
             to Become Tomorrow's <br />
             Leaders

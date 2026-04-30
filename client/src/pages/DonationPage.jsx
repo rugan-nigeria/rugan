@@ -230,7 +230,7 @@ export default function DonationPage() {
                     color: "#111827",
                   }}
                 >
-                  First Bank of Nigeria
+                  Moniepoint MFB
                 </p>
               </div>
               <div
@@ -257,7 +257,7 @@ export default function DonationPage() {
                     color: "#111827",
                   }}
                 >
-                  RUGAN NGO
+                  The Rural Girl Child Advancement Network
                 </p>
               </div>
             </div>
@@ -289,7 +289,7 @@ export default function DonationPage() {
                   letterSpacing: "0.05em",
                 }}
               >
-                2281542767
+                8143158700
               </p>
             </div>
 

@@ -192,9 +192,6 @@ export default function Navbar() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.45, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Button as={Link} to="/donate" variant="primary" size="sm" className="hidden sm:inline-flex">
-            Make a Donation
-          </Button>
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={cn(
@@ -338,16 +335,6 @@ export default function Navbar() {
                       onClick={closeMenu}
                     >
                       Make a Donation
-                    </Button>
-                    <Button
-                      as={Link}
-                      to="/volunteers"
-                      variant="outline-green"
-                      size="lg"
-                      className="w-full"
-                      onClick={closeMenu}
-                    >
-                      Volunteer With Us
                     </Button>
                   </div>
                 </div>
