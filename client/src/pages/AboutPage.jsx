@@ -583,19 +583,6 @@ export default function AboutPage() {
           </motion.div>
         </div>
       </section>
-
-      <CTABanner
-        title="Join Us in Empowering Rural Girls"
-        subtitle="Your support helps us reach more girls, deliver more programmes, and inspire lasting change in rural communities across Nigeria."
-        buttons={[
-          {
-            label: "Volunteer With Us",
-            to: "/volunteers",
-            variant: "volunteer",
-          },
-          { label: "Make a Donation", to: "/donate", variant: "primary" },
-        ]}
-      />
     </>
   );
 }
