@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+import { Eye, EyeOff, Edit2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import api from "@/lib/api";
 
@@ -9,6 +10,7 @@ const EMPTY_FORM = {
   email: "",
   password: "",
   role: "editor",
+  isActive: true,
 };
 
 export default function AdminUsersPage() {
@@ -16,6 +18,8 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function loadUsers() {
     try {
@@ -42,24 +46,49 @@ export default function AdminUsersPage() {
     setSubmitting(true);
 
     try {
-      await api.post("/auth/register", form);
-      toast.success("User created.");
+      if (editingUserId) {
+        await api.put(`/auth/users/${editingUserId}`, form);
+        toast.success("User updated.");
+      } else {
+        await api.post("/auth/register", form);
+        toast.success("User created.");
+      }
       setForm(EMPTY_FORM);
+      setEditingUserId(null);
       await loadUsers();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Could not create user.");
+      toast.error(error.response?.data?.message || `Could not ${editingUserId ? "update" : "create"} user.`);
     } finally {
       setSubmitting(false);
     }
   }
 
+  function handleEdit(user) {
+    setEditingUserId(user._id);
+    setForm({
+      name: user.name,
+      email: user.email,
+      password: "", // Don't populate password
+      role: user.role,
+      isActive: user.isActive,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function cancelEdit() {
+    setEditingUserId(null);
+    setForm(EMPTY_FORM);
+  }
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white">
+    <div className="grid gap-6 grid-cols-1 lg:grid-cols-[380px_1fr] items-start">
+      <section className="relative lg:sticky top-6 rounded-2xl border border-[#E5E7EB] bg-white">
         <div className="border-b border-[#E5E7EB] px-5 py-4">
-          <h2 className="text-lg font-bold text-[#101828]">Create user</h2>
+          <h2 className="text-lg font-bold text-[#101828]">
+            {editingUserId ? "Edit user" : "Create user"}
+          </h2>
           <p className="text-sm text-[#667085]">
-            Admins can create editor and admin accounts for the CMS.
+            {editingUserId ? "Update user details or reset password." : "Admins can create editor and admin accounts for the CMS."}
           </p>
         </div>
 
@@ -86,15 +115,39 @@ export default function AdminUsersPage() {
           </div>
 
           <div>
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-input"
-              value={form.password}
-              onChange={(event) => updateForm("password", event.target.value)}
-              minLength={8}
-              required
-            />
+            <label className="form-label">
+              Password {editingUserId && <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(leave blank to keep current)</span>}
+            </label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-input"
+                value={form.password}
+                onChange={(event) => updateForm("password", event.target.value)}
+                minLength={8}
+                required={!editingUserId}
+                style={{ paddingRight: "2.5rem" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  color: "#9CA3AF",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           <div>
@@ -109,9 +162,30 @@ export default function AdminUsersPage() {
             </select>
           </div>
 
-          <Button type="submit" variant="green" size="lg" disabled={submitting} className="w-full">
-            {submitting ? "Creating..." : "Create user"}
-          </Button>
+          {editingUserId && (
+            <div>
+              <label className="form-label">Status</label>
+              <select
+                className="form-input"
+                value={form.isActive ? "true" : "false"}
+                onChange={(event) => updateForm("isActive", event.target.value === "true")}
+              >
+                <option value="true">Active</option>
+                <option value="false">Disabled</option>
+              </select>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: "0.75rem" }}>
+            {editingUserId && (
+              <Button type="button" variant="outline-green" onClick={cancelEdit} disabled={submitting} className="w-full">
+                Cancel
+              </Button>
+            )}
+            <Button type="submit" variant="green" size="lg" disabled={submitting} className="w-full">
+              {submitting ? "Saving..." : editingUserId ? "Update user" : "Create user"}
+            </Button>
+          </div>
         </form>
       </section>
 
@@ -139,6 +213,9 @@ export default function AdminUsersPage() {
                 <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-[#667085]">
                   Status
                 </th>
+                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-[0.14em] text-[#667085]">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F2F4F7]">
@@ -162,6 +239,15 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-4 text-sm text-[#475467]">{user.role}</td>
                     <td className="px-5 py-4 text-sm text-[#475467]">
                       {user.isActive ? "Active" : "Disabled"}
+                    </td>
+                    <td className="px-5 py-4 text-right text-sm">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(user)}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#4F7B44", fontWeight: 500, background: "none", border: "none", cursor: "pointer", padding: "0.25rem 0.5rem", borderRadius: "0.375rem" }}
+                      >
+                        <Edit2 size={14} /> Edit
+                      </button>
                     </td>
                   </tr>
                 ))

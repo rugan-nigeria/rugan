@@ -35,14 +35,14 @@ const TIMELINE = [
     side: "left",
     title: 'RUGAN Founded as "The Girl A Nation (TGAN)"',
     description:
-      "The organization was officially established with a mission to empower young girls and women through education.",
+      "The organisation was officially established with a mission to empower young girls and women through education.",
   },
   {
     year: "2022",
     side: "right",
     title: "RUGAN IDGC Project Launched",
     description:
-      "Marked RUGAN’s first major advocacy and school outreach initiative, aligning the organization with the International Day of the Girl Child and strengthening awareness around girls’ rights, confidence, and leadership.",
+      "Marked RUGAN’s first major advocacy and school outreach initiative, aligning the organisation with the International Day of the Girl Child and strengthening awareness around girls’ rights, confidence, and leadership.",
   },
   {
     year: "2023",
@@ -56,7 +56,7 @@ const TIMELINE = [
     side: "right",
     title: "The Excellence Award launch",
     description:
-      "Established a system to recognize and reward academic excellence among rural secondary school girls, motivating school retention and high academic performance.",
+      "Established a system to recognise and reward academic excellence among rural secondary school girls, motivating school retention and high academic performance.",
   },
   {
     year: "2025",
@@ -80,7 +80,7 @@ const FOCUS_AREAS = [
     icon: Star,
     title: "Academic Excellence Recognition",
     description:
-      "Recognizing and rewarding outstanding performance among secondary school girls in rural communities to promote academic achievement.",
+      "Recognising and rewarding outstanding performance among secondary school girls in rural communities to promote academic achievement.",
     image: "/images/about/focus-excellence.jpg",
   },
   {
@@ -101,7 +101,7 @@ const FOCUS_AREAS = [
     icon: ClipboardList,
     title: "SS3 Life Guidance",
     description:
-      "Specialized school tours for SS3 girls providing accurate guidance on life after secondary school and available educational, vocational, and career pathways.",
+      "Specialised school tours for SS3 girls providing accurate guidance on life after secondary school and available educational, vocational, and career pathways.",
     image: "/images/about/focus-guidance.jpg",
   },
   {
@@ -133,7 +133,7 @@ const PRINCIPLES = [
     icon: BookOpen,
     title: "Education for All",
     description:
-      "Education is a fundamental right and the most powerful tool for change, regardless of location or background. We recognize academic excellence through awards, provide school-based programmes, and encourage school retention through supportive initiatives like menstrual health education and resource distribution.",
+      "Education is a fundamental right and the most powerful tool for change, regardless of location or background. We recognise academic excellence through awards, provide school-based programmes, and encourage school retention through supportive initiatives like menstrual health education and resource distribution.",
     color: "green",
   },
   {
@@ -147,7 +147,7 @@ const PRINCIPLES = [
     icon: Handshake,
     title: "Inclusion",
     description:
-      "We are committed to reaching the most marginalized girls, ensuring that no girl is left behind because of her location, financial status, or social barriers. We prioritize rural communities, engage with schools and families, and design programmes that reach girls across all levels of secondary school.",
+      "We are committed to reaching the most marginalised girls, ensuring that no girl is left behind because of her location, financial status, or social barriers. We prioritise rural communities, engage with schools and families, and design programmes that reach girls across all levels of secondary school.",
     color: "green",
   },
   {
@@ -180,7 +180,7 @@ function FocusAreaCard({ icon: Icon, title, description, image }) {
       className="relative rounded-2xl overflow-hidden"
       style={{ aspectRatio: "16/10" }}
     >
-      <img src={image} alt={title} className="w-full h-full object-cover" />
+      <img loading="lazy" src={image} alt={title} className="w-full h-full object-cover" />
       <div
         className="absolute inset-0"
         style={{
@@ -478,12 +478,12 @@ export default function AboutPage() {
                   RUGAN (Rural Girl-Child Advancement Network) was founded by
                   <strong style={{ color: "#111827" }}> Fidel Nnadi</strong>, a
                   graduate of Social Work from the University of Nigeria,
-                  Nsukka. The organization was originally launched as{" "}
+                  Nsukka. The organisation was originally launched as{" "}
                   <strong style={{ color: "#111827" }}>
                     "The Girl & Nation (TGAN)"
                   </strong>{" "}
                   in November 2022, born out of Fidel's passion to empower young
-                  girls and women with the right resources needed to maximize
+                  girls and women with the right resources needed to maximise
                   their full potential through education.
                 </p>
                 <p

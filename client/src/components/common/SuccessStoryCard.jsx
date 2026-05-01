@@ -28,7 +28,7 @@ export default function SuccessStoryCard({
     <motion.div variants={scaleIn} initial='hidden' whileInView='visible' viewport={viewportOnce} className={cn('card flex flex-col', className)}>
       {/* Photo */}
       <div className="aspect-[4/3] overflow-hidden">
-        <img src={image} alt={name} className="w-full h-full object-cover" />
+        <img loading="lazy" src={image} alt={name} className="w-full h-full object-cover" />
       </div>
 
       {/* Content */}

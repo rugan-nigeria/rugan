@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import {
   ArrowLeft,
   Calendar,
@@ -11,9 +12,9 @@ import {
 } from "lucide-react";
 
 import NewsletterForm from "@/components/forms/NewsletterForm";
+import { resolveApiAssetUrl } from "@/lib/api";
 import api from "@/lib/api";
 import { formatPostDate, getPostAuthorName, getPostImage } from "@/lib/blog";
-import { parseFormattedText } from "@/lib/formatText";
 import { fadeIn, fadeUp, staggerContainer } from "@/lib/motion";
 
 function readingTime(content) {
@@ -60,6 +61,13 @@ function readingTime(content) {
   return Math.max(1, Math.round(words.split(/\s+/).filter(Boolean).length / 200));
 }
 
+function formatHtml(text) {
+  if (!text) return { __html: "" };
+  let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+  return { __html: html };
+}
+
 function Paragraph({ text }) {
   return (
     <p
@@ -69,9 +77,8 @@ function Paragraph({ text }) {
         lineHeight: 1.85,
         marginBottom: "1.25rem",
       }}
-    >
-      {parseFormattedText(text)}
-    </p>
+      dangerouslySetInnerHTML={formatHtml(text)}
+    />
   );
 }
 
@@ -87,9 +94,8 @@ function Heading({ text }) {
         paddingLeft: "0.875rem",
         borderLeft: "3px solid var(--color-primary)",
       }}
-    >
-      {parseFormattedText(text)}
-    </h2>
+      dangerouslySetInnerHTML={formatHtml(text)}
+    />
   );
 }
 
@@ -118,9 +124,7 @@ function BulletList({ items }) {
               marginTop: "3px",
             }}
           />
-          <span style={{ fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }}>
-            {parseFormattedText(item)}
-          </span>
+          <span style={{ fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(item)} />
         </li>
       ))}
     </ul>
@@ -278,7 +282,7 @@ function Conclusion({ text }) {
         >
           Conclusion
         </strong>
-        {parseFormattedText(text)}
+        <span dangerouslySetInnerHTML={formatHtml(text)} />
       </p>
     </div>
   );
@@ -292,15 +296,13 @@ function renderBlock(block, index) {
       return <Heading key={index} text={block.text} />;
     case "subheading":
       return (
-        <h3 key={index} style={{ fontSize: "1.05rem", fontWeight: 600, color: "#1F2937", margin: "1.5rem 0 0.5rem" }}>
-          {block.text}
-        </h3>
+        <h3 key={index} style={{ fontSize: "1.05rem", fontWeight: 600, color: "#1F2937", margin: "1.5rem 0 0.5rem" }} dangerouslySetInnerHTML={formatHtml(block.text)} />
       );
     case "image":
       return block.url ? (
         <figure key={index} style={{ margin: "1.75rem 0" }}>
           <img
-            src={block.url}
+            src={resolveApiAssetUrl(block.url)}
             alt={block.alt || ""}
             loading="lazy"
             decoding="async"
@@ -315,15 +317,13 @@ function renderBlock(block, index) {
       ) : null;
     case "quote":
       return (
-        <blockquote key={index} style={{ borderLeft: "4px solid #4F7B44", margin: "1.5rem 0", padding: "0.875rem 1.25rem", fontStyle: "italic", color: "#374151", background: "#F9FAFB", borderRadius: "0 0.625rem 0.625rem 0" }}>
-          {parseFormattedText(block.text)}
-        </blockquote>
+        <blockquote key={index} style={{ borderLeft: "4px solid #4F7B44", margin: "1.5rem 0", padding: "0.875rem 1.25rem", fontStyle: "italic", color: "#374151", background: "#F9FAFB", borderRadius: "0 0.625rem 0.625rem 0" }} dangerouslySetInnerHTML={formatHtml(block.text)} />
       );
     case "numbered":
       return (
         <ol key={index} style={{ margin: "0.5rem 0 1.25rem", paddingLeft: "1.5rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
           {(block.items || []).map((item, i) => (
-            <li key={i} style={{ fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }}>{parseFormattedText(item)}</li>
+            <li key={i} style={{ fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(item)} />
           ))}
         </ol>
       );
@@ -333,7 +333,7 @@ function renderBlock(block, index) {
       return (
         <div key={index} style={{ background: v.bg, border: `1px solid ${v.border}`, borderRadius: "0.625rem", padding: "1rem 1.25rem", margin: "1rem 0", display: "flex", gap: "0.75rem" }}>
           <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>{v.icon}</span>
-          <p style={{ margin: 0, fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }}>{parseFormattedText(block.text)}</p>
+          <p style={{ margin: 0, fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(block.text)} />
         </div>
       );
     }
@@ -440,10 +440,20 @@ function RelatedCard({ article }) {
               fontWeight: 700,
               color: "#111827",
               lineHeight: 1.45,
+              marginBottom: article.tags?.length ? "0.75rem" : 0,
             }}
           >
             {article.title}
           </p>
+          {article.tags && article.tags.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
+              {article.tags.map(tag => (
+                <span key={tag} style={{ padding: "2px 10px", borderRadius: "9999px", background: "#E8F2E6", color: "#3d6235", fontSize: "0.75rem", fontWeight: 500 }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Link>
@@ -630,6 +640,16 @@ export default function ArticlePage() {
         }}
       >
         <div className="container-rugan" style={{ maxWidth: "780px" }}>
+          {article.tags && article.tags.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "1.75rem" }}>
+              {article.tags.map(tag => (
+                <span key={tag} style={{ padding: "2px 10px", borderRadius: "9999px", background: "#E8F2E6", color: "#3d6235", fontSize: "0.75rem", fontWeight: 500 }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           <motion.article variants={staggerContainer} initial="hidden" animate="visible">
             <motion.div variants={staggerContainer}>{renderBody(article.content)}</motion.div>
           </motion.article>
@@ -665,17 +685,22 @@ export default function ArticlePage() {
             </Link>
 
             <button
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: article.title,
-                    url: window.location.href,
-                  });
-                  return;
-                }
+              onClick={async () => {
+                try {
+                  if (navigator.share) {
+                    await navigator.share({
+                      title: article.title,
+                      url: window.location.href,
+                    });
+                    return;
+                  }
 
-                navigator.clipboard.writeText(window.location.href);
-                window.alert("Link copied to clipboard.");
+                  await navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied to clipboard.");
+                } catch (error) {
+                  if (error?.name === "AbortError") return;
+                  toast.error("Could not share this article right now.");
+                }
               }}
               style={{
                 display: "inline-flex",

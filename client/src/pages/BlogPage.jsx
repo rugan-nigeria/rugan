@@ -108,6 +108,7 @@ export default function BlogPage() {
                     author={getPostAuthorName(post)}
                     date={formatPostDate(post)}
                     to={`/blog/${post.slug}`}
+                    tags={post.tags}
                   />
                 </motion.div>
               ))}

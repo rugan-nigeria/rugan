@@ -47,7 +47,7 @@ function renderBlock(block, index) {
     case "image":
       return block.url ? (
         <figure key={index} style={{ margin: "1.75rem 0" }}>
-          <img src={block.url} alt={block.alt || ""} style={{ width: "100%", borderRadius: "0.75rem", display: "block", border: "1px solid #E5E7EB" }} />
+          <img loading="lazy" src={block.url} alt={block.alt || ""} style={{ width: "100%", borderRadius: "0.75rem", display: "block", border: "1px solid #E5E7EB" }} />
           {block.caption && (
             <figcaption style={{ textAlign: "center", fontSize: "0.8125rem", color: "#9CA3AF", marginTop: "0.5rem", fontStyle: "italic" }}>
               {block.caption}
@@ -156,7 +156,7 @@ export default function ArticlePreviewModal({ form, blocks, onClose }) {
         {/* Hero */}
         <section style={{ position: "relative", minHeight: 280, overflow: "hidden", background: form.coverImage ? "transparent" : "#1a3a1a" }}>
           {form.coverImage && (
-            <img src={form.coverImage} alt={form.title}
+            <img loading="lazy" src={form.coverImage} alt={form.title}
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           )}
           <div style={{ position: "absolute", inset: 0, background: "rgba(10,25,10,0.72)" }} />

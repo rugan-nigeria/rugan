@@ -158,12 +158,12 @@ export default function PartnershipPage() {
     {
       title: "Strategic Impact Partnership",
       description:
-        "A long-term, high-level collaboration with organizations committed to advancing rural girls' development across multiple initiative",
+        "A long-term, high-level collaboration with organisations committed to advancing rural girls' development across multiple initiative",
       icon: Target,
       details: {
         contribute: [
           "Sustained funding or multi-program support",
-          "Co-design of education, health or empowerment program",
+          "Co-design of education, health or empowerment programme",
           "Access to networks, tools, or infrastructure",
         ],
         expects: [
@@ -180,23 +180,23 @@ export default function PartnershipPage() {
     },
 
     {
-      title: "Program-Based Partnership",
+      title: "Programme-Based Partnership",
       description:
         "A collaboration focused on a specific initiative such as school outreaches, menstrual hygiene campaigns, or skill-building workshops.",
       icon: BookOpen,
       details: {
         contribute: [
-          "Funding materials, or logistics for a defined program",
+          "Funding materials, or logistics for a defined programme",
           "Facilitators or volunteers",
           "Technical or operational support",
         ],
         expects: [
-          "Clear deliverables tied to the program",
+          "Clear deliverables tied to the programme",
           "Defined timeline and execution plan",
           "Active collaboration during implementation",
         ],
         receive: [
-          "Visibility within the specific program",
+          "Visibility within the specific programme",
           "Recognition in reports and communication materials",
           "Direct connection to a targeted group of beneficiaries",
         ],
@@ -206,7 +206,7 @@ export default function PartnershipPage() {
     {
       title: "Financial Sponsorship Partnership",
       description:
-        "A partnership centered on finanicial contributions to support programs or operational needs.",
+        "A partnership centered on finanicial contributions to support programmes or operational needs.",
       icon: DollarSign,
       details: {
         contribute: [
@@ -229,12 +229,12 @@ export default function PartnershipPage() {
     {
       title: "Technical and Knowledge  Partnership",
       description:
-        "A collaboration with individuals or organizations that provide expertise, training, or educational resources to empower rural girls.",
+        "A collaboration with individuals or organisations that provide expertise, training, or educational resources to empower rural girls.",
       icon: Lightbulb,
       details: {
         contribute: [
           "Training sessions (digital skills, career guidance, health education)",
-          "Mentorship programs",
+          "Mentorship programmes",
           "Learning materials or tools",
         ],
         expects: [
@@ -268,7 +268,7 @@ export default function PartnershipPage() {
         ],
         receive: [
           "Recognition as community change drivers",
-          "Access to RUGAN programs and resourses",
+          "Access to RUGAN programmes and resourses",
           "Strengthened local impact",
         ],
       },
@@ -312,7 +312,7 @@ export default function PartnershipPage() {
         expects: [
           "Commitment and reliability",
           "Respect for beneficiaries and communities",
-          "Alignment with organizational values",
+          "Alignment with organisational values",
         ],
         receive: [
           "Practical experience in social impact work",
@@ -329,14 +329,14 @@ export default function PartnershipPage() {
       icon: Building2,
       details: {
         contribute: [
-          "Program funding",
+          "Programme funding",
           "Employee volunteer engagement",
           "Products such a sanitary kits or learning tools",
         ],
         expects: [
           "Commitment and reliability",
           "Respect for beneficiaries and communities",
-          "Alignment with organizational values",
+          "Alignment with organisational values",
         ],
         receive: [
           "Practical experience in social impact work",

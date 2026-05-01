@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { lazy, Suspense } from "react";
 
 import RootLayout from "@/components/layout/RootLayout";
@@ -26,6 +26,7 @@ const AdminLoginPage  = lazy(() => import("@/pages/admin/AdminLoginPage"));
 const AdminLayout     = lazy(() => import("@/components/layout/AdminLayout"));
 const AdminPostsPage  = lazy(() => import("@/pages/admin/AdminPostsPage"));
 const AdminUsersPage  = lazy(() => import("@/pages/admin/AdminUsersPage"));
+const AdminAnalyticsPage = lazy(() => import("@/pages/admin/AdminAnalyticsPage"));
 
 // Minimal fallback shown during lazy chunk load (fast — just a white screen)
 function PageLoader() {
@@ -73,18 +74,30 @@ const router = createBrowserRouter([
     ],
   },
 
+  // /login — top-level alias for the admin login page
+  {
+    path: "/login",
+    element: <Lazy><AdminLoginPage /></Lazy>,
+  },
+
   // Admin CMS (outside public layout)
   {
     path: "/admin/login",
     element: <Lazy><AdminLoginPage /></Lazy>,
   },
   {
+    // /admin alone → redirect to login; authenticated users are redirected
+    // to /admin/posts inside AdminLoginPage via the isAuthenticated check
+    path: "/admin",
+    element: <Navigate to="/admin/login" replace />,
+  },
+  {
     path: "/admin",
     element: <Lazy><AdminLayout /></Lazy>,
     children: [
-      { index: true,        element: <Lazy><AdminPostsPage /></Lazy> },
       { path: "posts",      element: <Lazy><AdminPostsPage /></Lazy> },
       { path: "users",      element: <Lazy><AdminUsersPage /></Lazy> },
+      { path: "analytics",  element: <Lazy><AdminAnalyticsPage /></Lazy> },
     ],
   },
 ]);

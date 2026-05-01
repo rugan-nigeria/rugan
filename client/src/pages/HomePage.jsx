@@ -34,7 +34,7 @@ export default function HomePage() {
     {
       title: "Excellence Awards",
       description:
-        "Recognizes and rewards outstanding academic performance among rural secondary school girls to motivate excellence.",
+        "Recognises and rewards outstanding academic performance among rural secondary school girls to motivate excellence.",
       image: "/images/programs/card-3.jpg",
       to: "/programmes/excellence-award-project",
     },
@@ -79,9 +79,9 @@ export default function HomePage() {
     },
     {
       icon: TrendingUp,
-      title: "Our Vission",
+      title: "Our Vision",
       description:
-        "A world where every rural girl has equal access to opportunities, can realize her full potential, and grows into a global leader who shapes her community and the world with confidence and purpose.",
+        "A world where every rural girl has equal access to opportunities, can realise her full potential, and grows into a global leader who shapes her community and the world with confidence and purpose.",
     },
   ];
 
@@ -230,12 +230,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PROGRAMS */}
+      {/* PROGRAMMES */}
       <section className="section-padding">
         <div className="container-rugan">
           <SectionHeader
             title="Targeted School-Based Programmes"
-            subtitle="RUGAN delivers comprehensive programs that support rural girls at different stages of their life journey, equipping them with knowledge, confidence, and practical support."
+            subtitle="RUGAN delivers comprehensive programmes that support rural girls at different stages of their life journey, equipping them with knowledge, confidence, and practical support."
             className="mx-auto max-w-2xl"
           />
 
@@ -260,7 +260,7 @@ export default function HomePage() {
         <div className="container-rugan">
           <SectionHeader
             title="Our Impact Across Nigeria"
-            subtitle="Serving rural and underserved communities with targeted programs that create lasting grassroots impact"
+            subtitle="Serving rural and underserved communities with targeted programmes that create lasting grassroots impact"
           />
 
           <div className="lg:hidden">

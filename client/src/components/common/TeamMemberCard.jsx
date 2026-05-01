@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Linkedin, Mail } from "lucide-react";
 import { cn } from "@/lib/cn";
+import toast from "react-hot-toast";
 
 /**
  * TeamMemberCard
@@ -86,17 +87,16 @@ export default function TeamMemberCard({
               <button
                 type="button"
                 onClick={(e) => {
-                  console.log("Email button clicked!", email);
                   e.preventDefault();
                   e.stopPropagation();
                   navigator.clipboard
                     .writeText(email)
                     .then(() => {
-                      console.log("Email copied to clipboard!");
+                      toast.success("Email address copied!");
                       setCopied(true);
                       setTimeout(() => setCopied(false), 2000);
                     })
-                    .catch((err) => console.error("Copy failed:", err));
+                    .catch((err) => {});
                 }}
                 className="icon-box-sm hover:bg-primary-200 transition-colors"
                 style={{

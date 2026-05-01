@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 
+import { Eye, EyeOff } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 
@@ -11,6 +12,7 @@ export default function AdminLoginPage() {
   const { login, isAuthenticated, ready } = useAuth();
   const [email, setEmail]         = useState("");
   const [password, setPassword]   = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   if (ready && isAuthenticated) {
@@ -136,16 +138,37 @@ export default function AdminLoginPage() {
                 <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "#344054", marginBottom: "0.375rem" }}>
                   Password
                 </label>
-                <input
-                  type="password"
-                  className="form-input"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  required
-                  style={{ fontSize: "0.9375rem" }}
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    className="form-input"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    required
+                    style={{ fontSize: "0.9375rem", paddingRight: "2.5rem" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "0.75rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      color: "#9CA3AF",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
 
               <Button

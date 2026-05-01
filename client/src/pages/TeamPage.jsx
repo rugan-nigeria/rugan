@@ -16,7 +16,7 @@ const TEAM = [
   {
     name: "Cynthia Chimarame Ugwu",
     role: "Co-founder and Chief Operating Officer",
-    bio: "Product manager and operations strategist with years of experience in the technology sector. She brings a systems-driven approach to leadership, combining strategic execution, operational excellence, and stakeholder management to drive sustainable organizational growth. She leads strategy implementation, partnerships, and internal operations.",
+    bio: "Product manager and operations strategist with years of experience in the technology sector. She brings a systems-driven approach to leadership, combining strategic execution, operational excellence, and stakeholder management to drive sustainable organisational growth. She leads strategy implementation, partnerships, and internal operations.",
     image: "/images/team/cynthia.jpg",
     linkedin: "https://www.linkedin.com/in/cynthia-ugwu-472754201",
     email: "cynthiaugwuu@gmail.com",
@@ -96,7 +96,7 @@ function MemberCard({ name, role, bio, image, linkedin, email }) {
     try {
       success = document.execCommand("copy");
     } catch (err) {
-      console.error("Fallback copy failed:", err);
+      // Silent catch
     }
 
     document.body.removeChild(textarea);

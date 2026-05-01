@@ -88,7 +88,7 @@ const HIGHLIGHTS = [
     icon: Award,
     title: "Excellence Award Project",
     stat: "157+",
-    description: "Students recognized for academic excellence",
+    description: "Students recognised for academic excellence",
     iconShape: "circle",
   },
   {

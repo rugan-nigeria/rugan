@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { CreditCard, Building2, AlertTriangle, X, Loader2 } from "lucide-react";
+import { CreditCard, Building2, AlertTriangle, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+
+import api from "@/lib/api";
 
 const PRESET_AMOUNTS = [5000, 10000, 25000, 50000, 100000];
 const PAYMENT_METHODS = [
@@ -50,33 +53,27 @@ export default function DonationForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/donations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: Number(finalAmount),
-          frequency,
-          paymentMethod,
-          donorName: donorName.trim(),
-          donorEmail: donorEmail.trim(),
-        }),
+      const response = await api.post("/donations", {
+        amount: Number(finalAmount),
+        frequency,
+        paymentMethod,
+        donorName: donorName.trim(),
+        donorEmail: donorEmail.trim(),
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         if (paymentMethod === "card") {
           window.location.href = data.data.authorization_url;
         } else {
-          alert(
-            "Donation recorded. Please transfer to the account details shown below.",
-          );
+          toast.success("Donation recorded. Please transfer to the account details shown below.");
         }
       } else {
-        alert("Error: " + data.message);
+        toast.error(data.message || "Could not record donation.");
       }
     } catch (error) {
-      alert("Network error. Please try again.");
+      toast.error(error.response?.data?.message || "Network error. Please try again.");
     } finally {
       setLoading(false);
     }

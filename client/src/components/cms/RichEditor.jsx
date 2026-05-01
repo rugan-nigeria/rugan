@@ -1,25 +1,10 @@
-/**
- * RichEditor — full-featured block-based article editor
- *
- * Block types supported:
- *   paragraph  — body text
- *   heading    — H2 section heading
- *   subheading — H3 sub-section heading
- *   image      — inline image with optional caption
- *   quote      — pull-quote / blockquote
- *   bullets    — unordered bullet list
- *   numbered   — ordered numbered list
- *   divider    — horizontal rule / section break
- *   callout    — highlighted info/tip box
- */
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlignLeft,
   Bold,
+  Bookmark,
   ChevronDown,
   ChevronUp,
-  GripVertical,
   Heading2,
   Heading3,
   Image,
@@ -30,18 +15,22 @@ import {
   Minus,
   Plus,
   Quote,
+  Redo,
   Trash2,
+  Undo,
   Upload,
 } from "lucide-react";
-import api from "@/lib/api";
+import toast from "react-hot-toast";
 
-/* ─── Helpers ────────────────────────────────────────────── */
+import api, { resolveApiAssetUrl } from "@/lib/api";
+
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
 function makeBlock(type) {
   const base = { id: uid(), type };
+
   switch (type) {
     case "image":
       return { ...base, url: "", caption: "", alt: "" };
@@ -50,25 +39,27 @@ function makeBlock(type) {
       return { ...base, items: [""] };
     case "callout":
       return { ...base, text: "", variant: "info" };
+    case "conclusion":
+      return { ...base, text: "" };
     default:
       return { ...base, text: "" };
   }
 }
 
 const BLOCK_META = [
-  { type: "paragraph",  label: "Paragraph",   icon: AlignLeft },
-  { type: "heading",    label: "Heading",      icon: Heading2 },
-  { type: "subheading", label: "Subheading",   icon: Heading3 },
-  { type: "image",      label: "Image",        icon: Image },
-  { type: "quote",      label: "Quote",        icon: Quote },
-  { type: "bullets",    label: "Bullet list",  icon: List },
-  { type: "numbered",   label: "Numbered list",icon: ListOrdered },
-  { type: "callout",    label: "Callout",      icon: Info },
-  { type: "divider",    label: "Divider",      icon: Minus },
+  { type: "paragraph", label: "Paragraph", icon: AlignLeft },
+  { type: "heading", label: "Heading", icon: Heading2 },
+  { type: "subheading", label: "Subheading", icon: Heading3 },
+  { type: "image", label: "Image", icon: Image },
+  { type: "quote", label: "Quote", icon: Quote },
+  { type: "bullets", label: "Bullet list", icon: List },
+  { type: "numbered", label: "Numbered list", icon: ListOrdered },
+  { type: "callout", label: "Callout", icon: Info },
+  { type: "divider", label: "Divider", icon: Minus },
+  { type: "conclusion", label: "Conclusion", icon: Bookmark },
 ];
 
-/* ─── Styles ─────────────────────────────────────────────── */
-const TEXTAREA = {
+const TA = {
   width: "100%",
   border: "none",
   outline: "none",
@@ -79,7 +70,7 @@ const TEXTAREA = {
   lineHeight: 1.75,
 };
 
-const INPUT_LINE = {
+const IL = {
   width: "100%",
   border: "none",
   borderBottom: "1px solid #E5E7EB",
@@ -90,133 +81,129 @@ const INPUT_LINE = {
   fontSize: "0.875rem",
 };
 
-/* ─── Image upload helper ────────────────────────────────── */
-async function uploadImageFile(file) {
-  const formData = new FormData();
-  formData.append("image", file);
-  const res = await api.post("/upload", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return res.data.data.url;
-}
-
-/* ─── Formatting Toolbar (bold/italic) ───────────────────── */
-function FormattingToolbar({ textareaRef, value, onChange }) {
-  const [show, setShow] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
-  const toolbarRef = useRef(null);
+function EditableText({ value, onChange, placeholder, style, as = "div", onKeyDown }) {
+  const ref = useRef(null);
 
   useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    function handleSelect() {
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      if (start !== end) {
-        const rect = el.getBoundingClientRect();
-        setPos({ top: rect.top - 40, left: rect.left + (rect.width / 2) - 50 });
-        setShow(true);
-      } else {
-        setShow(false);
-      }
+    if (ref.current && value !== ref.current.innerHTML) {
+      ref.current.innerHTML = value || "";
     }
-    el.addEventListener("mouseup", handleSelect);
-    el.addEventListener("keyup", handleSelect);
-    return () => {
-      el.removeEventListener("mouseup", handleSelect);
-      el.removeEventListener("keyup", handleSelect);
-    };
-  }, [textareaRef]);
+  }, [value]);
 
-  function wrapSelection(marker) {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    if (start === end) return;
-    const selected = value.slice(start, end);
-    // Toggle: if already wrapped, unwrap
-    const alreadyWrapped = selected.startsWith(marker) && selected.endsWith(marker);
-    let newText;
-    if (alreadyWrapped) {
-      newText = value.slice(0, start) + selected.slice(marker.length, -marker.length) + value.slice(end);
-    } else {
-      newText = value.slice(0, start) + marker + selected + marker + value.slice(end);
+  const emit = () => {
+    if (ref.current && ref.current.innerHTML !== value) {
+      onChange(ref.current.innerHTML);
     }
-    onChange(newText);
-    setShow(false);
-  }
+  };
 
-  if (!show) return null;
+  const Tag = as;
+
   return (
-    <div ref={toolbarRef} style={{
-      position: "fixed", top: pos.top, left: pos.left, zIndex: 100,
-      display: "flex", gap: "2px", background: "#1F2937", borderRadius: "0.5rem",
-      padding: "4px 6px", boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-    }}>
-      <button type="button" onClick={() => wrapSelection("**")} title="Bold"
-        style={{ background: "none", border: "none", cursor: "pointer", color: "white", padding: "4px 6px", borderRadius: 4, display: "flex", alignItems: "center" }}
-        onMouseEnter={e => { e.currentTarget.style.background = "#374151"; }}
-        onMouseLeave={e => { e.currentTarget.style.background = "none"; }}>
-        <Bold size={14} />
-      </button>
-      <button type="button" onClick={() => wrapSelection("*")} title="Italic"
-        style={{ background: "none", border: "none", cursor: "pointer", color: "white", padding: "4px 6px", borderRadius: 4, display: "flex", alignItems: "center" }}
-        onMouseEnter={e => { e.currentTarget.style.background = "#374151"; }}
-        onMouseLeave={e => { e.currentTarget.style.background = "none"; }}>
-        <Italic size={14} />
-      </button>
-    </div>
-  );
-}
-
-/* ─── Text block with formatting support ─────────────────── */
-function FormattableTextarea({ style, value, placeholder, rows, onChange }) {
-  const ref = useRef(null);
-  function handleChange(e) {
-    e.target.style.height = "auto";
-    e.target.style.height = e.target.scrollHeight + "px";
-    onChange(e.target.value);
-  }
-  return (
-    <div style={{ position: "relative" }}>
-      <FormattingToolbar textareaRef={ref} value={value || ""} onChange={onChange} />
-      <textarea
-        ref={ref}
-        style={style}
-        value={value || ""}
-        placeholder={placeholder}
-        rows={rows || 1}
-        onChange={handleChange}
-        onFocus={(e) => { e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }}
-      />
-    </div>
-  );
-}
-
-/* ─── Individual Block Renderers ─────────────────────────── */
-
-function ParagraphBlock({ block, onChange }) {
-  return (
-    <FormattableTextarea
-      style={{ ...TEXTAREA, fontSize: "0.9375rem", color: "#374151", minHeight: 28 }}
-      value={block.text || ""}
-      placeholder="Write something..."
-      onChange={(text) => onChange({ text })}
+    <Tag
+      ref={ref}
+      contentEditable
+      suppressContentEditableWarning
+      onInput={emit}
+      onBlur={emit}
+      onKeyDown={onKeyDown}
+      style={{
+        ...style,
+        outline: "none",
+        minHeight: "1.5em",
+        cursor: "text"
+      }}
+      data-placeholder={placeholder}
     />
   );
 }
 
-function HeadingBlock({ block, onChange, level = 2 }) {
-  const style = level === 2
-    ? { ...TEXTAREA, fontSize: "1.25rem", fontWeight: 700, color: "#111827", minHeight: 32 }
-    : { ...TEXTAREA, fontSize: "1.05rem", fontWeight: 600, color: "#1F2937", minHeight: 28 };
+function FormatBar() {
+  const btnStyle = {
+    padding: "3px 7px",
+    border: "1px solid #E5E7EB",
+    borderRadius: 4,
+    background: "white",
+    cursor: "pointer",
+    fontSize: "0.75rem",
+    color: "#374151",
+    display: "flex",
+    alignItems: "center"
+  };
+
   return (
-    <FormattableTextarea
+    <div style={{ display: "flex", gap: "4px", marginBottom: "6px" }}>
+      <button
+        type="button"
+        title="Undo (Ctrl+Z)"
+        onMouseDown={e => e.preventDefault()}
+        onClick={() => document.execCommand("undo")}
+        style={btnStyle}
+      >
+        <Undo size={13} />
+      </button>
+      <button
+        type="button"
+        title="Redo (Ctrl+Y)"
+        onMouseDown={e => e.preventDefault()}
+        onClick={() => document.execCommand("redo")}
+        style={btnStyle}
+      >
+        <Redo size={13} />
+      </button>
+      <div style={{ width: 1, background: "#E5E7EB", margin: "0 4px" }} />
+      <button
+        type="button"
+        title="Bold (Ctrl+B)"
+        onMouseDown={e => e.preventDefault()}
+        onClick={() => document.execCommand("bold")}
+        style={{ ...btnStyle, fontWeight: 700 }}
+      >
+        <Bold size={13} />
+      </button>
+      <button
+        type="button"
+        title="Italic (Ctrl+I)"
+        onMouseDown={e => e.preventDefault()}
+        onClick={() => document.execCommand("italic")}
+        style={{ ...btnStyle, fontStyle: "italic" }}
+      >
+        <Italic size={13} />
+      </button>
+      <span style={{ fontSize: "0.7rem", color: "#D1D5DB", alignSelf: "center", marginLeft: 4 }}>
+        Select text to format
+      </span>
+    </div>
+  );
+}
+
+function ParagraphBlock({ block, onChange }) {
+  return (
+    <>
+      <FormatBar />
+      <EditableText
+        style={{ ...TA, fontSize: "0.9375rem", color: "#374151", minHeight: 28, border: "none" }}
+        value={block.text || ""}
+        placeholder="Write something..."
+        onChange={(val) => onChange({ text: val })}
+        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
+      />
+    </>
+  );
+}
+
+function HeadingBlock({ block, onChange, level = 2 }) {
+  const style =
+    level === 2
+      ? { ...TA, fontSize: "1.25rem", fontWeight: 700, color: "#111827", minHeight: 32, border: "none" }
+      : { ...TA, fontSize: "1.05rem", fontWeight: 600, color: "#1F2937", minHeight: 28, border: "none" };
+
+  return (
+    <EditableText
       style={style}
       value={block.text || ""}
       placeholder={level === 2 ? "Section heading..." : "Sub-section heading..."}
-      onChange={(text) => onChange({ text })}
+      onChange={(val) => onChange({ text: val })}
+      onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
     />
   );
 }
@@ -224,86 +211,119 @@ function HeadingBlock({ block, onChange, level = 2 }) {
 function QuoteBlock({ block, onChange }) {
   return (
     <div style={{ borderLeft: "4px solid #4F7B44", paddingLeft: "1rem" }}>
-      <FormattableTextarea
-        style={{ ...TEXTAREA, fontSize: "1.05rem", fontStyle: "italic", color: "#374151", minHeight: 28 }}
+      <FormatBar />
+      <EditableText
+        style={{ ...TA, fontSize: "1.05rem", fontStyle: "italic", color: "#374151", minHeight: 28, border: "none" }}
         value={block.text || ""}
         placeholder="Enter a quote or pull-out text..."
-        onChange={(text) => onChange({ text })}
+        onChange={(val) => onChange({ text: val })}
+        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
       />
     </div>
   );
 }
 
 function ImageBlock({ block, onChange }) {
-  const [preview, setPreview] = useState(block.url || "");
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
 
-  function handleUrl(e) {
-    setPreview(e.target.value);
-    onChange({ url: e.target.value });
-  }
-
-  async function handleFileUpload(e) {
-    const file = e.target.files?.[0];
+  async function handleFile(event) {
+    const file = event.target.files?.[0];
     if (!file) return;
+
     setUploading(true);
+
     try {
-      const url = await uploadImageFile(file);
-      setPreview(url);
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const response = await api.post("/upload/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const url = resolveApiAssetUrl(response.data?.url || response.data?.data?.url);
       onChange({ url });
-    } catch {
-      /* toast handled by interceptor */
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Upload failed. Please try again.");
     } finally {
       setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-      {/* URL input + upload */}
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <Image size={15} style={{ color: "#9CA3AF", flexShrink: 0 }} />
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+        <Image size={14} style={{ color: "#9CA3AF", flexShrink: 0 }} />
         <input
-          style={{ ...INPUT_LINE, flex: 1 }}
+          style={{ ...IL, flex: 1 }}
           value={block.url || ""}
           placeholder="Paste image URL (https://...)"
-          onChange={handleUrl}
-          onBlur={(e) => setPreview(e.target.value)}
+          onChange={(event) => onChange({ url: event.target.value })}
         />
-        <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
-        <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-          style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "4px 10px", border: "1px solid #D1D5DB", borderRadius: "0.375rem", background: "#F9FAFB", fontSize: "0.75rem", color: "#4F7B44", cursor: uploading ? "not-allowed" : "pointer", whiteSpace: "nowrap", fontWeight: 500 }}>
-          <Upload size={12} /> {uploading ? "Uploading…" : "Upload"}
+        <span style={{ fontSize: "0.75rem", color: "#9CA3AF", flexShrink: 0 }}>or</span>
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={() => fileRef.current?.click()}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.375rem",
+            padding: "5px 10px",
+            border: "1px solid #D0D5DD",
+            borderRadius: "0.375rem",
+            background: uploading ? "#F9FAFB" : "white",
+            cursor: uploading ? "not-allowed" : "pointer",
+            fontSize: "0.8rem",
+            color: "#344054",
+            flexShrink: 0,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <Upload size={13} /> {uploading ? "Uploading..." : "Upload"}
         </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          style={{ display: "none" }}
+          onChange={handleFile}
+        />
       </div>
 
-      {/* Preview */}
-      {preview && (
-        <div style={{ borderRadius: "0.625rem", overflow: "hidden", border: "1px solid #E5E7EB", background: "#F9FAFB", maxHeight: 400 }}>
+      {block.url && (
+        <div
+          style={{
+            borderRadius: "0.5rem",
+            overflow: "hidden",
+            border: "1px solid #E5E7EB",
+            background: "#F9FAFB",
+            maxHeight: 360,
+          }}
+        >
           <img
-            src={preview}
+            src={resolveApiAssetUrl(block.url)}
             alt={block.alt || "preview"}
-            style={{ width: "100%", maxHeight: 400, objectFit: "cover", display: "block" }}
-            onError={(e) => { e.target.style.display = "none"; }}
+            style={{ width: "100%", maxHeight: 360, objectFit: "cover", display: "block" }}
+            onError={(event) => {
+              event.target.style.display = "none";
+            }}
           />
         </div>
       )}
 
-      {/* Alt text */}
       <input
-        style={INPUT_LINE}
+        style={IL}
         value={block.alt || ""}
         placeholder="Alt text (for accessibility)"
-        onChange={(e) => onChange({ alt: e.target.value })}
+        onChange={(event) => onChange({ alt: event.target.value })}
       />
-
-      {/* Caption */}
       <input
-        style={{ ...INPUT_LINE, fontSize: "0.8125rem", color: "#6B7280", fontStyle: "italic" }}
+        style={{ ...IL, fontSize: "0.8125rem", color: "#6B7280", fontStyle: "italic" }}
         value={block.caption || ""}
         placeholder="Caption (optional)"
-        onChange={(e) => onChange({ caption: e.target.value })}
+        onChange={(event) => onChange({ caption: event.target.value })}
       />
     </div>
   );
@@ -312,45 +332,67 @@ function ImageBlock({ block, onChange }) {
 function ListBlock({ block, onChange, numbered = false }) {
   const items = block.items || [""];
 
-  function updateItem(idx, val) {
-    const next = [...items];
-    next[idx] = val;
-    onChange({ items: next });
+  function updateItem(index, value) {
+    const nextItems = [...items];
+    nextItems[index] = value;
+    onChange({ items: nextItems });
   }
 
-  function addItem(idx) {
-    const next = [...items];
-    next.splice(idx + 1, 0, "");
-    onChange({ items: next });
+  function addItem(index) {
+    const nextItems = [...items];
+    nextItems.splice(index + 1, 0, "");
+    onChange({ items: nextItems });
   }
 
-  function removeItem(idx) {
+  function removeItem(index) {
     if (items.length === 1) return;
-    const next = items.filter((_, i) => i !== idx);
-    onChange({ items: next });
+    onChange({ items: items.filter((_, itemIndex) => itemIndex !== index) });
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-      {items.map((item, idx) => (
-        <div key={idx} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ color: "#4F7B44", fontWeight: 700, fontSize: "0.875rem", width: 20, flexShrink: 0, textAlign: "right" }}>
-            {numbered ? `${idx + 1}.` : "•"}
+      {items.map((item, index) => (
+        <div key={index} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span
+            style={{
+              color: "#4F7B44",
+              fontWeight: 700,
+              fontSize: "0.875rem",
+              width: 20,
+              flexShrink: 0,
+              textAlign: "right",
+            }}
+          >
+            {numbered ? `${index + 1}.` : "\u2022"}
           </span>
-          <input
-            style={{ ...INPUT_LINE, flex: 1, borderBottom: "none" }}
+          <EditableText
+            style={{ ...IL, flex: 1, borderBottom: "none", minHeight: 20 }}
             value={item}
-            placeholder={`Item ${idx + 1}`}
-            onChange={(e) => updateItem(idx, e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") { e.preventDefault(); addItem(idx); }
-              if (e.key === "Backspace" && !item) { e.preventDefault(); removeItem(idx); }
+            placeholder={`Item ${index + 1}`}
+            onChange={(val) => updateItem(index, val)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                addItem(index);
+              }
+
+              if (event.key === "Backspace" && !item) {
+                event.preventDefault();
+                removeItem(index);
+              }
             }}
           />
           <button
             type="button"
-            onClick={() => removeItem(idx)}
-            style={{ color: "#D1D5DB", background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0 }}
+            onClick={() => removeItem(index)}
+            style={{
+              color: "#D1D5DB",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 2,
+              flexShrink: 0,
+            }}
           >
             <Trash2 size={13} />
           </button>
@@ -359,7 +401,19 @@ function ListBlock({ block, onChange, numbered = false }) {
       <button
         type="button"
         onClick={() => addItem(items.length - 1)}
-        style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "0.8rem", color: "#4F7B44", background: "none", border: "none", cursor: "pointer", marginTop: "0.25rem", fontWeight: 500 }}
+        style={{
+          alignSelf: "flex-start",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.25rem",
+          fontSize: "0.8rem",
+          color: "#4F7B44",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          marginTop: "0.25rem",
+          fontWeight: 500,
+        }}
       >
         <Plus size={13} /> Add item
       </button>
@@ -368,33 +422,52 @@ function ListBlock({ block, onChange, numbered = false }) {
 }
 
 function CalloutBlock({ block, onChange }) {
-  const variants = { info: { bg: "#EFF6FF", border: "#BFDBFE", icon: "💡" }, tip: { bg: "#F0FDF4", border: "#BBF7D0", icon: "✅" }, warning: { bg: "#FFFBEB", border: "#FDE68A", icon: "⚠️" } };
-  const v = variants[block.variant || "info"];
+  const ref = useRef(null);
+  const variants = {
+    info: { bg: "#EFF6FF", border: "#BFDBFE", icon: "\u{1F4A1}" },
+    tip: { bg: "#F0FDF4", border: "#BBF7D0", icon: "\u2705" },
+    warning: { bg: "#FFFBEB", border: "#FDE68A", icon: "\u26A0\uFE0F" },
+  };
+  const variant = variants[block.variant || "info"];
+
+  useEffect(() => {
+    autoGrow(ref.current);
+  }, [block.text]);
+
   return (
-    <div style={{ background: v.bg, border: `1px solid ${v.border}`, borderRadius: "0.625rem", padding: "0.875rem 1rem" }}>
+    <div
+      style={{
+        background: variant.bg,
+        border: `1px solid ${variant.border}`,
+        borderRadius: "0.625rem",
+        padding: "0.875rem 1rem",
+      }}
+    >
       <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
-        <span>{v.icon}</span>
+        <span>{variant.icon}</span>
         <select
           value={block.variant || "info"}
-          onChange={(e) => onChange({ variant: e.target.value })}
-          style={{ fontSize: "0.75rem", border: "none", background: "transparent", color: "#6B7280", cursor: "pointer" }}
+          onChange={(event) => onChange({ variant: event.target.value })}
+          style={{
+            fontSize: "0.75rem",
+            border: "none",
+            background: "transparent",
+            color: "#6B7280",
+            cursor: "pointer",
+          }}
         >
           <option value="info">Info</option>
           <option value="tip">Tip</option>
           <option value="warning">Warning</option>
         </select>
       </div>
-      <textarea
-        style={{ ...TEXTAREA, fontSize: "0.9rem", color: "#374151", minHeight: 24 }}
+      <FormatBar />
+      <EditableText
+        style={{ ...TA, fontSize: "0.9rem", color: "#374151", minHeight: 24, background: "transparent", border: "none" }}
         value={block.text || ""}
         placeholder="Callout text..."
-        rows={1}
-        onChange={(e) => {
-          e.target.style.height = "auto";
-          e.target.style.height = e.target.scrollHeight + "px";
-          onChange({ text: e.target.value });
-        }}
-        onFocus={(e) => { e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }}
+        onChange={(val) => onChange({ text: val })}
+        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
       />
     </div>
   );
@@ -410,206 +483,124 @@ function DividerBlock() {
   );
 }
 
-/* ─── Block Wrapper ──────────────────────────────────────── */
-function Block({ block, index, total, onChange, onDelete, onMove, onAdd }) {
-  const [hovered, setHovered] = useState(false);
-  const [typeOpen, setTypeOpen] = useState(false);
-
-  const meta = BLOCK_META.find((m) => m.type === block.type) || BLOCK_META[0];
-
-  function renderContent() {
-    switch (block.type) {
-      case "paragraph":  return <ParagraphBlock  block={block} onChange={onChange} />;
-      case "heading":    return <HeadingBlock    block={block} onChange={onChange} level={2} />;
-      case "subheading": return <HeadingBlock    block={block} onChange={onChange} level={3} />;
-      case "image":      return <ImageBlock      block={block} onChange={onChange} />;
-      case "quote":      return <QuoteBlock      block={block} onChange={onChange} />;
-      case "bullets":    return <ListBlock       block={block} onChange={onChange} numbered={false} />;
-      case "numbered":   return <ListBlock       block={block} onChange={onChange} numbered={true} />;
-      case "callout":    return <CalloutBlock    block={block} onChange={onChange} />;
-      case "divider":    return <DividerBlock />;
-      default:           return <ParagraphBlock  block={block} onChange={onChange} />;
-    }
-  }
-
-  return (
-    <div
-      style={{ position: "relative", marginBottom: "0.25rem" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setHovered(false); setTypeOpen(false); }}
-    >
-      {/* Left gutter — visible on hover */}
-      <div style={{
-        position: "absolute",
-        left: -64,
-        top: 0,
-        width: 56,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "2px",
-        opacity: hovered ? 1 : 0,
-        transition: "opacity 150ms ease",
-        paddingTop: 2,
-      }}>
-        {/* Block type picker */}
-        <div style={{ position: "relative" }}>
-          <button
-            type="button"
-            title="Change block type"
-            onClick={() => setTypeOpen((v) => !v)}
-            style={{ padding: "3px 5px", borderRadius: 5, border: "1px solid #E5E7EB", background: "white", cursor: "pointer", display: "flex", alignItems: "center", gap: "2px", fontSize: "0.7rem", color: "#6B7280" }}
-          >
-            <meta.icon size={11} />
-          </button>
-          {typeOpen && (
-            <div style={{
-              position: "absolute",
-              left: 0,
-              top: "calc(100% + 4px)",
-              background: "white",
-              border: "1px solid #E5E7EB",
-              borderRadius: "0.5rem",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-              zIndex: 50,
-              minWidth: 160,
-              padding: "0.25rem",
-            }}>
-              {BLOCK_META.map((m) => (
-                <button
-                  key={m.type}
-                  type="button"
-                  onClick={() => { onChange({ type: m.type }); setTypeOpen(false); }}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "0.5rem",
-                    width: "100%", padding: "0.4rem 0.625rem",
-                    background: block.type === m.type ? "#F0FDF4" : "transparent",
-                    border: "none", borderRadius: "0.375rem", cursor: "pointer",
-                    fontSize: "0.8125rem", color: block.type === m.type ? "#4F7B44" : "#374151",
-                    fontWeight: block.type === m.type ? 600 : 400,
-                    textAlign: "left",
-                  }}
-                >
-                  <m.icon size={13} /> {m.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        {/* Move up */}
-        <button type="button" onClick={() => onMove("up")} disabled={index === 0}
-          style={{ padding: 3, border: "1px solid #E5E7EB", borderRadius: 4, background: "white", cursor: index === 0 ? "not-allowed" : "pointer", color: "#9CA3AF", opacity: index === 0 ? 0.4 : 1 }}>
-          <ChevronUp size={11} />
-        </button>
-        {/* Move down */}
-        <button type="button" onClick={() => onMove("down")} disabled={index === total - 1}
-          style={{ padding: 3, border: "1px solid #E5E7EB", borderRadius: 4, background: "white", cursor: index === total - 1 ? "not-allowed" : "pointer", color: "#9CA3AF", opacity: index === total - 1 ? 0.4 : 1 }}>
-          <ChevronDown size={11} />
-        </button>
-        {/* Delete */}
-        <button type="button" onClick={onDelete}
-          style={{ padding: 3, border: "1px solid #FECACA", borderRadius: 4, background: "white", cursor: "pointer", color: "#EF4444" }}>
-          <Trash2 size={11} />
-        </button>
-      </div>
-
-      {/* Block body */}
-      <div style={{
-        padding: "0.625rem 0.75rem",
-        borderRadius: "0.5rem",
-        border: "1px solid",
-        borderColor: hovered ? "#D1FAE5" : "transparent",
-        background: hovered ? "#FAFFFE" : "transparent",
-        transition: "border-color 150ms ease, background 150ms ease",
-      }}>
-        {renderContent()}
-      </div>
-
-    </div>
-  );
-}
-
-/* ─── Add Block Menu ─────────────────────────────────────── */
-function AddBlockMenu({ onAdd }) {
+function AddBlockMenu({ onAdd, label = "Add block" }) {
   const [open, setOpen] = useState(false);
-  const btnRef = useRef(null);
   const menuRef = useRef(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef(null);
 
-  // Close on outside click
   useEffect(() => {
-    if (!open) return;
-    function handleClick(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target) && btnRef.current && !btnRef.current.contains(e.target)) {
+    if (!open) return undefined;
+
+    function handleMouseDown(event) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [open]);
 
-  function toggleMenu() {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom + 4, left: rect.left + rect.width / 2 - 120 });
+  useEffect(() => {
+    if (!open || !menuRef.current) return;
+
+    const rect = menuRef.current.getBoundingClientRect();
+    const overflowY = rect.bottom - (window.innerHeight - 16);
+    const overflowX = rect.right - (window.innerWidth - 16);
+
+    if (overflowY > 0 || overflowX > 0) {
+      menuRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
-    setOpen((v) => !v);
-  }
+  }, [open]);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", display: "inline-block" }}>
       <button
-        ref={btnRef}
+        ref={buttonRef}
         type="button"
-        onClick={toggleMenu}
+        onClick={() => setOpen((value) => !value)}
         style={{
-          display: "flex", alignItems: "center", gap: "0.25rem",
-          padding: "2px 10px", borderRadius: "9999px",
-          border: "1px dashed #D1D5DB", background: "white",
-          color: "#9CA3AF", fontSize: "0.75rem", cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.25rem",
+          padding: "4px 12px",
+          borderRadius: "9999px",
+          border: "1px dashed #D1D5DB",
+          background: "white",
+          color: "#9CA3AF",
+          fontSize: "0.75rem",
+          cursor: "pointer",
           transition: "border-color 150ms, color 150ms",
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#4F7B44"; e.currentTarget.style.color = "#4F7B44"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#D1D5DB"; e.currentTarget.style.color = "#9CA3AF"; }}
+        onMouseEnter={(event) => {
+          event.currentTarget.style.borderColor = "#4F7B44";
+          event.currentTarget.style.color = "#4F7B44";
+        }}
+        onMouseLeave={(event) => {
+          event.currentTarget.style.borderColor = "#D1D5DB";
+          event.currentTarget.style.color = "#9CA3AF";
+        }}
       >
-        <Plus size={12} /> Add block
+        <Plus size={12} /> {label}
       </button>
+
       {open && (
-        <div ref={menuRef} style={{
-          position: "fixed",
-          top: menuPos.top,
-          left: menuPos.left,
-          background: "white",
-          border: "1px solid #E5E7EB",
-          borderRadius: "0.75rem",
-          boxShadow: "0 12px 32px rgba(0,0,0,0.14)",
-          zIndex: 9999,
-          padding: "0.375rem",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "2px",
-          minWidth: 240,
-          maxHeight: "min(320px, 60vh)",
-          overflowY: "auto",
-        }}>
-          {BLOCK_META.map((m) => (
+        <div
+          ref={menuRef}
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            left: 0,
+            background: "white",
+            border: "1px solid #E5E7EB",
+            borderRadius: "0.75rem",
+            boxShadow: "0 16px 40px rgba(0,0,0,0.14)",
+            zIndex: 9999,
+            padding: "0.375rem",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "2px",
+            minWidth: 248,
+            maxHeight: "min(360px, 60vh)",
+            overflowY: "auto",
+          }}
+        >
+          {BLOCK_META.map((item) => (
             <button
-              key={m.type}
+              key={item.type}
               type="button"
-              onClick={() => { onAdd(m.type); setOpen(false); }}
-              style={{
-                display: "flex", alignItems: "center", gap: "0.5rem",
-                padding: "0.425rem 0.75rem",
-                border: "none", borderRadius: "0.5rem",
-                background: "transparent", cursor: "pointer",
-                fontSize: "0.8125rem", color: "#374151",
-                textAlign: "left",
-                transition: "background 120ms",
+              onClick={() => {
+                onAdd(item.type);
+                setOpen(false);
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#F0FDF4"; e.currentTarget.style.color = "#4F7B44"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#374151"; }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.45rem 0.75rem",
+                border: "none",
+                borderRadius: "0.5rem",
+                background: "transparent",
+                cursor: "pointer",
+                fontSize: "0.8125rem",
+                color: "#374151",
+                textAlign: "left",
+              }}
+              onMouseEnter={(event) => {
+                event.currentTarget.style.background = "#F0FDF4";
+                event.currentTarget.style.color = "#4F7B44";
+              }}
+              onMouseLeave={(event) => {
+                event.currentTarget.style.background = "transparent";
+                event.currentTarget.style.color = "#374151";
+              }}
             >
-              <m.icon size={14} /> {m.label}
+              <item.icon size={14} /> {item.label}
             </button>
           ))}
         </div>
@@ -618,99 +609,362 @@ function AddBlockMenu({ onAdd }) {
   );
 }
 
-/* ─── Main RichEditor ────────────────────────────────────── */
-export default function RichEditor({ blocks, onChange }) {
-  const safeBlocks = Array.isArray(blocks) && blocks.length > 0
-    ? blocks
-    : [makeBlock("paragraph")];
+function ConclusionBlock({ block, onChange }) {
+  return (
+    <div style={{ background: "#4F7B44", borderRadius: "0.75rem", padding: "1.25rem 1.5rem" }}>
+      <FormatBar />
+      <EditableText
+        style={{ ...TA, fontSize: "1rem", color: "white", minHeight: 28, background: "transparent", border: "none" }}
+        value={block.text || ""}
+        placeholder="Write your conclusion..."
+        onChange={(val) => onChange({ text: val })}
+        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
+      />
+    </div>
+  );
+}
 
-  const update = useCallback((id, patch) => {
-    onChange(safeBlocks.map((b) => b.id === id ? { ...b, ...patch } : b));
-  }, [safeBlocks, onChange]);
+function Block({ block, index, total, onChange, onDelete, onMove }) {
+  const [hovered, setHovered] = useState(false);
+  const [typeOpen, setTypeOpen] = useState(false);
+  const typeButtonRef = useRef(null);
+  const typeMenuRef = useRef(null);
+  const meta = BLOCK_META.find((item) => item.type === block.type) || BLOCK_META[0];
+  const controlsVisible = hovered || typeOpen;
 
-  const remove = useCallback((id) => {
-    const next = safeBlocks.filter((b) => b.id !== id);
-    onChange(next.length > 0 ? next : [makeBlock("paragraph")]);
-  }, [safeBlocks, onChange]);
+  useEffect(() => {
+    if (!typeOpen) return undefined;
 
-  const move = useCallback((id, dir) => {
-    const idx = safeBlocks.findIndex((b) => b.id === id);
-    if (dir === "up" && idx === 0) return;
-    if (dir === "down" && idx === safeBlocks.length - 1) return;
-    const arr = [...safeBlocks];
-    const swap = dir === "up" ? idx - 1 : idx + 1;
-    [arr[idx], arr[swap]] = [arr[swap], arr[idx]];
-    onChange(arr);
-  }, [safeBlocks, onChange]);
+    function handleMouseDown(event) {
+      if (
+        typeMenuRef.current &&
+        !typeMenuRef.current.contains(event.target) &&
+        typeButtonRef.current &&
+        !typeButtonRef.current.contains(event.target)
+      ) {
+        setTypeOpen(false);
+      }
+    }
 
-  const addAfter = useCallback((id, type = "paragraph") => {
-    const idx = safeBlocks.findIndex((b) => b.id === id);
-    const arr = [...safeBlocks];
-    arr.splice(idx + 1, 0, makeBlock(type));
-    onChange(arr);
-  }, [safeBlocks, onChange]);
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, [typeOpen]);
+
+  useEffect(() => {
+    if (!typeOpen || !typeMenuRef.current) return;
+
+    const rect = typeMenuRef.current.getBoundingClientRect();
+    if (rect.bottom > window.innerHeight - 16 || rect.right > window.innerWidth - 16) {
+      typeMenuRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [typeOpen]);
+
+  function renderContent() {
+    switch (block.type) {
+      case "paragraph":
+        return <ParagraphBlock block={block} onChange={onChange} />;
+      case "heading":
+        return <HeadingBlock block={block} onChange={onChange} level={2} />;
+      case "subheading":
+        return <HeadingBlock block={block} onChange={onChange} level={3} />;
+      case "image":
+        return <ImageBlock block={block} onChange={onChange} />;
+      case "quote":
+        return <QuoteBlock block={block} onChange={onChange} />;
+      case "bullets":
+        return <ListBlock block={block} onChange={onChange} numbered={false} />;
+      case "numbered":
+        return <ListBlock block={block} onChange={onChange} numbered />;
+      case "callout":
+        return <CalloutBlock block={block} onChange={onChange} />;
+      case "divider":
+        return <DividerBlock />;
+      case "conclusion":
+        return <ConclusionBlock block={block} onChange={onChange} />;
+      default:
+        return <ParagraphBlock block={block} onChange={onChange} />;
+    }
+  }
 
   return (
-    <div style={{ paddingLeft: 64, position: "relative" }}>
-      {safeBlocks.map((block, idx) => (
-        <Block
-          key={block.id}
-          block={block}
-          index={idx}
-          total={safeBlocks.length}
-          onChange={(patch) => update(block.id, patch)}
-          onDelete={() => remove(block.id)}
-          onMove={(dir) => move(block.id, dir)}
-          onAdd={(type) => addAfter(block.id, type)}
-        />
-      ))}
+    <div
+      style={{ position: "relative", marginBottom: "0.35rem", paddingLeft: 116 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 8,
+          top: 8,
+          width: 100,
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+          opacity: controlsVisible ? 1 : 0,
+          pointerEvents: controlsVisible ? "auto" : "none",
+          transition: "opacity 150ms ease",
+          zIndex: 100,
+        }}
+      >
+        <div style={{ position: "relative" }}>
+          <button
+            ref={typeButtonRef}
+            type="button"
+            title="Change block type"
+            onClick={() => setTypeOpen((value) => !value)}
+            style={{
+              padding: "3px 5px",
+              borderRadius: 5,
+              border: "1px solid #E5E7EB",
+              background: "white",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              color: "#6B7280",
+            }}
+          >
+            <meta.icon size={11} />
+          </button>
+          {typeOpen && (
+            <div
+              ref={typeMenuRef}
+              style={{
+                position: "absolute",
+                left: 0,
+                top: "calc(100% + 4px)",
+                background: "white",
+                border: "1px solid #E5E7EB",
+                borderRadius: "0.5rem",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                zIndex: 9999,
+                minWidth: 160,
+                padding: "0.25rem",
+                maxHeight: "min(320px, 60vh)",
+                overflowY: "auto",
+              }}
+            >
+              {BLOCK_META.map((item) => (
+                <button
+                  key={item.type}
+                  type="button"
+                  onClick={() => {
+                    onChange({ type: item.type });
+                    setTypeOpen(false);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    width: "100%",
+                    padding: "0.4rem 0.625rem",
+                    background: block.type === item.type ? "#F0FDF4" : "transparent",
+                    border: "none",
+                    borderRadius: "0.375rem",
+                    cursor: "pointer",
+                    fontSize: "0.8125rem",
+                    color: block.type === item.type ? "#4F7B44" : "#374151",
+                    fontWeight: block.type === item.type ? 600 : 400,
+                    textAlign: "left",
+                  }}
+                >
+                  <item.icon size={13} /> {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Bottom add button */}
-      <div style={{ paddingLeft: 0, marginTop: "0.75rem", display: "flex" }}>
-        <AddBlockMenu onAdd={(type) => {
-          onChange([...safeBlocks, makeBlock(type)]);
-        }} />
+        <button
+          type="button"
+          onClick={() => onMove("up")}
+          disabled={index === 0}
+          style={{
+            padding: 3,
+            border: "1px solid #E5E7EB",
+            borderRadius: 4,
+            background: "white",
+            cursor: index === 0 ? "not-allowed" : "pointer",
+            color: "#9CA3AF",
+            opacity: index === 0 ? 0.4 : 1,
+          }}
+        >
+          <ChevronUp size={11} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onMove("down")}
+          disabled={index === total - 1}
+          style={{
+            padding: 3,
+            border: "1px solid #E5E7EB",
+            borderRadius: 4,
+            background: "white",
+            cursor: index === total - 1 ? "not-allowed" : "pointer",
+            color: "#9CA3AF",
+            opacity: index === total - 1 ? 0.4 : 1,
+          }}
+        >
+          <ChevronDown size={11} />
+        </button>
+
+        <button
+          type="button"
+          onClick={onDelete}
+          style={{
+            padding: 3,
+            border: "1px solid #FECACA",
+            borderRadius: 4,
+            background: "white",
+            cursor: "pointer",
+            color: "#EF4444",
+          }}
+        >
+          <Trash2 size={11} />
+        </button>
+      </div>
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: controlsVisible ? 10 : 1,
+          padding: "0.625rem 0.75rem",
+          borderRadius: "0.5rem",
+          border: "1px solid",
+          borderColor: controlsVisible ? "#D1FAE5" : "transparent",
+          background: controlsVisible ? "#FAFFFE" : "transparent",
+          transition: "border-color 150ms ease, background 150ms ease",
+        }}
+      >
+        {renderContent()}
       </div>
     </div>
   );
 }
 
-/* ─── Serialise blocks → HTML (for newsletter emails) ───── */
-export function blocksToHtml(blocks) {
-  if (!Array.isArray(blocks)) return typeof blocks === "string" ? blocks : "";
-  return blocks.map((b) => {
-    switch (b.type) {
-      case "paragraph":  return `<p style="font-size:1rem;color:#374151;line-height:1.8;margin:0 0 1rem">${b.text || ""}</p>`;
-      case "heading":    return `<h2 style="font-size:1.375rem;font-weight:700;color:#111827;margin:2rem 0 0.75rem;padding-left:0.75rem;border-left:3px solid #4F7B44">${b.text || ""}</h2>`;
-      case "subheading": return `<h3 style="font-size:1.1rem;font-weight:600;color:#1F2937;margin:1.5rem 0 0.5rem">${b.text || ""}</h3>`;
-      case "image":      return b.url ? `<figure style="margin:1.5rem 0"><img src="${b.url}" alt="${b.alt || ""}" style="width:100%;border-radius:8px;display:block">${b.caption ? `<figcaption style="text-align:center;font-size:0.8125rem;color:#6B7280;margin-top:0.5rem">${b.caption}</figcaption>` : ""}</figure>` : "";
-      case "quote":      return `<blockquote style="border-left:4px solid #4F7B44;margin:1.5rem 0;padding:0.75rem 1.25rem;font-style:italic;color:#374151;background:#F9FAFB;border-radius:0 8px 8px 0">${b.text || ""}</blockquote>`;
-      case "bullets":    return `<ul style="margin:0.5rem 0 1rem;padding-left:1.25rem">${(b.items || []).map((i) => `<li style="margin-bottom:0.375rem;color:#374151">${i}</li>`).join("")}</ul>`;
-      case "numbered":   return `<ol style="margin:0.5rem 0 1rem;padding-left:1.25rem">${(b.items || []).map((i) => `<li style="margin-bottom:0.375rem;color:#374151">${i}</li>`).join("")}</ol>`;
-      case "callout":    return `<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:1rem 1.25rem;margin:1rem 0"><p style="margin:0;color:#374151">${b.text || ""}</p></div>`;
-      case "divider":    return `<hr style="border:none;border-top:1px solid #E5E7EB;margin:2rem 0">`;
-      default:           return "";
-    }
-  }).join("\n");
+export default function RichEditor({ blocks, onChange }) {
+  const safeBlocks = Array.isArray(blocks) && blocks.length > 0 ? blocks : [makeBlock("paragraph")];
+
+  const update = useCallback(
+    (id, patch) => {
+      onChange(safeBlocks.map((block) => (block.id === id ? { ...block, ...patch } : block)));
+    },
+    [safeBlocks, onChange],
+  );
+
+  const remove = useCallback(
+    (id) => {
+      const nextBlocks = safeBlocks.filter((block) => block.id !== id);
+      onChange(nextBlocks.length > 0 ? nextBlocks : [makeBlock("paragraph")]);
+    },
+    [safeBlocks, onChange],
+  );
+
+  const move = useCallback(
+    (id, direction) => {
+      const index = safeBlocks.findIndex((block) => block.id === id);
+      if (direction === "up" && index === 0) return;
+      if (direction === "down" && index === safeBlocks.length - 1) return;
+
+      const nextBlocks = [...safeBlocks];
+      const swapIndex = direction === "up" ? index - 1 : index + 1;
+      [nextBlocks[index], nextBlocks[swapIndex]] = [nextBlocks[swapIndex], nextBlocks[index]];
+      onChange(nextBlocks);
+    },
+    [safeBlocks, onChange],
+  );
+
+  const addBlock = useCallback(
+    (type = "paragraph") => {
+      onChange([...safeBlocks, makeBlock(type)]);
+    },
+    [safeBlocks, onChange],
+  );
+
+  return (
+    <div style={{ position: "relative" }}>
+      {safeBlocks.map((block, index) => (
+        <Block
+          key={block.id}
+          block={block}
+          index={index}
+          total={safeBlocks.length}
+          onChange={(patch) => update(block.id, patch)}
+          onDelete={() => remove(block.id)}
+          onMove={(direction) => move(block.id, direction)}
+        />
+      ))}
+      <div style={{ marginTop: "0.75rem", marginLeft: 116 }}>
+        <AddBlockMenu onAdd={addBlock} />
+      </div>
+    </div>
+  );
 }
 
-/* ─── Parse legacy string/JSON content → blocks ─────────── */
+export function blocksToHtml(blocks) {
+  if (!Array.isArray(blocks)) return typeof blocks === "string" ? blocks : "";
+
+  return blocks
+    .map((block) => {
+      switch (block.type) {
+        case "paragraph":
+          return `<p style="font-size:1rem;color:#374151;line-height:1.8;margin:0 0 1rem">${block.text || ""}</p>`;
+        case "heading":
+          return `<h2 style="font-size:1.375rem;font-weight:700;color:#111827;margin:2rem 0 0.75rem;padding-left:0.75rem;border-left:3px solid #4F7B44">${block.text || ""}</h2>`;
+        case "subheading":
+          return `<h3 style="font-size:1.1rem;font-weight:600;color:#1F2937;margin:1.5rem 0 0.5rem">${block.text || ""}</h3>`;
+        case "image":
+          return block.url
+            ? `<figure style="margin:1.5rem 0"><img loading="lazy" src="${resolveApiAssetUrl(block.url)}" alt="${block.alt || ""}" style="width:100%;border-radius:8px;display:block">${block.caption ? `<figcaption style="text-align:center;font-size:0.8125rem;color:#6B7280;margin-top:0.5rem">${block.caption}</figcaption>` : ""}</figure>`
+            : "";
+        case "quote":
+          return `<blockquote style="border-left:4px solid #4F7B44;margin:1.5rem 0;padding:0.75rem 1.25rem;font-style:italic;color:#374151;background:#F9FAFB;border-radius:0 8px 8px 0">${block.text || ""}</blockquote>`;
+        case "bullets":
+          return `<ul style="margin:0.5rem 0 1rem;padding-left:1.25rem">${(block.items || []).map((item) => `<li style="margin-bottom:0.375rem;color:#374151">${item}</li>`).join("")}</ul>`;
+        case "numbered":
+          return `<ol style="margin:0.5rem 0 1rem;padding-left:1.25rem">${(block.items || []).map((item) => `<li style="margin-bottom:0.375rem;color:#374151">${item}</li>`).join("")}</ol>`;
+        case "callout":
+          return `<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:1rem 1.25rem;margin:1rem 0"><p style="margin:0;color:#374151">${block.text || ""}</p></div>`;
+        case "divider":
+          return `<hr style="border:none;border-top:1px solid #E5E7EB;margin:2rem 0">`;
+        case "conclusion":
+          return `<div style="background:#4F7B44;border-radius:8px;padding:1.25rem 1.5rem;margin:1.5rem 0"><p style="margin:0;font-size:1rem;color:white;line-height:1.8">${block.text || ""}</p></div>`;
+        default:
+          return "";
+      }
+    })
+    .join("\n");
+}
+
+function normalizeParsedBlock(block) {
+  const nextBlock = { ...(block || {}), id: uid() };
+
+  if (nextBlock.type === "image") {
+    nextBlock.url = resolveApiAssetUrl(nextBlock.url);
+  }
+
+  return nextBlock;
+}
+
 export function parseContentToBlocks(raw) {
   if (Array.isArray(raw) && raw.length > 0) {
-    // Already block array — ensure each has an id
-    return raw.map((b) => ({ id: uid(), ...b }));
+    return raw.map(normalizeParsedBlock);
   }
+
   if (typeof raw === "string" && raw.trim()) {
-    // Try parsing JSON
     try {
       const parsed = JSON.parse(raw.trim());
-      if (Array.isArray(parsed)) return parsed.map((b) => ({ id: uid(), ...b }));
+      if (Array.isArray(parsed)) {
+        return parsed.map(normalizeParsedBlock);
+      }
     } catch {}
-    // Plain text — split on double-newlines into paragraphs
+
     return raw
       .split(/\n{2,}/)
       .filter(Boolean)
-      .map((t) => ({ id: uid(), type: "paragraph", text: t.trim() }));
+      .map((text) => ({ id: uid(), type: "paragraph", text: text.trim() }));
   }
+
   return [makeBlock("paragraph")];
 }

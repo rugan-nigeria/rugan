@@ -1,3 +1,5 @@
+import { resolveApiAssetUrl } from "@/lib/api";
+
 export function getPostAuthorName(post) {
   if (!post) return "";
 
@@ -33,5 +35,5 @@ export function formatPostDate(postOrDate) {
 }
 
 export function getPostImage(post) {
-  return post?.coverImage || post?.image || "/images/blog/hero.jpg";
+  return resolveApiAssetUrl(post?.coverImage || post?.image) || "/images/blog/hero.jpg";
 }

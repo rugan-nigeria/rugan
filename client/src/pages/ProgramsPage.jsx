@@ -23,7 +23,7 @@ const PROGRAMS = [
     slug: "excellence-award-project",
     title: "Excellence Awards",
     description:
-      "Recognizing and rewarding outstanding academic performance among rural secondary school girls to motivate excellence and retention.",
+      "Recognising and rewarding outstanding academic performance among rural secondary school girls to motivate excellence and retention.",
     image: "/images/programs/card-3.jpg",
   },
   {

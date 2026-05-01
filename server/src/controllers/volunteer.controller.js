@@ -103,7 +103,8 @@ export async function getApplications(req, res, next) {
       VolunteerApplication.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(Number(limit)),
+        .limit(Number(limit))
+        .lean(),
       VolunteerApplication.countDocuments(filter),
     ]);
 

@@ -1,12 +1,11 @@
 import "dotenv/config";
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
+import mongoSanitize from "express-mongo-sanitize";
 
 import { ensureAdminUser } from "./config/admin.js";
 import { connectDB } from "./config/db.js";
@@ -26,16 +25,28 @@ import donationRoutes from "./routes/donation.routes.js";
 import newsletterRoutes from "./routes/newsletter.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+let initializationPromise = null;
 
 validateEnvironment();
 const allowedOrigins = getAllowedOrigins();
 const allowAllOrigins = allowedOrigins.includes("*");
 
-await connectDB();
-await ensureAdminUser();
+export function initializeApp() {
+  if (!initializationPromise) {
+    initializationPromise = (async () => {
+      await connectDB();
+      await ensureAdminUser();
+    })().catch((error) => {
+      initializationPromise = null;
+      throw error;
+    });
+  }
+
+  return initializationPromise;
+}
 
 app.set("trust proxy", 1);
 
@@ -71,7 +82,11 @@ app.use(
     },
   }),
 );
-app.use(express.urlencoded({ extended: true }));
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // ── Logging ───────────────────────────────────────────────
 app.use(morgan(process.env.NODE_ENV === "development" ? "dev" : "combined"));
@@ -115,7 +130,7 @@ app.use("/api/donations", limiter, donationRoutes);
 app.use("/api/newsletter", formLimiter, newsletterRoutes);
 app.use("/api/contact", formLimiter, contactRoutes);
 app.use("/api/upload", limiter, uploadRoutes);
-app.use("/api/uploads", express.static(path.resolve(__dirname, "../uploads")));
+app.use("/api/analytics", limiter, analyticsRoutes);
 
 // ── Health check (no rate limit) ─────────────────────────
 app.get("/api/health", (_req, res) =>

@@ -1,8 +1,13 @@
 import slugify from "slugify";
+import createDOMPurify from "dompurify";
+import { JSDOM } from "jsdom";
 
 import BlogPost from "../models/BlogPost.model.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { notifySubscribersOfPublishedPost } from "../services/newsletter.service.js";
+
+const window = new JSDOM("").window;
+const DOMPurify = createDOMPurify(window);
 
 const MAX_PAGE_SIZE = 50;
 
@@ -32,14 +37,60 @@ function normalizeTags(tags) {
 
 function normalizeContent(content) {
   if (typeof content === "string") {
-    return content.trim();
+    return DOMPurify.sanitize(content.trim());
   }
 
   if (Array.isArray(content)) {
-    return content;
+    // Sanitize blocks if it's block-based content
+    return content.map(block => {
+      if (block.text) {
+        block.text = DOMPurify.sanitize(block.text);
+      }
+      return block;
+    });
   }
 
   return "";
+}
+
+function resolveAssetUrl(value, req) {
+  const rawValue = String(value || "").trim();
+
+  if (!rawValue) return "";
+  if (/^(?:[a-z]+:)?\/\//i.test(rawValue) || rawValue.startsWith("data:") || rawValue.startsWith("blob:")) {
+    return rawValue;
+  }
+
+  if (!rawValue.startsWith("/")) {
+    return rawValue;
+  }
+
+  return new URL(rawValue, `${req.protocol}://${req.get("host")}`).toString();
+}
+
+function normalizeBlocksForResponse(content, req) {
+  if (!Array.isArray(content)) return content;
+
+  return content.map((block) => (
+    block?.type === "image"
+      ? { ...block, url: resolveAssetUrl(block.url, req) }
+      : block
+  ));
+}
+
+function serializePostForResponse(post, req) {
+  const serialized = typeof post?.toObject === "function"
+    ? post.toObject({ getters: true })
+    : { ...(post || {}) };
+
+  serialized.coverImage = resolveAssetUrl(serialized.coverImage, req);
+  serialized.content = normalizeBlocksForResponse(serialized.content, req);
+
+  if (Array.isArray(serialized.related)) {
+    serialized.related = serialized.related.map((item) => serializePostForResponse(item, req));
+  }
+
+  return serialized;
 }
 
 function normalizePostPayload(payload, { isCreate = false } = {}) {
@@ -153,7 +204,7 @@ export async function getPosts(req, res, next) {
 
     res.json({
       success: true,
-      data: posts,
+      data: posts.map((post) => serializePostForResponse(post, req)),
       pagination: {
         page,
         limit,
@@ -189,7 +240,7 @@ export async function getPost(req, res, next) {
 
     res.json({
       success: true,
-      data: { ...post.toObject({ getters: true }), related },
+      data: serializePostForResponse({ ...post.toObject({ getters: true }), related }, req),
     });
   } catch (err) {
     next(err);
@@ -207,6 +258,10 @@ export async function getAdminPosts(req, res, next) {
 
     if (status === "draft" || status === "published") {
       filter.status = status;
+    }
+
+    if (req.user?.role === "editor") {
+      filter.author = req.user._id;
     }
 
     if (search) {
@@ -228,7 +283,7 @@ export async function getAdminPosts(req, res, next) {
 
     res.json({
       success: true,
-      data: posts,
+      data: posts.map((post) => serializePostForResponse(post, req)),
       pagination: {
         page,
         limit,
@@ -247,7 +302,11 @@ export async function getAdminPost(req, res, next) {
 
     if (!post) throw new AppError("Post not found", 404);
 
-    res.json({ success: true, data: post });
+    if (req.user?.role === "editor" && post.author._id.toString() !== req.user._id.toString()) {
+      throw new AppError("Not authorized to access this post", 403);
+    }
+
+    res.json({ success: true, data: serializePostForResponse(post, req) });
   } catch (err) {
     next(err);
   }
@@ -268,7 +327,11 @@ export async function createPost(req, res, next) {
     const newsletter = await dispatchPublishNotification(post);
     await post.populate("author", "name");
 
-    res.status(201).json({ success: true, data: post, meta: { newsletter } });
+    res.status(201).json({
+      success: true,
+      data: serializePostForResponse(post, req),
+      meta: { newsletter },
+    });
   } catch (err) {
     next(err);
   }
@@ -280,6 +343,10 @@ export async function updatePost(req, res, next) {
 
     if (!post) throw new AppError("Post not found", 404);
 
+    if (req.user?.role === "editor" && post.author.toString() !== req.user._id.toString()) {
+      throw new AppError("Not authorized to update this post", 403);
+    }
+
     const payload = normalizePostPayload(req.body);
     const titleChanged =
       typeof payload.title === "string" && payload.title !== post.title;
@@ -290,16 +357,15 @@ export async function updatePost(req, res, next) {
       post.slug = await buildUniqueSlug(post.title, post._id);
     }
 
-    if (req.user?._id) {
-      post.author = req.user._id;
-      post.authorName = req.user.name;
-    }
-
     await post.save();
     const newsletter = await dispatchPublishNotification(post);
     await post.populate("author", "name");
 
-    res.json({ success: true, data: post, meta: { newsletter } });
+    res.json({
+      success: true,
+      data: serializePostForResponse(post, req),
+      meta: { newsletter },
+    });
   } catch (err) {
     next(err);
   }
@@ -307,8 +373,14 @@ export async function updatePost(req, res, next) {
 
 export async function deletePost(req, res, next) {
   try {
-    const post = await BlogPost.findByIdAndDelete(req.params.id);
+    const post = await BlogPost.findById(req.params.id);
     if (!post) throw new AppError("Post not found", 404);
+
+    if (req.user?.role === "editor" && post.author.toString() !== req.user._id.toString()) {
+      throw new AppError("Not authorized to delete this post", 403);
+    }
+
+    await post.deleteOne();
     res.json({ success: true, message: "Post deleted" });
   } catch (err) {
     next(err);

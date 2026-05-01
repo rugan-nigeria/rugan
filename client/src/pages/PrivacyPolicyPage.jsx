@@ -3,7 +3,7 @@ import LegalPageTemplate from "@/components/common/LegalPageTemplate";
 const SECTIONS = [
   {
     title: "Information We Collect",
-    body: "When you engage with RUGAN through this website, we may collect the information you choose to share with us. This may include your name, email address, phone number, organization details, donation information, application responses, and messages submitted through our volunteer, partnership, newsletter, or contact forms. We may also receive limited technical information such as browser type, device data, and general site usage information that helps us keep the website functional and improve the experience for visitors.",
+    body: "When you engage with RUGAN through this website, we may collect the information you choose to share with us. This may include your name, email address, phone number, organisation details, donation information, application responses, and messages submitted through our volunteer, partnership, newsletter, or contact forms. We may also receive limited technical information such as browser type, device data, and general site usage information that helps us keep the website functional and improve the experience for visitors.",
   },
   {
     title: "How We Use Information",
