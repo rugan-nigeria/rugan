@@ -2,31 +2,58 @@ import { createBrowserRouter, Navigate } from "react-router";
 import { lazy, Suspense } from "react";
 
 import RootLayout from "@/components/layout/RootLayout";
+import RouteErrorFallback from "@/components/RouteErrorFallback";
+
+// ── Retry wrapper for lazy imports ──────────────────────────
+// When a chunk fails to load (e.g. offline, deploy changed hashes),
+// this retries the import up to `retries` times before giving up.
+function lazyRetry(importFn, retries = 3, interval = 1500) {
+  return lazy(() => {
+    return new Promise((resolve, reject) => {
+      let attempt = 0;
+
+      function tryImport() {
+        importFn()
+          .then(resolve)
+          .catch((error) => {
+            attempt += 1;
+            if (attempt < retries) {
+              setTimeout(tryImport, interval);
+            } else {
+              reject(error);
+            }
+          });
+      }
+
+      tryImport();
+    });
+  });
+}
 
 // ── Eagerly loaded (critical path) ───────────────────────
 import HomePage from "@/pages/HomePage";
 
-// ── Lazily loaded (only when the user navigates there) ───
-const AboutPage           = lazy(() => import("@/pages/AboutPage"));
-const TeamPage            = lazy(() => import("@/pages/TeamPage"));
-const ProgramsPage        = lazy(() => import("@/pages/ProgramsPage"));
-const ProgramDetailPage   = lazy(() => import("@/pages/programs/ProgramDetailPage"));
-const ImpactPage          = lazy(() => import("@/pages/ImpactPage"));
-const VolunteerPage       = lazy(() => import("@/pages/VolunteerPage"));
-const PartnershipPage     = lazy(() => import("@/pages/PartnershipPage"));
-const BlogPage            = lazy(() => import("@/pages/BlogPage"));
-const ArticlePage         = lazy(() => import("@/pages/blog/ArticlePage"));
-const DonationPage        = lazy(() => import("@/pages/DonationPage"));
-const DonationSuccessPage = lazy(() => import("@/pages/DonationSuccessPage"));
-const PrivacyPolicyPage   = lazy(() => import("@/pages/PrivacyPolicyPage"));
-const TermsPage           = lazy(() => import("@/pages/TermsPage"));
+// ── Lazily loaded with retry (only when the user navigates there) ───
+const AboutPage           = lazyRetry(() => import("@/pages/AboutPage"));
+const TeamPage            = lazyRetry(() => import("@/pages/TeamPage"));
+const ProgramsPage        = lazyRetry(() => import("@/pages/ProgramsPage"));
+const ProgramDetailPage   = lazyRetry(() => import("@/pages/programs/ProgramDetailPage"));
+const ImpactPage          = lazyRetry(() => import("@/pages/ImpactPage"));
+const VolunteerPage       = lazyRetry(() => import("@/pages/VolunteerPage"));
+const PartnershipPage     = lazyRetry(() => import("@/pages/PartnershipPage"));
+const BlogPage            = lazyRetry(() => import("@/pages/BlogPage"));
+const ArticlePage         = lazyRetry(() => import("@/pages/blog/ArticlePage"));
+const DonationPage        = lazyRetry(() => import("@/pages/DonationPage"));
+const DonationSuccessPage = lazyRetry(() => import("@/pages/DonationSuccessPage"));
+const PrivacyPolicyPage   = lazyRetry(() => import("@/pages/PrivacyPolicyPage"));
+const TermsPage           = lazyRetry(() => import("@/pages/TermsPage"));
 
 // Admin CMS
-const AdminLoginPage  = lazy(() => import("@/pages/admin/AdminLoginPage"));
-const AdminLayout     = lazy(() => import("@/components/layout/AdminLayout"));
-const AdminPostsPage  = lazy(() => import("@/pages/admin/AdminPostsPage"));
-const AdminUsersPage  = lazy(() => import("@/pages/admin/AdminUsersPage"));
-const AdminAnalyticsPage = lazy(() => import("@/pages/admin/AdminAnalyticsPage"));
+const AdminLoginPage  = lazyRetry(() => import("@/pages/admin/AdminLoginPage"));
+const AdminLayout     = lazyRetry(() => import("@/components/layout/AdminLayout"));
+const AdminPostsPage  = lazyRetry(() => import("@/pages/admin/AdminPostsPage"));
+const AdminUsersPage  = lazyRetry(() => import("@/pages/admin/AdminUsersPage"));
+const AdminAnalyticsPage = lazyRetry(() => import("@/pages/admin/AdminAnalyticsPage"));
 
 // Minimal fallback shown during lazy chunk load (fast — just a white screen)
 function PageLoader() {
@@ -46,13 +73,14 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
+    errorElement: <RouteErrorFallback />,
     children: [
       { index: true,                   element: <HomePage /> },
       { path: "about",                 element: <Lazy><AboutPage /></Lazy> },
       { path: "team",                  element: <Lazy><TeamPage /></Lazy> },
       { path: "programmes",            element: <Lazy><ProgramsPage /></Lazy> },
       { path: "programmes/:slug",      element: <Lazy><ProgramDetailPage /></Lazy> },
-      { path: "impact",                element: <Lazy><ImpactPage /></Lazy> },
+      { path: "impact",               element: <Lazy><ImpactPage /></Lazy> },
       { path: "volunteers",            element: <Lazy><VolunteerPage /></Lazy> },
       { path: "partnership",           element: <Lazy><PartnershipPage /></Lazy> },
       { path: "blog",                  element: <Lazy><BlogPage /></Lazy> },
@@ -78,22 +106,26 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Lazy><AdminLoginPage /></Lazy>,
+    errorElement: <RouteErrorFallback />,
   },
 
   // Admin CMS (outside public layout)
   {
     path: "/admin/login",
     element: <Lazy><AdminLoginPage /></Lazy>,
+    errorElement: <RouteErrorFallback />,
   },
   {
     // /admin alone → redirect to login; authenticated users are redirected
     // to /admin/posts inside AdminLoginPage via the isAuthenticated check
     path: "/admin",
     element: <Navigate to="/admin/login" replace />,
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: "/admin",
     element: <Lazy><AdminLayout /></Lazy>,
+    errorElement: <RouteErrorFallback />,
     children: [
       { path: "posts",      element: <Lazy><AdminPostsPage /></Lazy> },
       { path: "users",      element: <Lazy><AdminUsersPage /></Lazy> },
