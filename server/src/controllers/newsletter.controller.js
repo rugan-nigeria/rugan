@@ -3,6 +3,7 @@ import { AppError } from "../middleware/errorHandler.js";
 import { sendEmailSafely } from "../utils/email.js";
 import { sendNewsletterSubscriptionConfirmation } from "../services/newsletter.service.js";
 import { escapeHtml } from "../utils/helpers.js";
+import { wrapEmailTemplate } from "../utils/emailTemplate.js";
 
 export async function subscribe(req, res, next) {
   try {
@@ -12,7 +13,9 @@ export async function subscribe(req, res, next) {
     const existing = await NewsletterSubscriber.findOne({ email });
     if (existing) {
       if (existing.isActive) {
-        return res.json({ success: true, message: "Already subscribed!" });
+        // Resend confirmation email even if already subscribed
+        await sendNewsletterSubscriptionConfirmation(email, false);
+        return res.json({ success: true, message: "Already subscribed! We've resent your confirmation email." });
       }
 
       existing.isActive = true;
@@ -25,7 +28,11 @@ export async function subscribe(req, res, next) {
             {
             to: process.env.ADMIN_EMAIL,
             subject: "Newsletter Subscriber Re-activated",
-            html: `<p>Subscriber re-activated: ${escapeHtml(email)}</p>`,
+            html: wrapEmailTemplate({
+              heading: "RUGAN",
+              subtitle: "Subscriber Re-activated",
+              body: `<p style="font-size:15px;color:#374151;margin:0">Subscriber re-activated: <strong>${escapeHtml(email)}</strong></p>`,
+            }),
             },
             "newsletter admin re-activation notification",
           ),
@@ -50,7 +57,11 @@ export async function subscribe(req, res, next) {
           {
           to: process.env.ADMIN_EMAIL,
           subject: "New Newsletter Subscriber",
-          html: `<p>New subscriber: ${escapeHtml(email)}</p>`,
+          html: wrapEmailTemplate({
+            heading: "RUGAN",
+            subtitle: "New Subscriber",
+            body: `<p style="font-size:15px;color:#374151;margin:0">New subscriber: <strong>${escapeHtml(email)}</strong></p>`,
+          }),
           },
           "newsletter admin notification",
         ),
@@ -90,6 +101,62 @@ export async function getSubscribers(req, res, next) {
       isActive: true,
     }).sort({ subscribedAt: -1 });
     res.json({ success: true, data: subscribers, total: subscribers.length });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function sendBroadcast(req, res, next) {
+  try {
+    const { subject, content } = req.body;
+    
+    if (!subject || !content) {
+      throw new AppError("Subject and content are required.", 400);
+    }
+
+    // Process attachments from multer
+    const attachments = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        attachments.push({
+          name: file.originalname,
+          content: file.buffer.toString('base64')
+        });
+      }
+    }
+
+    // Fetch active subscribers
+    const subscribers = await NewsletterSubscriber.find({ isActive: true });
+    
+    if (subscribers.length === 0) {
+      return res.json({ success: true, message: "No active subscribers found. Broadcast not sent." });
+    }
+
+    // Wrap the body in the standard email template
+    const emailHtml = wrapEmailTemplate({
+      heading: "RUGAN",
+      subtitle: subject,
+      body: content,
+    });
+
+    const emailTasks = subscribers.map((sub) => {
+      return sendEmailSafely(
+        {
+          to: sub.email,
+          subject: subject,
+          html: emailHtml,
+          attachments: attachments.length > 0 ? attachments : undefined
+        },
+        "newsletter broadcast"
+      );
+    });
+
+    await Promise.allSettled(emailTasks);
+
+    res.json({
+      success: true,
+      message: `Broadcast sent successfully to ${subscribers.length} subscriber(s).`
+    });
   } catch (err) {
     next(err);
   }

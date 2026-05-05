@@ -1,21 +1,57 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import {
-  BarChart2,
+  AlertCircle,
+  Briefcase,
   Eye,
+  ExternalLink,
   FileText,
   Heart,
+  Mail,
+  UtensilsCrossed,
   Users,
   UserPlus,
-  Mail,
-  Briefcase,
-  AlertCircle,
 } from "lucide-react";
+
 import api from "@/lib/api";
 
-function StatCard({ title, value, subtitle, icon: Icon, colorClass }) {
+function StatCardLink({ href, label, external = false }) {
+  if (!href || !label) {
+    return null;
+  }
+
+  const className =
+    "mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#4F7B44] transition-colors hover:text-[#3D6235]";
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer" className={className}>
+        {label}
+        <ExternalLink size={12} />
+      </a>
+    );
+  }
+
+  return (
+    <Link to={href} className={className}>
+      {label}
+    </Link>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  colorClass,
+  linkHref,
+  linkLabel,
+  externalLink = false,
+}) {
   return (
     <div className="rounded-xl border border-[#E5E7EB] bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-[#6B7280]">{title}</p>
           <p className="mt-2 text-3xl font-bold text-[#111827]">{value}</p>
@@ -24,6 +60,23 @@ function StatCard({ title, value, subtitle, icon: Icon, colorClass }) {
               {subtitle}
             </p>
           )}
+          <StatCardLink href={linkHref} label={linkLabel} external={externalLink} />
+        </div>
+        <div className={`rounded-xl p-3 ${colorClass}`}>
+          <Icon size={24} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MessageCard({ title, linkHref, linkLabel, icon: Icon, colorClass }) {
+  return (
+    <div className="rounded-xl border border-[#E5E7EB] bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-lg font-semibold leading-7 text-[#111827]">{title}</p>
+          <StatCardLink href={linkHref} label={linkLabel} external />
         </div>
         <div className={`rounded-xl p-3 ${colorClass}`}>
           <Icon size={24} />
@@ -43,12 +96,13 @@ export default function AdminAnalyticsPage() {
       try {
         const response = await api.get("/analytics");
         setData(response.data.data);
-      } catch (err) {
+      } catch {
         setError("Failed to load analytics data.");
       } finally {
         setLoading(false);
       }
     }
+
     fetchAnalytics();
   }, []);
 
@@ -123,6 +177,8 @@ export default function AdminAnalyticsPage() {
           value={formatNumber(data?.users)}
           icon={Users}
           colorClass="bg-[#F3F0FF] text-[#6941C6]"
+          linkHref="/admin/users"
+          linkLabel="Manage users"
         />
         <StatCard
           title="Newsletter Subscribers"
@@ -135,12 +191,25 @@ export default function AdminAnalyticsPage() {
           value={formatNumber(data?.volunteers)}
           icon={UserPlus}
           colorClass="bg-[#ECFDF3] text-[#027A48]"
+          linkHref={data?.links?.volunteerSheet}
+          linkLabel="Open volunteer spreadsheet"
+          externalLink
         />
         <StatCard
           title="Partnership Inquiries"
           value={formatNumber(data?.partnerships)}
           icon={Briefcase}
           colorClass="bg-[#FFF4ED] text-[#B54708]"
+          linkHref={data?.links?.partnershipSheet}
+          linkLabel="Open partnership spreadsheet"
+          externalLink
+        />
+        <MessageCard
+          title="I hope you've eaten today, Cynthia?"
+          linkHref="https://www.chowdeck.com/"
+          linkLabel="if not, click here"
+          icon={UtensilsCrossed}
+          colorClass="bg-[#FFF7E8] text-[#C46B00]"
         />
       </div>
     </div>

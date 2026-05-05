@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 import BlogCard from "@/components/common/BlogCard";
 import PageHeroBanner from "@/components/common/PageHeroBanner";
 import NewsletterForm from "@/components/forms/NewsletterForm";
-import api from "@/lib/api";
+import { fetchLatestBlogPosts, getCachedBlogPosts } from "@/lib/blogCache";
 import { formatPostDate, getPostAuthorName, getPostImage } from "@/lib/blog";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
+
+const BLOG_PAGE_LIMIT = 12;
 
 function EmptyState() {
   return (
@@ -22,26 +24,66 @@ function EmptyState() {
   );
 }
 
+function LoadingCard() {
+  return (
+    <div
+      className="overflow-hidden border border-[#E5E7EB] bg-white"
+      style={{ borderRadius: "1rem" }}
+    >
+      <div
+        className="animate-pulse bg-[linear-gradient(135deg,#E8F2E6_0%,#DDEDD9_100%)]"
+        style={{ aspectRatio: "16 / 9" }}
+      />
+      <div className="space-y-4 p-6">
+        <div className="h-3 w-24 animate-pulse rounded-full bg-[#E5E7EB]" />
+        <div className="space-y-2">
+          <div className="h-4 w-full animate-pulse rounded-full bg-[#E5E7EB]" />
+          <div className="h-4 w-4/5 animate-pulse rounded-full bg-[#E5E7EB]" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-3 w-full animate-pulse rounded-full bg-[#F2F4F7]" />
+          <div className="h-3 w-5/6 animate-pulse rounded-full bg-[#F2F4F7]" />
+          <div className="h-3 w-3/4 animate-pulse rounded-full bg-[#F2F4F7]" />
+        </div>
+        <div className="flex gap-3 pt-2">
+          <div className="h-3 w-24 animate-pulse rounded-full bg-[#F2F4F7]" />
+          <div className="h-3 w-28 animate-pulse rounded-full bg-[#F2F4F7]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="mx-auto grid max-w-[1220px] grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <LoadingCard key={index} />
+      ))}
+    </div>
+  );
+}
+
 export default function BlogPage() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const initialCachedPosts = useRef(getCachedBlogPosts(BLOG_PAGE_LIMIT)).current;
+  const [posts, setPosts] = useState(initialCachedPosts);
+  const [loading, setLoading] = useState(initialCachedPosts.length === 0);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
+    const hasCachedPosts = initialCachedPosts.length > 0;
 
     async function loadPosts() {
       try {
-        const response = await api.get("/blog/posts", {
-          params: { limit: 12 },
-        });
+        const freshPosts = await fetchLatestBlogPosts(BLOG_PAGE_LIMIT);
 
         if (active) {
-          setPosts(response.data.data || []);
+          setPosts(freshPosts);
           setError("");
         }
       } catch (err) {
-        if (active) {
+        if (active && !hasCachedPosts) {
           setError(err.response?.data?.message || "Could not load blog posts.");
         }
       } finally {
@@ -71,9 +113,7 @@ export default function BlogPage() {
       <section className="section-padding">
         <div className="container-rugan">
           {loading ? (
-            <div className="py-10 text-center">
-              <p className="text-base text-[#667085]">Loading stories...</p>
-            </div>
+            <LoadingState />
           ) : error ? (
             <div
               className="rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 text-center"

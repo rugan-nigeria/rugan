@@ -125,7 +125,7 @@ function FormatBar() {
     background: "white",
     cursor: "pointer",
     fontSize: "0.75rem",
-    color: "#374151",
+    color: "#111827",
     display: "flex",
     alignItems: "center"
   };
@@ -181,7 +181,7 @@ function ParagraphBlock({ block, onChange }) {
     <>
       <FormatBar />
       <EditableText
-        style={{ ...TA, fontSize: "0.9375rem", color: "#374151", minHeight: 28, border: "none" }}
+        style={{ ...TA, fontSize: "0.9375rem", color: "#111827", minHeight: 28, border: "none" }}
         value={block.text || ""}
         placeholder="Write something..."
         onChange={(val) => onChange({ text: val })}
@@ -213,7 +213,7 @@ function QuoteBlock({ block, onChange }) {
     <div style={{ borderLeft: "4px solid #4F7B44", paddingLeft: "1rem" }}>
       <FormatBar />
       <EditableText
-        style={{ ...TA, fontSize: "1.05rem", fontStyle: "italic", color: "#374151", minHeight: 28, border: "none" }}
+        style={{ ...TA, fontSize: "1.05rem", fontStyle: "italic", color: "#111827", minHeight: 28, border: "none" }}
         value={block.text || ""}
         placeholder="Enter a quote or pull-out text..."
         onChange={(val) => onChange({ text: val })}
@@ -463,7 +463,7 @@ function CalloutBlock({ block, onChange }) {
       </div>
       <FormatBar />
       <EditableText
-        style={{ ...TA, fontSize: "0.9rem", color: "#374151", minHeight: 24, background: "transparent", border: "none" }}
+        style={{ ...TA, fontSize: "0.9rem", color: "#111827", minHeight: 24, background: "transparent", border: "none" }}
         value={block.text || ""}
         placeholder="Callout text..."
         onChange={(val) => onChange({ text: val })}
@@ -588,7 +588,7 @@ function AddBlockMenu({ onAdd, label = "Add block" }) {
                 background: "transparent",
                 cursor: "pointer",
                 fontSize: "0.8125rem",
-                color: "#374151",
+                color: "#111827",
                 textAlign: "left",
               }}
               onMouseEnter={(event) => {
@@ -597,7 +597,7 @@ function AddBlockMenu({ onAdd, label = "Add block" }) {
               }}
               onMouseLeave={(event) => {
                 event.currentTarget.style.background = "transparent";
-                event.currentTarget.style.color = "#374151";
+                event.currentTarget.style.color = "#111827";
               }}
             >
               <item.icon size={14} /> {item.label}
@@ -763,7 +763,7 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
                     borderRadius: "0.375rem",
                     cursor: "pointer",
                     fontSize: "0.8125rem",
-                    color: block.type === item.type ? "#4F7B44" : "#374151",
+                    color: block.type === item.type ? "#4F7B44" : "#111827",
                     fontWeight: block.type === item.type ? 600 : 400,
                     textAlign: "left",
                   }}
@@ -909,7 +909,7 @@ export function blocksToHtml(blocks) {
     .map((block) => {
       switch (block.type) {
         case "paragraph":
-          return `<p style="font-size:1rem;color:#374151;line-height:1.8;margin:0 0 1rem">${block.text || ""}</p>`;
+          return `<p style="font-size:1rem;color:#111827;line-height:1.8;margin:0 0 1rem">${block.text || ""}</p>`;
         case "heading":
           return `<h2 style="font-size:1.375rem;font-weight:700;color:#111827;margin:2rem 0 0.75rem;padding-left:0.75rem;border-left:3px solid #4F7B44">${block.text || ""}</h2>`;
         case "subheading":
@@ -919,13 +919,13 @@ export function blocksToHtml(blocks) {
             ? `<figure style="margin:1.5rem 0"><img loading="lazy" src="${resolveApiAssetUrl(block.url)}" alt="${block.alt || ""}" style="width:100%;border-radius:8px;display:block">${block.caption ? `<figcaption style="text-align:center;font-size:0.8125rem;color:#6B7280;margin-top:0.5rem">${block.caption}</figcaption>` : ""}</figure>`
             : "";
         case "quote":
-          return `<blockquote style="border-left:4px solid #4F7B44;margin:1.5rem 0;padding:0.75rem 1.25rem;font-style:italic;color:#374151;background:#F9FAFB;border-radius:0 8px 8px 0">${block.text || ""}</blockquote>`;
+          return `<blockquote style="border-left:4px solid #4F7B44;margin:1.5rem 0;padding:0.75rem 1.25rem;font-style:italic;color:#111827;background:#F9FAFB;border-radius:0 8px 8px 0">${block.text || ""}</blockquote>`;
         case "bullets":
-          return `<ul style="margin:0.5rem 0 1rem;padding-left:1.25rem">${(block.items || []).map((item) => `<li style="margin-bottom:0.375rem;color:#374151">${item}</li>`).join("")}</ul>`;
+          return `<ul style="margin:0.5rem 0 1rem;padding-left:1.25rem">${(block.items || []).map((item) => `<li style="margin-bottom:0.375rem;color:#111827">${item}</li>`).join("")}</ul>`;
         case "numbered":
-          return `<ol style="margin:0.5rem 0 1rem;padding-left:1.25rem">${(block.items || []).map((item) => `<li style="margin-bottom:0.375rem;color:#374151">${item}</li>`).join("")}</ol>`;
+          return `<ol style="margin:0.5rem 0 1rem;padding-left:1.25rem">${(block.items || []).map((item) => `<li style="margin-bottom:0.375rem;color:#111827">${item}</li>`).join("")}</ol>`;
         case "callout":
-          return `<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:1rem 1.25rem;margin:1rem 0"><p style="margin:0;color:#374151">${block.text || ""}</p></div>`;
+          return `<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:1rem 1.25rem;margin:1rem 0"><p style="margin:0;color:#111827">${block.text || ""}</p></div>`;
         case "divider":
           return `<hr style="border:none;border-top:1px solid #E5E7EB;margin:2rem 0">`;
         case "conclusion":

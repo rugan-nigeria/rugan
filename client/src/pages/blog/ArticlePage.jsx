@@ -19,7 +19,8 @@ import { fadeIn, fadeUp, staggerContainer } from "@/lib/motion";
 
 function readingTime(content) {
   if (typeof content === "string") {
-    return Math.max(1, Math.round(content.split(/\s+/).filter(Boolean).length / 200));
+    const cleanContent = content.replace(/<[^>]*>/g, " ");
+    return Math.max(1, Math.round(cleanContent.split(/\s+/).filter(Boolean).length / 200));
   }
 
   if (!Array.isArray(content)) {
@@ -58,7 +59,8 @@ function readingTime(content) {
     })
     .join(" ");
 
-  return Math.max(1, Math.round(words.split(/\s+/).filter(Boolean).length / 200));
+  const cleanWords = words.replace(/<[^>]*>/g, " ");
+  return Math.max(1, Math.round(cleanWords.split(/\s+/).filter(Boolean).length / 200));
 }
 
 function formatHtml(text) {
@@ -73,7 +75,7 @@ function Paragraph({ text }) {
     <p
       style={{
         fontSize: "1rem",
-        color: "#374151",
+        color: "#111827",
         lineHeight: 1.85,
         marginBottom: "1.25rem",
       }}
@@ -124,7 +126,7 @@ function BulletList({ items }) {
               marginTop: "3px",
             }}
           />
-          <span style={{ fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(item)} />
+          <span style={{ fontSize: "0.9375rem", color: "#111827", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(item)} />
         </li>
       ))}
     </ul>
@@ -164,7 +166,7 @@ function CardList({ items }) {
           <p
             style={{
               fontSize: "0.9rem",
-              color: "#374151",
+              color: "#111827",
               lineHeight: 1.7,
               margin: 0,
             }}
@@ -239,7 +241,7 @@ function TipsList({ items }) {
                 <span
                   style={{
                     fontSize: "0.9rem",
-                    color: "#374151",
+                    color: "#111827",
                     lineHeight: 1.65,
                   }}
                 >
@@ -317,13 +319,13 @@ function renderBlock(block, index) {
       ) : null;
     case "quote":
       return (
-        <blockquote key={index} style={{ borderLeft: "4px solid #4F7B44", margin: "1.5rem 0", padding: "0.875rem 1.25rem", fontStyle: "italic", color: "#374151", background: "#F9FAFB", borderRadius: "0 0.625rem 0.625rem 0" }} dangerouslySetInnerHTML={formatHtml(block.text)} />
+        <blockquote key={index} style={{ borderLeft: "4px solid #4F7B44", margin: "1.5rem 0", padding: "0.875rem 1.25rem", fontStyle: "italic", color: "#111827", background: "#F9FAFB", borderRadius: "0 0.625rem 0.625rem 0" }} dangerouslySetInnerHTML={formatHtml(block.text)} />
       );
     case "numbered":
       return (
         <ol key={index} style={{ margin: "0.5rem 0 1.25rem", paddingLeft: "1.5rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
           {(block.items || []).map((item, i) => (
-            <li key={i} style={{ fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(item)} />
+            <li key={i} style={{ fontSize: "0.9375rem", color: "#111827", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(item)} />
           ))}
         </ol>
       );
@@ -333,7 +335,7 @@ function renderBlock(block, index) {
       return (
         <div key={index} style={{ background: v.bg, border: `1px solid ${v.border}`, borderRadius: "0.625rem", padding: "1rem 1.25rem", margin: "1rem 0", display: "flex", gap: "0.75rem" }}>
           <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>{v.icon}</span>
-          <p style={{ margin: 0, fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(block.text)} />
+          <p style={{ margin: 0, fontSize: "0.9375rem", color: "#111827", lineHeight: 1.7 }} dangerouslySetInnerHTML={formatHtml(block.text)} />
         </div>
       );
     }
@@ -360,7 +362,7 @@ function renderBody(content) {
       return (
         <div
           dangerouslySetInnerHTML={{ __html: content }}
-          style={{ color: "#374151", lineHeight: 1.85 }}
+          style={{ color: "#111827", lineHeight: 1.85 }}
         />
       );
     }
@@ -369,7 +371,7 @@ function renderBody(content) {
       <motion.p
         key={index}
         variants={fadeUp}
-        style={{ color: "#374151", lineHeight: 1.85, marginBottom: "1.25rem" }}
+        style={{ color: "#111827", lineHeight: 1.85, marginBottom: "1.25rem" }}
       >
         {paragraph}
       </motion.p>
@@ -500,6 +502,19 @@ export default function ArticlePage() {
   }, [slug]);
 
   const minutes = article ? readingTime(article.content) : 0;
+
+  useEffect(() => {
+    if (!article?.title) {
+      return undefined;
+    }
+
+    const previousTitle = document.title;
+    document.title = `${article.title} | RUGAN`;
+
+    return () => {
+      document.title = previousTitle;
+    };
+  }, [article]);
 
   if (loading) {
     return (
@@ -690,6 +705,7 @@ export default function ArticlePage() {
                   if (navigator.share) {
                     await navigator.share({
                       title: article.title,
+                      text: article.excerpt,
                       url: window.location.href,
                     });
                     return;

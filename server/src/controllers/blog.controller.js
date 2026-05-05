@@ -190,27 +190,55 @@ export async function getPosts(req, res, next) {
     const limit = Math.min(toPositiveInteger(req.query.limit, 10), MAX_PAGE_SIZE);
     const skip = (page - 1) * limit;
     const filter = { status: "published" };
+    const includePagination = String(req.query.includePagination || "").toLowerCase() === "true";
 
-    const [posts, total] = await Promise.all([
-      BlogPost.find(filter)
-        .sort({ publishedAt: -1, createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .select("title slug excerpt coverImage publishedAt createdAt author authorName tags views")
-        .populate("author", "name")
-        .lean(),
-      BlogPost.countDocuments(filter),
-    ]);
+    const postsQuery = BlogPost.find(filter)
+      .sort({ publishedAt: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select("title slug excerpt coverImage publishedAt createdAt author authorName tags")
+      .populate("author", "name")
+      .lean();
 
-    res.json({
+    const [posts, total] = includePagination
+      ? await Promise.all([postsQuery, BlogPost.countDocuments(filter)])
+      : [await postsQuery, null];
+
+    const response = {
       success: true,
       data: posts.map((post) => serializePostForResponse(post, req)),
-      pagination: {
+    };
+
+    if (includePagination) {
+      response.pagination = {
         page,
         limit,
         total,
         pages: Math.ceil(total / limit) || 1,
-      },
+      };
+    }
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getPostMetadata(req, res, next) {
+  try {
+    const post = await BlogPost.findOne({
+      slug: req.params.slug,
+      status: "published",
+    })
+      .select("title slug excerpt coverImage publishedAt createdAt author authorName tags")
+      .populate("author", "name")
+      .lean();
+
+    if (!post) throw new AppError("Post not found", 404);
+
+    res.json({
+      success: true,
+      data: serializePostForResponse(post, req),
     });
   } catch (err) {
     next(err);

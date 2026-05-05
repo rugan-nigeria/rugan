@@ -54,6 +54,7 @@ const AdminLayout     = lazyRetry(() => import("@/components/layout/AdminLayout"
 const AdminPostsPage  = lazyRetry(() => import("@/pages/admin/AdminPostsPage"));
 const AdminUsersPage  = lazyRetry(() => import("@/pages/admin/AdminUsersPage"));
 const AdminAnalyticsPage = lazyRetry(() => import("@/pages/admin/AdminAnalyticsPage"));
+const BroadcastPage   = lazyRetry(() => import("@/pages/admin/BroadcastPage"));
 
 // Minimal fallback shown during lazy chunk load (fast — just a white screen)
 function PageLoader() {
@@ -130,6 +131,7 @@ const router = createBrowserRouter([
       { path: "posts",      element: <Lazy><AdminPostsPage /></Lazy> },
       { path: "users",      element: <Lazy><AdminUsersPage /></Lazy> },
       { path: "analytics",  element: <Lazy><AdminAnalyticsPage /></Lazy> },
+      { path: "broadcasts", element: <Lazy><BroadcastPage /></Lazy> },
     ],
   },
 ]);

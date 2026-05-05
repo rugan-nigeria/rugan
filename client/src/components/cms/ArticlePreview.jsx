@@ -15,8 +15,10 @@ function readingTime(blocks) {
     if (b.type === "bullets" || b.type === "numbered") return (b.items || []);
     if (b.type === "image") return [b.caption || ""];
     return [b.text || ""];
-  }).join(" ").split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.round(words / 200));
+  }).join(" ");
+  
+  const cleanWords = words.replace(/<[^>]*>/g, " ");
+  return Math.max(1, Math.round(cleanWords.split(/\s+/).filter(Boolean).length / 200));
 }
 
 /* ─── Inline bold/italic renderer ───────────────────────── */
@@ -33,7 +35,7 @@ function PreviewBlock({ block }) {
   switch (block.type) {
     case "paragraph":
       return (
-        <p style={{ fontSize: "1rem", color: "#374151", lineHeight: 1.85, marginBottom: "1.25rem" }}>
+        <p style={{ fontSize: "1rem", color: "#111827", lineHeight: 1.85, marginBottom: "1.25rem" }}>
           <InlineText text={block.text} />
         </p>
       );
@@ -63,7 +65,7 @@ function PreviewBlock({ block }) {
       ) : null;
     case "quote":
       return (
-        <blockquote style={{ borderLeft: "4px solid #4F7B44", margin: "1.5rem 0", padding: "0.875rem 1.25rem", fontStyle: "italic", color: "#374151", background: "#F9FAFB", borderRadius: "0 0.625rem 0.625rem 0" }}>
+        <blockquote style={{ borderLeft: "4px solid #4F7B44", margin: "1.5rem 0", padding: "0.875rem 1.25rem", fontStyle: "italic", color: "#111827", background: "#F9FAFB", borderRadius: "0 0.625rem 0.625rem 0" }}>
           <InlineText text={block.text} />
         </blockquote>
       );
@@ -73,7 +75,7 @@ function PreviewBlock({ block }) {
           {(block.items || []).map((item, i) => (
             <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
               <CheckCircle size={16} style={{ color: "#4F7B44", flexShrink: 0, marginTop: 3 }} />
-              <span style={{ fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: item }} />
+              <span style={{ fontSize: "0.9375rem", color: "#111827", lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: item }} />
             </li>
           ))}
         </ul>
@@ -82,7 +84,7 @@ function PreviewBlock({ block }) {
       return (
         <ol style={{ margin: "0.5rem 0 1.25rem", paddingLeft: "1.5rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
           {(block.items || []).map((item, i) => (
-            <li key={i} style={{ fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: item }} />
+            <li key={i} style={{ fontSize: "0.9375rem", color: "#111827", lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: item }} />
           ))}
         </ol>
       );
@@ -92,7 +94,7 @@ function PreviewBlock({ block }) {
       return (
         <div style={{ background: v.bg, border: `1px solid ${v.border}`, borderRadius: "0.625rem", padding: "1rem 1.25rem", margin: "1rem 0", display: "flex", gap: "0.75rem" }}>
           <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>{v.icon}</span>
-          <p style={{ margin: 0, fontSize: "0.9375rem", color: "#374151", lineHeight: 1.7 }}>
+          <p style={{ margin: 0, fontSize: "0.9375rem", color: "#111827", lineHeight: 1.7 }}>
             <InlineText text={block.text} />
           </p>
         </div>
@@ -153,7 +155,7 @@ export default function ArticlePreview({ form, blocks, onClose }) {
             </span>
           </div>
           <button type="button" onClick={onClose}
-            style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #374151", borderRadius: "0.5rem", background: "transparent", cursor: "pointer", color: "#9CA3AF" }}>
+            style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #111827", borderRadius: "0.5rem", background: "transparent", cursor: "pointer", color: "#9CA3AF" }}>
             <X size={15} />
           </button>
         </div>

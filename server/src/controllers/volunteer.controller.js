@@ -1,9 +1,10 @@
 import VolunteerApplication from "../models/VolunteerApplication.model.js";
-import { getVolunteerSheetUrl } from "../config/env.js";
+import { getVolunteerSheetUrl, getFrontendUrl } from "../config/env.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { sendEmailSafely } from "../utils/email.js";
 import { appendToSheet } from "../utils/googleSheets.js";
 import { escapeHtml, nl2br } from "../utils/helpers.js";
+import { wrapEmailTemplate } from "../utils/emailTemplate.js";
 
 export async function submitApplication(req, res, next) {
   try {
@@ -34,20 +35,41 @@ export async function submitApplication(req, res, next) {
       }
     }
 
+    const frontendUrl = getFrontendUrl();
+
     const emailTasks = [
       sendEmailSafely(
         {
           to: application.email,
-          subject: "Thank you for your volunteer application!",
-          html: `
-            <h2>Thank you for applying to volunteer with RUGAN!</h2>
-            <p>Dear ${escapeHtml(application.firstName)},</p>
-            <p>We have received your volunteer application and are excited about your interest in joining our mission to empower girls in Nigeria.</p>
-            <p>Our team will review your application and get back to you within 7-10 business days.</p>
-            <p>In the meantime, feel free to follow us on social media for updates on our work.</p>
-            <br>
-            <p>Best regards,<br>The RUGAN Team</p>
-          `,
+          subject: "Your volunteer application has been received",
+          html: wrapEmailTemplate({
+            heading: "RUGAN",
+            subtitle: "Volunteer Application",
+            body: `
+              <p style="font-size:15px;color:#374151;line-height:1.7;margin:0 0 16px">Dear ${escapeHtml(application.firstName)},</p>
+              <p style="font-size:15px;color:#374151;line-height:1.7;margin:0 0 16px">Thank you for applying to volunteer with RUGAN. We have received your application and are genuinely encouraged by your interest in joining this mission.</p>
+              <p style="font-size:15px;color:#374151;line-height:1.7;margin:0 0 16px">RUGAN exists to advance the rights, education, and wellbeing of rural girls across Nigeria. Every volunteer who joins us brings us closer to a future where no girl is left behind because of where she was born.</p>
+              <p style="font-size:15px;color:#374151;line-height:1.7;margin:0 0 10px">Our team will carefully review your application and get back to you within 3 to 5 business days. In the meantime, we encourage you to:</p>
+              <ul style="margin:0 0 18px;padding-left:0;list-style:none">
+                <li style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+                  <span style="color:#4F7B44;font-weight:700;margin-top:2px">•</span>
+                  <span style="font-size:15px;color:#374151;line-height:1.7">Follow us on social media for updates on our programmes and communities</span>
+                </li>
+                <li style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+                  <span style="color:#4F7B44;font-weight:700;margin-top:2px">•</span>
+                  <span style="font-size:15px;color:#374151;line-height:1.7">Visit <a href="${frontendUrl}" style="color:#4F7B44;text-decoration:none;font-weight:600">rugan.org</a> to learn more about our current initiatives</span>
+                </li>
+                <li style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+                  <span style="color:#4F7B44;font-weight:700;margin-top:2px">•</span>
+                  <span style="font-size:15px;color:#374151;line-height:1.7">Share our work with anyone who shares this vision</span>
+                </li>
+              </ul>
+              <p style="font-size:15px;color:#374151;line-height:1.7;margin:0 0 20px">We look forward to the possibility of working with you.</p>
+              <p style="font-size:15px;color:#374151;line-height:1.7;margin:0">
+                Best regards,<br>The RUGAN Team
+              </p>
+            `,
+          }),
         },
         "volunteer applicant confirmation",
       ),
@@ -59,19 +81,41 @@ export async function submitApplication(req, res, next) {
           {
             to: process.env.ADMIN_EMAIL,
             subject: "New Volunteer Application",
-            html: `
-              <h2>New Volunteer Application</h2>
-              <p><strong>Name:</strong> ${escapeHtml(applicantName)}</p>
-              <p><strong>Email:</strong> ${escapeHtml(application.email)}</p>
-              <p><strong>WhatsApp:</strong> ${escapeHtml(application.whatsapp)}</p>
-              <p><strong>Availability:</strong> ${escapeHtml(application.availability)}</p>
-              ${
-                volunteerSheetUrl
-                  ? `<p><a href="${volunteerSheetUrl}" target="_blank" rel="noopener noreferrer">Open the volunteer spreadsheet for the full application details</a></p>`
-                  : `<p><strong>Skills:</strong><br>${nl2br(application.skills)}</p>
-                     <p><strong>Motivation:</strong><br>${nl2br(application.motivation)}</p>`
-              }
-            `,
+            html: wrapEmailTemplate({
+              heading: "RUGAN",
+              subtitle: "New Volunteer Application",
+              body: `
+                <h2 style="font-size:20px;font-weight:700;color:#101828;margin:0 0 16px">New Volunteer Application</h2>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin-bottom:20px">
+                  <tr>
+                    <td style="padding:8px 0;font-size:14px;color:#6B7280;width:100px;vertical-align:top"><strong>Name:</strong></td>
+                    <td style="padding:8px 0;font-size:14px;color:#374151">${escapeHtml(applicantName)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-size:14px;color:#6B7280;vertical-align:top"><strong>Email:</strong></td>
+                    <td style="padding:8px 0;font-size:14px;color:#374151">${escapeHtml(application.email)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-size:14px;color:#6B7280;vertical-align:top"><strong>WhatsApp:</strong></td>
+                    <td style="padding:8px 0;font-size:14px;color:#374151">${escapeHtml(application.whatsapp)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-size:14px;color:#6B7280;vertical-align:top"><strong>Availability:</strong></td>
+                    <td style="padding:8px 0;font-size:14px;color:#374151">${escapeHtml(application.availability)}</td>
+                  </tr>
+                </table>
+                ${
+                  volunteerSheetUrl
+                    ? `<a href="${volunteerSheetUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 20px;background:#4F7B44;color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">Open Volunteer Spreadsheet →</a>`
+                    : `<div style="background:#F9FAFB;border-radius:8px;padding:16px;border-left:3px solid #4F7B44">
+                        <p style="font-size:14px;color:#6B7280;margin:0 0 8px"><strong>Skills:</strong></p>
+                        <p style="font-size:14px;color:#374151;margin:0 0 12px">${nl2br(application.skills)}</p>
+                        <p style="font-size:14px;color:#6B7280;margin:0 0 8px"><strong>Motivation:</strong></p>
+                        <p style="font-size:14px;color:#374151;margin:0">${nl2br(application.motivation)}</p>
+                       </div>`
+                }
+              `,
+            }),
             replyTo: application.email,
           },
           "volunteer admin notification",

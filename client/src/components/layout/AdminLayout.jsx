@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Globe, LogOut, Shield, UserPlus, BarChart2 } from "lucide-react";
+import { FileText, Globe, LogOut, Shield, UserPlus, BarChart2, Mail } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -33,7 +33,7 @@ export default function AdminLayout() {
       />
 
       <div className="min-h-screen bg-[#F7F8F6]">
-        <header className="border-b border-[#E5E7EB] bg-white">
+        <header className="border-b border-[#3D6235] bg-[#4F7B44]">
           <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-4 px-4 py-4 lg:px-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -43,7 +43,7 @@ export default function AdminLayout() {
                     height: 36,
                     borderRadius: "0.5rem",
                     overflow: "hidden",
-                    border: "1px solid #E5E7EB",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
                     flexShrink: 0,
                   }}
                 >
@@ -57,19 +57,19 @@ export default function AdminLayout() {
                   />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4F7B44]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
                     RUGAN
                   </p>
-                  <h1 className="text-lg font-bold leading-tight text-[#101828]">
+                  <h1 className="text-lg font-bold leading-tight text-white">
                     Content Management System
                   </h1>
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <div className="rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2">
-                  <p className="text-sm font-semibold text-[#101828]">{user?.name}</p>
-                  <p className="text-xs uppercase tracking-[0.14em] text-[#667085]">
+                <div className="rounded-lg border border-[#3D6235] bg-[#3D6235]/50 px-3 py-2">
+                  <p className="text-sm font-semibold text-white">{user?.name}</p>
+                  <p className="text-xs uppercase tracking-[0.14em] text-white/70">
                     {user?.role}
                   </p>
                 </div>
@@ -78,7 +78,7 @@ export default function AdminLayout() {
                   href="/"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-[#D0D5DD] px-3 py-2 text-sm font-medium text-[#344054] transition-colors hover:border-[#4F7B44] hover:text-[#4F7B44]"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 hover:border-white/40"
                 >
                   <Globe size={16} />
                   View site
@@ -87,7 +87,7 @@ export default function AdminLayout() {
                 <button
                   type="button"
                   onClick={() => setShowSignOutConfirm(true)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#101828] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1D2939]"
+                  className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-[#4F7B44] transition-colors hover:bg-gray-100 shadow-sm"
                 >
                   <LogOut size={16} />
                   Sign out
@@ -102,8 +102,8 @@ export default function AdminLayout() {
                   cn(
                     navLinkBase,
                     isActive
-                      ? "bg-[#E8F2E6] text-[#4F7B44]"
-                      : "text-[#475467] hover:bg-[#EEF2EE] hover:text-[#4F7B44]",
+                      ? "bg-white/20 text-white shadow-sm"
+                      : "text-white/70 hover:bg-white/10 hover:text-white",
                   )
                 }
               >
@@ -114,28 +114,43 @@ export default function AdminLayout() {
               {user?.role === "admin" && (
                 <>
                   <NavLink
+                    to="/admin/broadcasts"
+                    className={({ isActive }) =>
+                      cn(
+                        navLinkBase,
+                        isActive
+                          ? "bg-white/20 text-white shadow-sm"
+                          : "text-white/70 hover:bg-white/10 hover:text-white",
+                      )
+                    }
+                  >
+                    <Mail size={16} />
+                    Broadcasts
+                  </NavLink>
+
+                  <NavLink
                     to="/admin/users"
                     className={({ isActive }) =>
                       cn(
                         navLinkBase,
                         isActive
-                          ? "bg-[#E8F2E6] text-[#4F7B44]"
-                          : "text-[#475467] hover:bg-[#EEF2EE] hover:text-[#4F7B44]",
+                          ? "bg-white/20 text-white shadow-sm"
+                          : "text-white/70 hover:bg-white/10 hover:text-white",
                       )
                     }
                   >
                     <UserPlus size={16} />
                     Users
                   </NavLink>
-                  
+
                   <NavLink
                     to="/admin/analytics"
                     className={({ isActive }) =>
                       cn(
                         navLinkBase,
                         isActive
-                          ? "bg-[#E8F2E6] text-[#4F7B44]"
-                          : "text-[#475467] hover:bg-[#EEF2EE] hover:text-[#4F7B44]",
+                          ? "bg-white/20 text-white shadow-sm"
+                          : "text-white/70 hover:bg-white/10 hover:text-white",
                       )
                     }
                   >
@@ -145,7 +160,7 @@ export default function AdminLayout() {
                 </>
               )}
 
-              <span className="hidden sm:inline-flex items-center gap-2 rounded-lg border border-[#D0D5DD] px-3 py-2 text-sm text-[#667085]">
+              <span className="hidden sm:inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white/80">
                 <Shield size={16} />
                 Admin and editors can author and publish
               </span>

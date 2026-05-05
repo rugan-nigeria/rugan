@@ -20,7 +20,8 @@ function readingTime(blocks) {
       return "";
     })
     .join(" ");
-  return Math.max(1, Math.round(words.split(/\s+/).filter(Boolean).length / 200));
+  const cleanWords = words.replace(/<[^>]*>/g, " ");
+  return Math.max(1, Math.round(cleanWords.split(/\s+/).filter(Boolean).length / 200));
 }
 
 /* ─── Block renderers (mirror ArticlePage) ──────────────── */

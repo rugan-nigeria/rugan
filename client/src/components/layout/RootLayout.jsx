@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect } from "react";
 import { Outlet, useLocation } from "react-router";
+import { preloadBlogResources } from "@/lib/blogCache";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
@@ -57,6 +58,26 @@ function ScrollToTop() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    const schedule =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback.bind(window)
+        : (callback) => window.setTimeout(callback, 1200);
+
+    const cancel =
+      typeof window.cancelIdleCallback === "function"
+        ? window.cancelIdleCallback.bind(window)
+        : window.clearTimeout.bind(window);
+
+    const handle = schedule(() => {
+      preloadBlogResources();
+    });
+
+    return () => {
+      cancel(handle);
+    };
+  }, []);
+
   return (
     <>
       <ScrollToTop />

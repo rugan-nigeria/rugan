@@ -450,7 +450,7 @@ export default function AdminPostsPage() {
             </div>
           </div>
 
-          <div style={{ maxHeight: "calc(100vh - 320px)", overflowY: "auto" }}>
+          <div style={{ maxHeight: "calc(100vh - 220px)", overflowY: "auto" }}>
             {listLoading ? (
               <p style={{ padding: "2rem", textAlign: "center", color: "#9CA3AF", fontSize: "0.875rem" }}>Loading…</p>
             ) : posts.length === 0 ? (

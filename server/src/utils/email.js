@@ -4,7 +4,7 @@ import { isEmailConfigured } from '../config/env.js'
  * sendEmail — uses Brevo HTTP API (avoids SMTP port restrictions)
  * @param {{ to, subject, html, replyTo? }} options
  */
-export async function sendEmail({ to, subject, html, replyTo }) {
+export async function sendEmail({ to, subject, html, replyTo, attachments }) {
   if (process.env.NODE_ENV === 'test') return
 
   if (!process.env.BREVO_API_KEY) {
@@ -27,6 +27,12 @@ export async function sendEmail({ to, subject, html, replyTo }) {
   }
 
   if (replyTo) body.replyTo = { email: replyTo }
+  
+  if (attachments && attachments.length > 0) {
+    body.attachment = attachments;
+  }
+
+  console.log(`[EMAIL] Sending to: ${to} | Subject: ${subject} | HTML size: ${html?.length || 0} chars`)
 
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
@@ -39,10 +45,13 @@ export async function sendEmail({ to, subject, html, replyTo }) {
 
   if (!response.ok) {
     const error = await response.json()
+    console.error(`[EMAIL] FAILED to: ${to} | Status: ${response.status} | Error:`, JSON.stringify(error))
     throw new Error(`Brevo API error: ${JSON.stringify(error)}`)
   }
 
-  return response.json()
+  const result = await response.json()
+  console.log(`[EMAIL] SUCCESS to: ${to} | MessageId: ${result.messageId}`)
+  return result
 }
 
 export async function sendEmailSafely(options, label = 'email notification') {

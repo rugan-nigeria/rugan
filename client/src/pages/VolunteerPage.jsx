@@ -24,9 +24,8 @@ const WHO = [
 /* ── Volunteer Stories ── */
 const STORIES = [
   {
-    label: "Why I Volunteer",
-    videoUrl:
-      "https://drive.google.com/file/d/1jGrmnudMv3iBhIyuOhdb8vIIZpfS6SLV/preview",
+    label: "Stories of Impact from RUGAN Volunteers",
+    videoUrl: "https://www.youtube.com/embed/ZPWM55hwx6o",
   },
 ];
 
@@ -169,6 +168,7 @@ function StoryCard({ label, image, videoUrl }) {
           borderRadius: "1rem",
           overflow: "hidden",
           aspectRatio: "16/9",
+          background: "#000",
         }}
       >
         {videoUrl ? (
@@ -178,7 +178,8 @@ function StoryCard({ label, image, videoUrl }) {
             width="100%"
             height="100%"
             style={{ border: "0" }}
-            allow="autoplay; encrypted-media; fullscreen; picture-in-picture; subtitles; captions"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
         ) : (

@@ -32,7 +32,10 @@ export function isProductionEnv() {
 }
 
 export function getFrontendUrl() {
-  return getEnvValue("FRONTEND_URL").replace(/\/+$/, "");
+  const raw = getEnvValue("FRONTEND_URL");
+  // Handle comma-separated values (e.g. "https://rugan.org,https://www.rugan.org")
+  const firstUrl = raw.split(",")[0].trim();
+  return firstUrl.replace(/\/+$/, "");
 }
 
 export function getAllowedOrigins() {
@@ -76,6 +79,13 @@ export function isGoogleSheetsConfigured() {
 
 export function getVolunteerSheetUrl() {
   const spreadsheetId = getEnvValue("VOLUNTEER_SHEET_ID");
+  return spreadsheetId
+    ? `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`
+    : "";
+}
+
+export function getPartnershipSheetUrl() {
+  const spreadsheetId = getEnvValue("PARTNERSHIP_SHEET_ID");
   return spreadsheetId
     ? `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`
     : "";

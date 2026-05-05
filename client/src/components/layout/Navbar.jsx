@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router'
 import { Menu, X, ChevronDown, ArrowRight } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
+import { preloadBlogResources } from '@/lib/blogCache'
 import { cn } from '@/lib/cn'
 
 const NAV_LINKS = [
@@ -67,6 +68,12 @@ export default function Navbar() {
   }
 
   const closeMenu = () => setIsOpen(false)
+
+  const handleNavIntent = (to) => {
+    if (to === '/blog') {
+      preloadBlogResources()
+    }
+  }
 
   const isLinkActive = (link) => {
     if (link.to === '/') {
@@ -177,6 +184,8 @@ export default function Navbar() {
                 <NavLink
                   to={link.to}
                   end={link.to === '/'}
+                  onMouseEnter={() => handleNavIntent(link.to)}
+                  onFocus={() => handleNavIntent(link.to)}
                   className={({ isActive: linkIsActive }) => cn(base, linkIsActive ? active : cn(idle, hover))}
                 >
                   {link.label}
@@ -264,6 +273,8 @@ export default function Navbar() {
                             to={link.to}
                             end={link.to === '/'}
                             onClick={closeMenu}
+                            onMouseEnter={() => handleNavIntent(link.to)}
+                            onFocus={() => handleNavIntent(link.to)}
                             className="group block rounded-[18px] p-2.5"
                           >
                             <div className="flex items-center justify-between gap-3">

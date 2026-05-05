@@ -4,6 +4,10 @@ import NewsletterSubscriber from "../models/NewsletterSubscriber.model.js";
 import PartnershipInquiry from "../models/PartnershipInquiry.model.js";
 import User from "../models/User.model.js";
 import VolunteerApplication from "../models/VolunteerApplication.model.js";
+import {
+  getPartnershipSheetUrl,
+  getVolunteerSheetUrl,
+} from "../config/env.js";
 
 export const getAnalytics = async (req, res, next) => {
   try {
@@ -60,6 +64,10 @@ export const getAnalytics = async (req, res, next) => {
         donations: {
           amount: donationStats.totalAmount,
           count: donationStats.totalCount,
+        },
+        links: {
+          volunteerSheet: getVolunteerSheetUrl(),
+          partnershipSheet: getPartnershipSheetUrl(),
         },
       },
     });
