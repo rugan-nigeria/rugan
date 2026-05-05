@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { Edit2, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { Eye, EyeOff, Edit2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import api from "@/lib/api";
 
@@ -12,6 +12,21 @@ const EMPTY_FORM = {
   role: "editor",
   isActive: true,
 };
+
+function EditUserButton({ onClick, fullWidth = false }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={fullWidth
+        ? "inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-[#D0D5DD] px-3 py-2 text-sm font-medium text-[#4F7B44]"
+        : "inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-[#4F7B44]"}
+      style={fullWidth ? undefined : { background: "none", border: "none", cursor: "pointer" }}
+    >
+      <Edit2 size={14} /> Edit
+    </button>
+  );
+}
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -53,6 +68,7 @@ export default function AdminUsersPage() {
         await api.post("/auth/register", form);
         toast.success("User created.");
       }
+
       setForm(EMPTY_FORM);
       setEditingUserId(null);
       await loadUsers();
@@ -68,7 +84,7 @@ export default function AdminUsersPage() {
     setForm({
       name: user.name,
       email: user.email,
-      password: "", // Don't populate password
+      password: "",
       role: user.role,
       isActive: user.isActive,
     });
@@ -81,18 +97,20 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="grid gap-6 grid-cols-1 lg:grid-cols-[380px_1fr] items-start">
-      <section className="relative lg:sticky top-6 rounded-2xl border border-[#E5E7EB] bg-white">
-        <div className="border-b border-[#E5E7EB] px-5 py-4">
+    <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
+      <section className="rounded-2xl border border-[#E5E7EB] bg-white lg:sticky lg:top-6">
+        <div className="border-b border-[#E5E7EB] px-4 py-4 sm:px-5">
           <h2 className="text-lg font-bold text-[#101828]">
             {editingUserId ? "Edit user" : "Create user"}
           </h2>
           <p className="text-sm text-[#667085]">
-            {editingUserId ? "Update user details or reset password." : "Admins can create editor and admin accounts for the CMS."}
+            {editingUserId
+              ? "Update user details or reset password."
+              : "Admins can create editor and admin accounts for the CMS."}
           </p>
         </div>
 
-        <form className="space-y-5 px-5 py-5" onSubmit={handleSubmit}>
+        <form className="space-y-5 px-4 py-5 sm:px-5" onSubmit={handleSubmit}>
           <div>
             <label className="form-label">Full name</label>
             <input
@@ -116,7 +134,10 @@ export default function AdminUsersPage() {
 
           <div>
             <label className="form-label">
-              Password {editingUserId && <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(leave blank to keep current)</span>}
+              Password{" "}
+              {editingUserId && (
+                <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(leave blank to keep current)</span>
+              )}
             </label>
             <div style={{ position: "relative" }}>
               <input
@@ -126,7 +147,7 @@ export default function AdminUsersPage() {
                 onChange={(event) => updateForm("password", event.target.value)}
                 minLength={8}
                 required={!editingUserId}
-                style={{ paddingRight: "2.5rem" }}
+                style={{ paddingRight: "2.75rem" }}
               />
               <button
                 type="button"
@@ -176,9 +197,15 @@ export default function AdminUsersPage() {
             </div>
           )}
 
-          <div style={{ display: "flex", gap: "0.75rem" }}>
+          <div className={editingUserId ? "grid grid-cols-2 gap-2 sm:flex sm:flex-row" : "flex flex-col gap-3 sm:flex-row"}>
             {editingUserId && (
-              <Button type="button" variant="outline-green" onClick={cancelEdit} disabled={submitting} className="w-full">
+              <Button
+                type="button"
+                variant="outline-green"
+                onClick={cancelEdit}
+                disabled={submitting}
+                className="w-full"
+              >
                 Cancel
               </Button>
             )}
@@ -190,14 +217,52 @@ export default function AdminUsersPage() {
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
-        <div className="border-b border-[#E5E7EB] px-5 py-4">
+        <div className="border-b border-[#E5E7EB] px-4 py-4 sm:px-5">
           <h2 className="text-lg font-bold text-[#101828]">Authorized users</h2>
-          <p className="text-sm text-[#667085]">
-            Current admins and editors with CMS access.
-          </p>
+          <p className="text-sm text-[#667085]">Current admins and editors with CMS access.</p>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-[#F2F4F7] md:hidden">
+          {loading ? (
+            <div className="px-4 py-10 text-center text-sm text-[#667085]">Loading users...</div>
+          ) : users.length === 0 ? (
+            <div className="px-4 py-10 text-center text-sm text-[#667085]">No users found.</div>
+          ) : (
+            users.map((user) => (
+              <div key={user._id} className="space-y-4 px-4 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-semibold text-[#101828]">{user.name}</p>
+                    <p className="break-all text-sm text-[#475467]">{user.email}</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleEdit(user)}
+                    aria-label={`Edit ${user.name}`}
+                    title={`Edit ${user.name}`}
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#D0D5DD] text-[#4F7B44]"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 rounded-xl bg-[#F9FAFB] p-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#98A2B3]">Role</p>
+                    <p className="mt-1 text-sm text-[#475467]">{user.role}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#98A2B3]">Status</p>
+                    <p className="mt-1 text-sm text-[#475467]">{user.isActive ? "Active" : "Disabled"}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="min-w-full divide-y divide-[#E5E7EB]">
             <thead className="bg-[#F9FAFB]">
               <tr>
@@ -221,13 +286,13 @@ export default function AdminUsersPage() {
             <tbody className="divide-y divide-[#F2F4F7]">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-5 py-10 text-center text-sm text-[#667085]">
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-[#667085]">
                     Loading users...
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-5 py-10 text-center text-sm text-[#667085]">
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-[#667085]">
                     No users found.
                   </td>
                 </tr>
@@ -241,13 +306,7 @@ export default function AdminUsersPage() {
                       {user.isActive ? "Active" : "Disabled"}
                     </td>
                     <td className="px-5 py-4 text-right text-sm">
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(user)}
-                        style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#4F7B44", fontWeight: 500, background: "none", border: "none", cursor: "pointer", padding: "0.25rem 0.5rem", borderRadius: "0.375rem" }}
-                      >
-                        <Edit2 size={14} /> Edit
-                      </button>
+                      <EditUserButton onClick={() => handleEdit(user)} />
                     </td>
                   </tr>
                 ))

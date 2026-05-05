@@ -1,15 +1,26 @@
-import { useDeferredValue, useEffect, useRef, useState, useCallback } from "react";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import {
-  Eye, FilePlus2, ImageIcon, RefreshCw, Save, Search, Send, Trash2,
-  Tag, ChevronDown, Clock, CheckCircle2,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  Eye,
+  FilePlus2,
+  ImageIcon,
+  RefreshCw,
+  Save,
+  Search,
+  Send,
+  Tag,
+  Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+import ArticlePreview from "@/components/cms/ArticlePreview";
+import RichEditor, { parseContentToBlocks } from "@/components/cms/RichEditor";
 import Button from "@/components/ui/Button";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import RichEditor, { parseContentToBlocks } from "@/components/cms/RichEditor";
-import ArticlePreview from "@/components/cms/ArticlePreview";
 import { useAuth } from "@/context/AuthContext";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import api, { resolveApiAssetUrl } from "@/lib/api";
 import { formatPostDate } from "@/lib/blog";
 import { cn } from "@/lib/cn";
@@ -19,21 +30,19 @@ const EMPTY_FORM = { title: "", excerpt: "", coverImage: "", tags: "", status: "
 function normalizeEditorBlocks(blocks) {
   if (!Array.isArray(blocks)) return [];
 
-  return blocks.map((block) => (
-    block?.type === "image"
-      ? { ...block, url: resolveApiAssetUrl(block.url) }
-      : block
-  ));
+  return blocks.map((block) =>
+    block?.type === "image" ? { ...block, url: resolveApiAssetUrl(block.url) } : block,
+  );
 }
-
-/* ─── Small components ───────────────────────────────────── */
 
 function StatusPill({ status }) {
   return (
-    <span className={cn(
-      "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
-      status === "published" ? "bg-[#ECFDF3] text-[#027A48]" : "bg-[#F2F4F7] text-[#475467]",
-    )}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+        status === "published" ? "bg-[#ECFDF3] text-[#027A48]" : "bg-[#F2F4F7] text-[#475467]",
+      )}
+    >
       {status === "published" ? <CheckCircle2 size={11} /> : <Clock size={11} />}
       {status}
     </span>
@@ -55,20 +64,24 @@ function CoverImageField({ value, onChange }) {
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
 
-  async function handleFile(e) {
-    const file = e.target.files?.[0];
+  async function handleFile(event) {
+    const file = event.target.files?.[0];
     if (!file) return;
+
     setUploading(true);
+
     try {
-      const fd = new FormData();
-      fd.append("image", file);
-      const res = await api.post("/upload/image", fd, {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const response = await api.post("/upload/image", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const url = resolveApiAssetUrl(res.data?.url || res.data?.data?.url);
+
+      const url = resolveApiAssetUrl(response.data?.url || response.data?.data?.url);
       onChange(url);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Upload failed.");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Upload failed.");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -77,33 +90,98 @@ function CoverImageField({ value, onChange }) {
 
   return (
     <div style={{ border: "1px solid #E5E7EB", borderRadius: "0.75rem", overflow: "hidden" }}>
-      <button type="button" onClick={() => setExpanded(v => !v)}
-        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "0.75rem 1rem", background: "#F9FAFB", border: "none", cursor: "pointer", fontSize: "0.875rem", fontWeight: 600, color: "#374151" }}>
+      <button
+        type="button"
+        onClick={() => setExpanded((current) => !current)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          padding: "0.75rem 1rem",
+          background: "#F9FAFB",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "0.875rem",
+          fontWeight: 600,
+          color: "#374151",
+        }}
+      >
         <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <><ImageIcon size={15} style={{ color: "#4F7B44" }} /> Cover Image {value && <span style={{ color: "#4F7B44", fontSize: "0.75rem" }}>✓ set</span>}</>
+          <ImageIcon size={15} style={{ color: "#4F7B44" }} />
+          <span>
+            Cover Image{" "}
+            {value && <span style={{ color: "#4F7B44", fontSize: "0.75rem" }}>set</span>}
+          </span>
         </span>
-        <ChevronDown size={15} style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 200ms" }} />
+        <ChevronDown
+          size={15}
+          style={{
+            transform: expanded ? "rotate(180deg)" : "none",
+            transition: "transform 200ms",
+          }}
+        />
       </button>
+
       {expanded && (
         <div style={{ padding: "0.875rem 1rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <input className="form-input" style={{ flex: 1 }} value={value || ""}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+            <input
+              className="form-input"
+              style={{ flex: "1 1 220px", minWidth: 0 }}
+              value={value || ""}
               placeholder="Paste image URL (https://...)"
-              onChange={e => onChange(e.target.value)} />
+              onChange={(event) => onChange(event.target.value)}
+            />
             <span style={{ fontSize: "0.75rem", color: "#9CA3AF", flexShrink: 0 }}>or</span>
-            <button type="button" disabled={uploading} onClick={() => fileRef.current?.click()}
-              style={{ padding: "6px 12px", border: "1px solid #D0D5DD", borderRadius: "0.375rem", background: "white", cursor: uploading ? "not-allowed" : "pointer", fontSize: "0.8rem", color: "#344054", flexShrink: 0, whiteSpace: "nowrap" }}>
-              {uploading ? "Uploading…" : "📁 Upload"}
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => fileRef.current?.click()}
+              style={{
+                padding: "10px 12px",
+                border: "1px solid #D0D5DD",
+                borderRadius: "0.5rem",
+                background: "white",
+                cursor: uploading ? "not-allowed" : "pointer",
+                fontSize: "0.8rem",
+                color: "#344054",
+                flex: "1 1 140px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {uploading ? "Uploading..." : "Upload image"}
             </button>
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
-              style={{ display: "none" }} onChange={handleFile} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              style={{ display: "none" }}
+              onChange={handleFile}
+            />
           </div>
+
           {value && (
-            <div style={{ borderRadius: "0.5rem", overflow: "hidden", maxHeight: 200, border: "1px solid #E5E7EB" }}>
-              <img loading="lazy" src={resolveApiAssetUrl(value)} alt="cover preview"
+            <div
+              style={{
+                borderRadius: "0.5rem",
+                overflow: "hidden",
+                maxHeight: 200,
+                border: "1px solid #E5E7EB",
+              }}
+            >
+              <img
+                loading="lazy"
+                src={resolveApiAssetUrl(value)}
+                alt="cover preview"
                 style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }}
-                onError={e => { e.target.style.display = "none"; }}
-                onLoad={e => { e.target.style.display = "block"; }} />
+                onError={(event) => {
+                  event.target.style.display = "none";
+                }}
+                onLoad={(event) => {
+                  event.target.style.display = "block";
+                }}
+              />
             </div>
           )}
         </div>
@@ -113,32 +191,92 @@ function CoverImageField({ value, onChange }) {
 }
 
 function TagsField({ value, onChange }) {
-  const tags = value ? value.split(",").map(t => t.trim()).filter(Boolean) : [];
+  const tags = value ? value.split(",").map((tag) => tag.trim()).filter(Boolean) : [];
   const [input, setInput] = useState("");
+
   function addTag() {
-    const t = input.trim().toLowerCase();
-    if (t && !tags.includes(t)) onChange([...tags, t].join(", "));
+    const tag = input.trim().toLowerCase();
+    if (tag && !tags.includes(tag)) onChange([...tags, tag].join(", "));
     setInput("");
   }
-  function removeTag(tag) { onChange(tags.filter(t => t !== tag).join(", ")); }
+
+  function removeTag(tag) {
+    onChange(tags.filter((current) => current !== tag).join(", "));
+  }
+
   return (
     <div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "0.5rem", minHeight: 28 }}>
-        {tags.map(tag => (
-          <span key={tag} style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", padding: "2px 10px", borderRadius: "9999px", background: "#E8F2E6", color: "#3d6235", fontSize: "0.8rem", fontWeight: 500 }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.375rem",
+          marginBottom: "0.5rem",
+          minHeight: 28,
+        }}
+      >
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.25rem",
+              padding: "2px 10px",
+              borderRadius: "9999px",
+              background: "#E8F2E6",
+              color: "#3d6235",
+              fontSize: "0.8rem",
+              fontWeight: 500,
+            }}
+          >
             <Tag size={10} /> {tag}
-            <button type="button" onClick={() => removeTag(tag)}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", padding: "0 0 0 2px", lineHeight: 1 }}>×</button>
+            <button
+              type="button"
+              onClick={() => removeTag(tag)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#6B7280",
+                padding: "0 0 0 2px",
+                lineHeight: 1,
+              }}
+            >
+              x
+            </button>
           </span>
         ))}
       </div>
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <input className="form-input" value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
-          placeholder="Type a tag and press Enter" />
-        <button type="button" onClick={addTag}
-          style={{ padding: "0 0.875rem", border: "1px solid #E5E7EB", borderRadius: "0.5rem", background: "#F9FAFB", fontSize: "0.875rem", cursor: "pointer", whiteSpace: "nowrap" }}>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+        <input
+          className="form-input"
+          style={{ flex: "1 1 220px", minWidth: 0 }}
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              addTag();
+            }
+          }}
+          placeholder="Type a tag and press Enter"
+        />
+        <button
+          type="button"
+          onClick={addTag}
+          style={{
+            minWidth: 96,
+            padding: "0 0.875rem",
+            border: "1px solid #E5E7EB",
+            borderRadius: "0.5rem",
+            background: "#F9FAFB",
+            fontSize: "0.875rem",
+            cursor: "pointer",
+            minHeight: 44,
+          }}
+        >
           Add
         </button>
       </div>
@@ -146,89 +284,122 @@ function TagsField({ value, onChange }) {
   );
 }
 
-function SaveIndicator({ state }) {
-  if (state === "saving") return <span style={{ fontSize: "0.8rem", color: "#6B7280" }}>Saving…</span>;
-  if (state === "saved")  return <span style={{ fontSize: "0.8rem", color: "#4F7B44" }}>✓ Draft saved</span>;
-  return null;
+function SecondaryActionButton({ children, className, ...props }) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D0D5DD] bg-white px-3 py-2 text-sm font-medium text-[#344054]",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
 }
 
-/* ─── Main page ──────────────────────────────────────────── */
 export default function AdminPostsPage() {
   const { user } = useAuth();
+  const isStackedLayout = useMediaQuery("(max-width: 1023px)");
+  const isCompactMobile = useMediaQuery("(max-width: 639px)");
+  const editorCardRef = useRef(null);
 
-  // List state
-  const [posts, setPosts]               = useState([]);
-  const [listLoading, setListLoading]   = useState(true);
-  const [search, setSearch]             = useState("");
+  const [posts, setPosts] = useState([]);
+  const [listLoading, setListLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const deferredSearch                  = useDeferredValue(search);
+  const deferredSearch = useDeferredValue(search);
 
-  // Editor state
-  const [selectedId, setSelectedId]     = useState("");
-  const [form, setForm]                 = useState(EMPTY_FORM);
-  const [blocks, setBlocks]             = useState([]);
+  const [selectedId, setSelectedId] = useState("");
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [blocks, setBlocks] = useState([]);
   const [editorLoading, setEditorLoading] = useState(false);
 
-  // UI state
-  const [saving, setSaving]             = useState(false);
-  const [autoSaveState, setAutoSave]    = useState(null);
-  const [deleting, setDeleting]         = useState(false);
-  const [showPreview, setShowPreview]   = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [mobileListOpen, setMobileListOpen] = useState(false);
 
-  // Refs — always hold latest values, safe inside async callbacks
-  const formRef        = useRef(EMPTY_FORM);
-  const blocksRef      = useRef([]);
-  const selectedIdRef  = useRef("");
-  const autoSaveTimer  = useRef(null);
-  const isDirty        = useRef(false);
+  const formRef = useRef(EMPTY_FORM);
+  const blocksRef = useRef([]);
+  const selectedIdRef = useRef("");
+  const autoSaveTimer = useRef(null);
+  const isDirty = useRef(false);
 
-  // Keep refs in sync
-  useEffect(() => { formRef.current = form; }, [form]);
-  useEffect(() => { blocksRef.current = blocks; }, [blocks]);
-  useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
 
-  /* ── Load post list ──────────────────────────────────── */
+  useEffect(() => {
+    blocksRef.current = blocks;
+  }, [blocks]);
+
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (!isStackedLayout) {
+      setMobileListOpen(true);
+    } else {
+      setMobileListOpen(false);
+    }
+  }, [isStackedLayout]);
+
+  const scrollEditorIntoView = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      editorCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
+
   const loadPosts = useCallback(async () => {
     setListLoading(true);
     try {
-      const res = await api.get("/blog/admin/posts", {
+      const response = await api.get("/blog/admin/posts", {
         params: { status: statusFilter, search: deferredSearch, limit: 50 },
       });
-      setPosts(res.data.data || []);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Could not load posts.");
+      setPosts(response.data.data || []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Could not load posts.");
     } finally {
       setListLoading(false);
     }
   }, [statusFilter, deferredSearch]);
 
-  useEffect(() => { loadPosts(); }, [loadPosts]);
+  useEffect(() => {
+    loadPosts();
+  }, [loadPosts]);
 
-  /* ── Select post ─────────────────────────────────────── */
   async function selectPost(id) {
     clearTimeout(autoSaveTimer.current);
     setSelectedId(id);
     setEditorLoading(true);
     isDirty.current = false;
-    setAutoSave(null);
+
+    if (isStackedLayout) {
+      setMobileListOpen(false);
+      scrollEditorIntoView();
+    }
+
     try {
-      const res = await api.get(`/blog/admin/posts/${id}`);
-      const p = res.data.data;
-      const newForm = {
-        title:      p.title      || "",
-        excerpt:    p.excerpt    || "",
-        coverImage: resolveApiAssetUrl(p.coverImage),
-        tags:       Array.isArray(p.tags) ? p.tags.join(", ") : "",
-        status:     p.status     || "draft",
+      const response = await api.get(`/blog/admin/posts/${id}`);
+      const post = response.data.data;
+      const nextForm = {
+        title: post.title || "",
+        excerpt: post.excerpt || "",
+        coverImage: resolveApiAssetUrl(post.coverImage),
+        tags: Array.isArray(post.tags) ? post.tags.join(", ") : "",
+        status: post.status || "draft",
       };
-      const newBlocks = normalizeEditorBlocks(parseContentToBlocks(p.content));
-      setForm(newForm);
-      setBlocks(newBlocks);
-      formRef.current   = newForm;
-      blocksRef.current = newBlocks;
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Could not load post.");
+      const nextBlocks = normalizeEditorBlocks(parseContentToBlocks(post.content));
+      setForm(nextForm);
+      setBlocks(nextBlocks);
+      formRef.current = nextForm;
+      blocksRef.current = nextBlocks;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Could not load post.");
     } finally {
       setEditorLoading(false);
     }
@@ -240,71 +411,69 @@ export default function AdminPostsPage() {
     selectedIdRef.current = "";
     setForm(EMPTY_FORM);
     setBlocks([]);
-    formRef.current   = EMPTY_FORM;
+    formRef.current = EMPTY_FORM;
     blocksRef.current = [];
-    isDirty.current   = false;
-    setAutoSave(null);
+    isDirty.current = false;
+
+    if (isStackedLayout) {
+      setMobileListOpen(false);
+      scrollEditorIntoView();
+    }
   }
 
-  function setField(key, val) {
-    setForm(f => {
-      const next = { ...f, [key]: val };
+  function setField(key, value) {
+    setForm((current) => {
+      const next = { ...current, [key]: value };
       formRef.current = next;
       return next;
     });
-    markDirty();
-  }
-
-  function handleBlocksChange(next) {
-    setBlocks(next);
-    blocksRef.current = next;
-    markDirty();
-  }
-
-  /* ── Auto-save (3s debounce, drafts only) ────────────── */
-  function markDirty() {
     isDirty.current = true;
   }
 
-  /* ── Core save — reads from refs (always fresh) ──────── */
-  async function corePerformSave(forcedStatus, silent = false) {
-    const f      = formRef.current;
-    const b      = blocksRef.current;
-    const status = forcedStatus || f.status;
+  function handleBlocksChange(nextBlocks) {
+    setBlocks(nextBlocks);
+    blocksRef.current = nextBlocks;
+    isDirty.current = true;
+  }
 
-    if (!f.title.trim()) {
+  async function corePerformSave(forcedStatus, silent = false) {
+    const currentForm = formRef.current;
+    const currentBlocks = blocksRef.current;
+    const status = forcedStatus || currentForm.status;
+
+    if (!currentForm.title.trim()) {
       if (!silent) toast.error("Title is required.");
       throw new Error("validation");
     }
-    if (!f.excerpt.trim()) {
+
+    if (!currentForm.excerpt.trim()) {
       if (!silent) toast.error("Excerpt is required.");
       throw new Error("validation");
     }
 
     const payload = {
-      title:      f.title.trim(),
-      excerpt:    f.excerpt.trim(),
-      coverImage: resolveApiAssetUrl((f.coverImage || "").trim()),
-      tags:       f.tags,
-      content:    normalizeEditorBlocks(b),
+      title: currentForm.title.trim(),
+      excerpt: currentForm.excerpt.trim(),
+      coverImage: resolveApiAssetUrl((currentForm.coverImage || "").trim()),
+      tags: currentForm.tags,
+      content: normalizeEditorBlocks(currentBlocks),
       status,
     };
 
     const id = selectedIdRef.current;
-    const res = id
+    const response = id
       ? await api.put(`/blog/posts/${id}`, payload)
       : await api.post("/blog/posts", payload);
 
-    const saved      = res.data.data;
-    const newsletter = res.data.meta?.newsletter;
+    const saved = response.data.data;
+    const newsletter = response.data.meta?.newsletter;
 
-    // Update state + refs with saved values
     const savedForm = {
-      title:      saved.title      || "",
-      excerpt:    saved.excerpt    || "",
+      title: saved.title || "",
+      excerpt: saved.excerpt || "",
       coverImage: saved.coverImage || "",
-      tags:       Array.isArray(saved.tags) ? saved.tags.join(", ") : "",
-      status:     saved.status     || "draft",
+      tags: Array.isArray(saved.tags) ? saved.tags.join(", ") : "",
+      status: saved.status || "draft",
     };
     const savedBlocks = normalizeEditorBlocks(parseContentToBlocks(saved.content));
 
@@ -312,67 +481,62 @@ export default function AdminPostsPage() {
     setForm(savedForm);
     setBlocks(savedBlocks);
     selectedIdRef.current = saved._id;
-    formRef.current       = savedForm;
-    blocksRef.current     = savedBlocks;
-    isDirty.current       = false;
+    formRef.current = savedForm;
+    blocksRef.current = savedBlocks;
+    isDirty.current = false;
 
-    loadPosts(); // refresh list without await so it doesn't block
+    loadPosts();
 
     return { saved, newsletter };
   }
 
-  /* ── Save draft button ───────────────────────────────── */
   async function handleSaveDraft() {
     clearTimeout(autoSaveTimer.current);
     setSaving(true);
-    setAutoSave(null);
     try {
       await corePerformSave("draft", false);
       toast.success("Draft saved.");
-      setAutoSave("saved");
-      setTimeout(() => setAutoSave(v => v === "saved" ? null : v), 2500);
-    } catch (err) {
-      if (err.message !== "validation") {
-        toast.error(err.response?.data?.message || "Could not save draft.");
+    } catch (error) {
+      if (error.message !== "validation") {
+        toast.error(error.response?.data?.message || "Could not save draft.");
       }
     } finally {
       setSaving(false);
     }
   }
 
-  /* ── Publish button ──────────────────────────────────── */
   async function handlePublish() {
     clearTimeout(autoSaveTimer.current);
     setSaving(true);
-    setAutoSave(null);
     try {
       const { newsletter } = await corePerformSave("published", false);
+
       if (newsletter?.reason === "sent") {
-        toast.success(`Published! Newsletter sent to ${newsletter.sent} subscriber(s).`);
+        toast.success(`Published. Newsletter sent to ${newsletter.sent} subscriber(s).`);
       } else if (newsletter?.reason === "no-active-subscribers") {
-        toast.success("Published! No active subscribers to notify.");
+        toast.success("Published. No active subscribers to notify.");
       } else if (newsletter?.reason === "email-not-configured") {
-        toast.success("Published! (Email not configured.)");
+        toast.success("Published. Email not configured.");
       } else {
         toast.success("Post published.");
       }
-    } catch (err) {
-      if (err.message !== "validation") {
-        toast.error(err.response?.data?.message || "Could not publish.");
+    } catch (error) {
+      if (error.message !== "validation") {
+        toast.error(error.response?.data?.message || "Could not publish.");
       }
     } finally {
       setSaving(false);
     }
   }
 
-  /* ── Delete ──────────────────────────────────────────── */
-  async function handleDelete() {
+  function handleDelete() {
     if (!selectedId) return;
     setShowDeleteConfirm(true);
   }
 
   async function confirmDelete() {
     if (!selectedId) return;
+
     setDeleting(true);
     try {
       await api.delete(`/blog/posts/${selectedId}`);
@@ -380,17 +544,21 @@ export default function AdminPostsPage() {
       setShowDeleteConfirm(false);
       startNew();
       await loadPosts();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Could not delete.");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Could not delete.");
     } finally {
       setDeleting(false);
     }
   }
 
-  const currentPost = posts.find(p => p._id === selectedId);
-  const viewLink    = currentPost?.slug ? `/blog/${currentPost.slug}` : "";
+  const currentPost = posts.find((post) => post._id === selectedId);
+  const viewLink = currentPost?.slug ? `/blog/${currentPost.slug}` : "";
+  const postListExpanded = !isStackedLayout || mobileListOpen;
+  const mobileToolbarGridClass = isCompactMobile ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2 sm:flex-row sm:flex-wrap";
+  const mobileStatusSelectStyle = isCompactMobile
+    ? { width: "100%", padding: "6px 10px", fontSize: "0.8rem" }
+    : { width: "100%", maxWidth: 140, padding: "6px 10px", fontSize: "0.8rem" };
 
-  /* ─────────────────────────────────────────────────────── */
   return (
     <>
       <ConfirmDialog
@@ -406,192 +574,387 @@ export default function AdminPostsPage() {
         onConfirm={confirmDelete}
       />
 
-      {/* Preview modal */}
-      {showPreview && (
-        <ArticlePreview
-          form={form}
-          blocks={blocks}
-          onClose={() => setShowPreview(false)}
-        />
-      )}
+      {showPreview && <ArticlePreview form={form} blocks={blocks} onClose={() => setShowPreview(false)} />}
 
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-[300px_1fr] items-start">
-
-        {/* ── Post list sidebar ─────────────────────────── */}
-        <aside style={{ border: "1px solid #E5E7EB", borderRadius: "1rem", background: "white", overflow: "hidden", position: "sticky", top: 24 }}>
-          <div style={{ borderBottom: "1px solid #E5E7EB", padding: "1rem 1.25rem" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+      <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
+        <aside
+          className={cn(
+            "overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white",
+            !isStackedLayout && "lg:sticky lg:top-6",
+          )}
+        >
+          <div className="border-b border-[#E5E7EB] px-4 py-4 sm:px-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#101828", margin: 0 }}>Posts</h2>
-                <p style={{ fontSize: "0.775rem", color: "#667085", margin: 0 }}>{posts.length} total</p>
+                <h2 className="m-0 text-base font-bold text-[#101828]">Posts</h2>
+                <p className="m-0 text-xs text-[#667085]">{posts.length} total</p>
               </div>
-              <button type="button" onClick={startNew} title="New post"
-                style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #D0D5DD", borderRadius: "0.5rem", background: "white", cursor: "pointer", color: "#344054" }}>
-                <FilePlus2 size={15} />
-              </button>
+
+              <div className={isCompactMobile ? "grid grid-cols-[minmax(0,1fr)_40px] gap-2" : "flex items-center gap-2"}>
+                {isStackedLayout && (
+                  <SecondaryActionButton
+                    onClick={() => setMobileListOpen((current) => !current)}
+                    className={cn("min-h-10 text-xs", isCompactMobile ? "w-full px-3" : "px-3")}
+                  >
+                    {postListExpanded ? "Hide posts" : "Posts"}
+                    <ChevronDown
+                      size={14}
+                      style={{
+                        transform: postListExpanded ? "rotate(180deg)" : "none",
+                        transition: "transform 150ms ease",
+                      }}
+                    />
+                  </SecondaryActionButton>
+                )}
+
+                <SecondaryActionButton
+                  onClick={startNew}
+                  title="New post"
+                  aria-label="Create new post"
+                  className="min-h-10 w-10 px-0"
+                >
+                  <FilePlus2 size={15} />
+                </SecondaryActionButton>
+              </div>
             </div>
 
-            <div style={{ position: "relative", marginBottom: "0.5rem" }}>
-              <Search size={13} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }} />
-              <input className="form-input" style={{ paddingLeft: 30, fontSize: "0.875rem" }}
-                value={search} onChange={e => setSearch(e.target.value)} placeholder="Search posts…" />
-            </div>
+            <div
+              className={cn(
+                "mt-4 space-y-3 transition-all duration-200",
+                postListExpanded ? "opacity-100" : "pointer-events-none h-0 overflow-hidden opacity-0",
+              )}
+            >
+              <div className="relative">
+                <Search
+                  size={13}
+                  style={{
+                    position: "absolute",
+                    left: 10,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#9CA3AF",
+                  }}
+                />
+                <input
+                  className="form-input"
+                  style={{ paddingLeft: 30, fontSize: "0.875rem" }}
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search posts..."
+                />
+              </div>
 
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <select className="form-input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ flex: 1, fontSize: "0.875rem" }}>
-                <option value="all">All</option>
-                <option value="draft">Drafts</option>
-                <option value="published">Published</option>
-              </select>
-              <button type="button" onClick={loadPosts}
-                style={{ width: 38, height: 38, border: "1px solid #D0D5DD", borderRadius: "0.5rem", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#344054", flexShrink: 0 }}>
-                <RefreshCw size={14} />
-              </button>
+              <div className={isCompactMobile ? "grid grid-cols-[minmax(0,1fr)_44px] gap-2" : "flex flex-col gap-3 sm:flex-row sm:items-center"}>
+                <select
+                  className="form-input sm:max-w-[170px]"
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value)}
+                  style={{ fontSize: "0.875rem" }}
+                >
+                  <option value="all">All</option>
+                  <option value="draft">Drafts</option>
+                  <option value="published">Published</option>
+                </select>
+
+                <SecondaryActionButton
+                  onClick={loadPosts}
+                  aria-label="Refresh posts"
+                  title="Refresh posts"
+                  className={isCompactMobile ? "min-h-11 w-11 shrink-0 px-0" : "min-h-11 shrink-0"}
+                >
+                  <RefreshCw size={14} />
+                </SecondaryActionButton>
+              </div>
             </div>
           </div>
 
-          <div style={{ maxHeight: "calc(100vh - 220px)", overflowY: "auto" }}>
-            {listLoading ? (
-              <p style={{ padding: "2rem", textAlign: "center", color: "#9CA3AF", fontSize: "0.875rem" }}>Loading…</p>
-            ) : posts.length === 0 ? (
-              <p style={{ padding: "2rem", textAlign: "center", color: "#9CA3AF", fontSize: "0.875rem" }}>No posts found.</p>
-            ) : posts.map(post => {
-              const active = post._id === selectedId;
-              return (
-                <button key={post._id} type="button" onClick={() => selectPost(post._id)}
-                  style={{ display: "block", width: "100%", textAlign: "left", padding: "0.875rem 1.25rem", background: active ? "#F8FBF8" : "transparent", border: "none", borderLeft: `3px solid ${active ? "#4F7B44" : "transparent"}`, borderBottom: "1px solid #F2F4F7", cursor: "pointer" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
-                    <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "#101828", margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                      {post.title}
-                    </p>
-                    <StatusPill status={post.status} />
-                  </div>
-                  <div style={{ display: "flex", gap: "0.625rem", marginTop: "0.25rem", fontSize: "0.75rem", color: "#9CA3AF" }}>
-                    <span>{formatPostDate(post) || "Unpublished"}</span>
-                    <span>·</span>
-                    <span>{post.views || 0} views</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+          {postListExpanded && (
+            <div style={{ maxHeight: isStackedLayout ? "50vh" : "calc(100vh - 220px)", overflowY: "auto" }}>
+              {listLoading ? (
+                <p style={{ padding: "2rem", textAlign: "center", color: "#9CA3AF", fontSize: "0.875rem" }}>
+                  Loading...
+                </p>
+              ) : posts.length === 0 ? (
+                <p style={{ padding: "2rem", textAlign: "center", color: "#9CA3AF", fontSize: "0.875rem" }}>
+                  No posts found.
+                </p>
+              ) : (
+                posts.map((post) => {
+                  const active = post._id === selectedId;
+
+                  return (
+                    <button
+                      key={post._id}
+                      type="button"
+                      onClick={() => selectPost(post._id)}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "0.875rem 1rem",
+                        background: active ? "#F8FBF8" : "transparent",
+                        border: "none",
+                        borderLeft: `3px solid ${active ? "#4F7B44" : "transparent"}`,
+                        borderBottom: "1px solid #F2F4F7",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "0.625rem" }}>
+                        <p
+                          style={{
+                            fontSize: "0.875rem",
+                            fontWeight: 600,
+                            color: "#101828",
+                            margin: 0,
+                            overflow: "hidden",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            flex: "1 1 220px",
+                          }}
+                        >
+                          {post.title}
+                        </p>
+                        <StatusPill status={post.status} />
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "0.5rem",
+                          marginTop: "0.35rem",
+                          fontSize: "0.75rem",
+                          color: "#9CA3AF",
+                        }}
+                      >
+                        <span>{formatPostDate(post) || "Unpublished"}</span>
+                        <span style={{ color: "#D0D5DD" }}>|</span>
+                        <span>{post.views || 0} views</span>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          )}
         </aside>
 
-        {/* ── Editor ───────────────────────────────────── */}
-        <div style={{ border: "1px solid #E5E7EB", borderRadius: "1rem", background: "white", overflow: "visible" }}>
-          {/* Toolbar */}
-          <div style={{ borderBottom: "1px solid #E5E7EB", padding: "1rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
-            <div>
-              <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#101828", margin: 0 }}>
-                {selectedId ? "Edit post" : "New post"}
-              </h2>
-              <p style={{ fontSize: "0.775rem", color: "#667085", margin: 0 }}>
-                Publishing notifies all active newsletter subscribers.
-              </p>
-            </div>
+        <div ref={editorCardRef} className="overflow-visible rounded-2xl border border-[#E5E7EB] bg-white">
+          <div className="border-b border-[#E5E7EB] px-4 py-4 sm:px-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <h2 className="m-0 text-base font-bold text-[#101828]">
+                  {selectedId ? "Edit post" : "New post"}
+                </h2>
+                <p className="m-0 text-xs text-[#667085]">
+                  Publishing notifies all active newsletter subscribers.
+                </p>
+              </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
-              {/* Removed autoSave indicator */}
+              <div className={cn(mobileToolbarGridClass, "lg:justify-end")}>
+                {isStackedLayout && (
+                  <SecondaryActionButton
+                    onClick={() => setMobileListOpen((current) => !current)}
+                    className={cn(isCompactMobile ? "w-full" : "w-full sm:w-auto")}
+                  >
+                    {postListExpanded ? "Hide posts" : "Posts"}
+                  </SecondaryActionButton>
+                )}
 
-              {/* Preview button */}
-              <button type="button" onClick={() => setShowPreview(true)}
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 0.875rem", border: "1px solid #D0D5DD", borderRadius: "0.5rem", fontSize: "0.875rem", fontWeight: 500, color: "#344054", background: "white", cursor: "pointer" }}>
-                <Eye size={14} /> Preview
-              </button>
+                <SecondaryActionButton
+                  onClick={() => setShowPreview(true)}
+                  aria-label="Preview article"
+                  className={cn(isCompactMobile ? "w-full" : "w-full sm:w-auto")}
+                >
+                  <Eye size={14} /> Preview
+                </SecondaryActionButton>
 
-              {/* View live (published only) */}
-              {viewLink && currentPost?.status === "published" && (
-                <a href={viewLink} target="_blank" rel="noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 0.875rem", border: "1px solid #D0D5DD", borderRadius: "0.5rem", fontSize: "0.875rem", fontWeight: 500, color: "#344054", textDecoration: "none" }}>
-                  <Eye size={14} /> Live
-                </a>
-              )}
+                {viewLink && currentPost?.status === "published" && (
+                  <a
+                    href={viewLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={cn(
+                      "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#D0D5DD] bg-white px-3 py-2 text-sm font-medium text-[#344054]",
+                      isCompactMobile ? "w-full" : "w-full sm:w-auto",
+                    )}
+                  >
+                    <Eye size={14} /> Live
+                  </a>
+                )}
 
-              <Button type="button" variant="outline-green" disabled={saving || editorLoading} onClick={handleSaveDraft}>
-                <Save size={14} /> Save draft
-              </Button>
+                <Button
+                  type="button"
+                  variant="outline-green"
+                  disabled={saving || editorLoading}
+                  onClick={handleSaveDraft}
+                  className={cn(isCompactMobile ? "w-full" : "w-full sm:w-auto")}
+                >
+                  <Save size={14} /> {isCompactMobile ? "Draft" : "Save draft"}
+                </Button>
 
-              <Button type="button" variant="green" disabled={saving || editorLoading} onClick={handlePublish}>
-                <Send size={14} /> {currentPost?.status === "published" ? "Update" : "Publish"}
-              </Button>
+                <Button
+                  type="button"
+                  variant="green"
+                  disabled={saving || editorLoading}
+                  onClick={handlePublish}
+                  className={cn(isCompactMobile ? "w-full" : "w-full sm:w-auto")}
+                >
+                  <Send size={14} /> {currentPost?.status === "published" ? "Update" : "Publish"}
+                </Button>
 
-              {user?.role === "admin" && selectedId && (
-                <button type="button" disabled={deleting} onClick={handleDelete}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 0.875rem", border: "1px solid #FECACA", borderRadius: "0.5rem", fontSize: "0.875rem", fontWeight: 500, color: "#B42318", background: "white", cursor: deleting ? "not-allowed" : "pointer" }}>
-                  <Trash2 size={14} /> Delete
-                </button>
-              )}
+                {user?.role === "admin" && selectedId && (
+                  <button
+                    type="button"
+                    disabled={deleting}
+                    onClick={handleDelete}
+                    className={cn(
+                      "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#FECACA] bg-white px-3 py-2 text-sm font-medium text-[#B42318]",
+                      isCompactMobile ? "col-span-2 w-full" : "w-full sm:w-auto",
+                    )}
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
           {editorLoading ? (
-            <div style={{ padding: "4rem", textAlign: "center", color: "#9CA3AF" }}>Loading post…</div>
+            <div style={{ padding: "4rem", textAlign: "center", color: "#9CA3AF" }}>Loading post...</div>
           ) : (
-            <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-
-              {/* Status bar for existing posts */}
+            <div className="flex flex-col gap-5 px-4 py-4 sm:px-6 sm:py-6">
               {selectedId && (
-                <div style={{ display: "flex", gap: "0.875rem", background: "#F9FAFB", borderRadius: "0.625rem", padding: "0.625rem 1rem", flexWrap: "wrap", alignItems: "center" }}>
-                  <select className="form-input" style={{ width: "110px", padding: "3px 10px", fontSize: "0.8rem" }}
-                    value={form.status} onChange={e => setField("status", e.target.value)}>
+                <div className="flex flex-wrap items-center gap-3 rounded-xl bg-[#F9FAFB] px-4 py-3">
+                  <select
+                    className="form-input"
+                    style={mobileStatusSelectStyle}
+                    value={form.status}
+                    onChange={(event) => setField("status", event.target.value)}
+                  >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
                   </select>
+
                   {currentPost?.publishedAt && (
                     <span style={{ fontSize: "0.8rem", color: "#6B7280" }}>{formatPostDate(currentPost)}</span>
                   )}
+
                   {currentPost?.newsletterSentAt && (
-                    <span style={{ fontSize: "0.8rem", color: "#4F7B44" }}>✓ Newsletter sent</span>
+                    <span style={{ fontSize: "0.8rem", color: "#4F7B44" }}>Newsletter sent</span>
                   )}
+
                   {currentPost?.slug && (
-                    <span style={{ fontSize: "0.8rem", color: "#9CA3AF", marginLeft: "auto" }}>/blog/{currentPost.slug}</span>
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "#9CA3AF",
+                        marginLeft: isStackedLayout ? 0 : "auto",
+                        width: isStackedLayout ? "100%" : "auto",
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      /blog/{currentPost.slug}
+                    </span>
                   )}
                 </div>
               )}
 
               <Field label="Title *">
-                <input className="form-input" style={{ fontSize: "1.05rem", fontWeight: 600 }}
-                  value={form.title} placeholder="Article title"
-                  onChange={e => setField("title", e.target.value)} />
+                <input
+                  className="form-input"
+                  style={{ fontSize: "1.05rem", fontWeight: 600 }}
+                  value={form.title}
+                  placeholder="Article title"
+                  onChange={(event) => setField("title", event.target.value)}
+                />
               </Field>
 
               <Field label="Excerpt *" hint="Brief summary shown on the blog listing page (max 300 chars).">
-                <textarea className="form-input" rows={3} style={{ resize: "none" }}
-                  value={form.excerpt} placeholder="A compelling one or two sentence summary…"
-                  maxLength={300} onChange={e => setField("excerpt", e.target.value)} />
+                <textarea
+                  className="form-input"
+                  rows={3}
+                  style={{ resize: "none" }}
+                  value={form.excerpt}
+                  placeholder="A compelling one or two sentence summary..."
+                  maxLength={300}
+                  onChange={(event) => setField("excerpt", event.target.value)}
+                />
                 <p style={{ textAlign: "right", fontSize: "0.75rem", color: "#9CA3AF", margin: "3px 0 0" }}>
                   {form.excerpt.length}/300
                 </p>
               </Field>
 
               <Field label="Cover Image">
-                <CoverImageField value={form.coverImage} onChange={v => setField("coverImage", v)} />
+                <CoverImageField value={form.coverImage} onChange={(value) => setField("coverImage", value)} />
               </Field>
 
               <Field label="Tags" hint="Press Enter or click Add after each tag.">
-                <TagsField value={form.tags} onChange={v => setField("tags", v)} />
+                <TagsField value={form.tags} onChange={(value) => setField("tags", value)} />
               </Field>
 
-              <Field label="Content *" hint="Hover a block to reveal move/delete/type controls. Use '+ Add block' to insert new blocks.">
-                <div style={{ border: "1px solid #E5E7EB", borderRadius: "0.75rem", padding: "1.25rem 1.25rem 0.75rem", minHeight: 360 }}>
+              <Field
+                label="Content *"
+                hint="Use the block controls to change block types, move sections, delete sections, and insert new blocks."
+              >
+                <div className="min-h-[360px] rounded-xl border border-[#E5E7EB] px-3 py-4 sm:px-5 sm:py-5">
                   <RichEditor blocks={blocks} onChange={handleBlocksChange} />
                 </div>
               </Field>
 
-              {/* Bottom actions */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem", borderTop: "1px solid #E5E7EB", flexWrap: "wrap", gap: "0.75rem" }}>
-                <button type="button" onClick={startNew}
-                  style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 0.875rem", border: "1px solid #D0D5DD", borderRadius: "0.5rem", fontSize: "0.875rem", color: "#344054", background: "white", cursor: "pointer" }}>
-                  <FilePlus2 size={14} /> New post
-                </button>
-                <div style={{ display: "flex", gap: "0.625rem" }}>
-                  <Button type="button" variant="outline-green" disabled={saving} onClick={handleSaveDraft}>
-                    <Save size={14} /> Save draft
-                  </Button>
-                  <Button type="button" variant="green" disabled={saving} onClick={handlePublish}>
-                    <Send size={14} /> {currentPost?.status === "published" ? "Update" : "Publish"}
-                  </Button>
-                </div>
+              <div className="border-t border-[#E5E7EB] pt-4">
+                {isCompactMobile ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <SecondaryActionButton onClick={startNew} className="w-full">
+                      <FilePlus2 size={14} /> New
+                    </SecondaryActionButton>
+                    <Button
+                      type="button"
+                      variant="outline-green"
+                      disabled={saving}
+                      onClick={handleSaveDraft}
+                      className="w-full"
+                    >
+                      <Save size={14} /> Draft
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="green"
+                      disabled={saving}
+                      onClick={handlePublish}
+                      className="col-span-2 w-full"
+                    >
+                      <Send size={14} /> {currentPost?.status === "published" ? "Update" : "Publish"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <SecondaryActionButton onClick={startNew} className="w-full sm:w-auto">
+                      <FilePlus2 size={14} /> New post
+                    </SecondaryActionButton>
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <Button
+                        type="button"
+                        variant="outline-green"
+                        disabled={saving}
+                        onClick={handleSaveDraft}
+                        className="w-full sm:w-auto"
+                      >
+                        <Save size={14} /> Save draft
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="green"
+                        disabled={saving}
+                        onClick={handlePublish}
+                        className="w-full sm:w-auto"
+                      >
+                        <Send size={14} /> {currentPost?.status === "published" ? "Update" : "Publish"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

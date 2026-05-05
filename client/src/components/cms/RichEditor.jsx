@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import api, { resolveApiAssetUrl } from "@/lib/api";
 
 function uid() {
@@ -110,32 +111,34 @@ function EditableText({ value, onChange, placeholder, style, as = "div", onKeyDo
         ...style,
         outline: "none",
         minHeight: "1.5em",
-        cursor: "text"
+        cursor: "text",
       }}
       data-placeholder={placeholder}
     />
   );
 }
 
-function FormatBar() {
+function FormatBar({ compact = false }) {
   const btnStyle = {
-    padding: "3px 7px",
+    padding: compact ? "5px 8px" : "3px 7px",
     border: "1px solid #E5E7EB",
-    borderRadius: 4,
+    borderRadius: 6,
     background: "white",
     cursor: "pointer",
     fontSize: "0.75rem",
     color: "#111827",
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: compact ? 34 : "auto",
   };
 
   return (
-    <div style={{ display: "flex", gap: "4px", marginBottom: "6px" }}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "8px" }}>
       <button
         type="button"
         title="Undo (Ctrl+Z)"
-        onMouseDown={e => e.preventDefault()}
+        onMouseDown={(event) => event.preventDefault()}
         onClick={() => document.execCommand("undo")}
         style={btnStyle}
       >
@@ -144,17 +147,17 @@ function FormatBar() {
       <button
         type="button"
         title="Redo (Ctrl+Y)"
-        onMouseDown={e => e.preventDefault()}
+        onMouseDown={(event) => event.preventDefault()}
         onClick={() => document.execCommand("redo")}
         style={btnStyle}
       >
         <Redo size={13} />
       </button>
-      <div style={{ width: 1, background: "#E5E7EB", margin: "0 4px" }} />
+      <div style={{ width: 1, alignSelf: "stretch", background: "#E5E7EB", margin: compact ? "0 2px" : "0 4px" }} />
       <button
         type="button"
         title="Bold (Ctrl+B)"
-        onMouseDown={e => e.preventDefault()}
+        onMouseDown={(event) => event.preventDefault()}
         onClick={() => document.execCommand("bold")}
         style={{ ...btnStyle, fontWeight: 700 }}
       >
@@ -163,67 +166,111 @@ function FormatBar() {
       <button
         type="button"
         title="Italic (Ctrl+I)"
-        onMouseDown={e => e.preventDefault()}
+        onMouseDown={(event) => event.preventDefault()}
         onClick={() => document.execCommand("italic")}
         style={{ ...btnStyle, fontStyle: "italic" }}
       >
         <Italic size={13} />
       </button>
-      <span style={{ fontSize: "0.7rem", color: "#D1D5DB", alignSelf: "center", marginLeft: 4 }}>
-        Select text to format
-      </span>
+      {!compact && (
+        <span style={{ fontSize: "0.7rem", color: "#D1D5DB", alignSelf: "center", marginLeft: 4 }}>
+          Select text to format
+        </span>
+      )}
     </div>
   );
 }
 
-function ParagraphBlock({ block, onChange }) {
+function ParagraphBlock({ block, onChange, compact = false }) {
   return (
     <>
-      <FormatBar />
+      <FormatBar compact={compact} />
       <EditableText
-        style={{ ...TA, fontSize: "0.9375rem", color: "#111827", minHeight: 28, border: "none" }}
+        style={{
+          ...TA,
+          fontSize: compact ? "0.9rem" : "0.9375rem",
+          color: "#111827",
+          minHeight: 28,
+          border: "none",
+        }}
         value={block.text || ""}
         placeholder="Write something..."
-        onChange={(val) => onChange({ text: val })}
-        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
+        onChange={(value) => onChange({ text: value })}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            document.execCommand("insertLineBreak");
+          }
+        }}
       />
     </>
   );
 }
 
-function HeadingBlock({ block, onChange, level = 2 }) {
+function HeadingBlock({ block, onChange, level = 2, compact = false }) {
   const style =
     level === 2
-      ? { ...TA, fontSize: "1.25rem", fontWeight: 700, color: "#111827", minHeight: 32, border: "none" }
-      : { ...TA, fontSize: "1.05rem", fontWeight: 600, color: "#1F2937", minHeight: 28, border: "none" };
+      ? {
+          ...TA,
+          fontSize: compact ? "1.125rem" : "1.25rem",
+          fontWeight: 700,
+          color: "#111827",
+          minHeight: 32,
+          border: "none",
+        }
+      : {
+          ...TA,
+          fontSize: compact ? "1rem" : "1.05rem",
+          fontWeight: 600,
+          color: "#1F2937",
+          minHeight: 28,
+          border: "none",
+        };
 
   return (
     <EditableText
       style={style}
       value={block.text || ""}
       placeholder={level === 2 ? "Section heading..." : "Sub-section heading..."}
-      onChange={(val) => onChange({ text: val })}
-      onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
+      onChange={(value) => onChange({ text: value })}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.execCommand("insertLineBreak");
+        }
+      }}
     />
   );
 }
 
-function QuoteBlock({ block, onChange }) {
+function QuoteBlock({ block, onChange, compact = false }) {
   return (
-    <div style={{ borderLeft: "4px solid #4F7B44", paddingLeft: "1rem" }}>
-      <FormatBar />
+    <div style={{ borderLeft: "4px solid #4F7B44", paddingLeft: compact ? "0.875rem" : "1rem" }}>
+      <FormatBar compact={compact} />
       <EditableText
-        style={{ ...TA, fontSize: "1.05rem", fontStyle: "italic", color: "#111827", minHeight: 28, border: "none" }}
+        style={{
+          ...TA,
+          fontSize: compact ? "1rem" : "1.05rem",
+          fontStyle: "italic",
+          color: "#111827",
+          minHeight: 28,
+          border: "none",
+        }}
         value={block.text || ""}
         placeholder="Enter a quote or pull-out text..."
-        onChange={(val) => onChange({ text: val })}
-        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
+        onChange={(value) => onChange({ text: value })}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            document.execCommand("insertLineBreak");
+          }
+        }}
       />
     </div>
   );
 }
 
-function ImageBlock({ block, onChange }) {
+function ImageBlock({ block, onChange, compact = false }) {
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
 
@@ -253,15 +300,22 @@ function ImageBlock({ block, onChange }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-        <Image size={14} style={{ color: "#9CA3AF", flexShrink: 0 }} />
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.5rem",
+          alignItems: compact ? "stretch" : "center",
+        }}
+      >
+        <Image size={14} style={{ color: "#9CA3AF", flexShrink: 0, marginTop: compact ? 12 : 0 }} />
         <input
-          style={{ ...IL, flex: 1 }}
+          style={{ ...IL, flex: "1 1 220px", minWidth: 0 }}
           value={block.url || ""}
           placeholder="Paste image URL (https://...)"
           onChange={(event) => onChange({ url: event.target.value })}
         />
-        <span style={{ fontSize: "0.75rem", color: "#9CA3AF", flexShrink: 0 }}>or</span>
+        <span style={{ fontSize: "0.75rem", color: "#9CA3AF", flexShrink: 0, alignSelf: "center" }}>or</span>
         <button
           type="button"
           disabled={uploading}
@@ -269,15 +323,16 @@ function ImageBlock({ block, onChange }) {
           style={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             gap: "0.375rem",
-            padding: "5px 10px",
+            padding: "10px 12px",
             border: "1px solid #D0D5DD",
-            borderRadius: "0.375rem",
+            borderRadius: "0.5rem",
             background: uploading ? "#F9FAFB" : "white",
             cursor: uploading ? "not-allowed" : "pointer",
             fontSize: "0.8rem",
             color: "#344054",
-            flexShrink: 0,
+            flex: compact ? "1 1 100%" : "0 0 auto",
             whiteSpace: "nowrap",
           }}
         >
@@ -329,7 +384,7 @@ function ImageBlock({ block, onChange }) {
   );
 }
 
-function ListBlock({ block, onChange, numbered = false }) {
+function ListBlock({ block, onChange, numbered = false, compact = false }) {
   const items = block.items || [""];
 
   function updateItem(index, value) {
@@ -352,7 +407,14 @@ function ListBlock({ block, onChange, numbered = false }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
       {items.map((item, index) => (
-        <div key={index} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <div
+          key={index}
+          style={{
+            display: "flex",
+            alignItems: compact ? "flex-start" : "center",
+            gap: "0.5rem",
+          }}
+        >
           <span
             style={{
               color: "#4F7B44",
@@ -361,6 +423,7 @@ function ListBlock({ block, onChange, numbered = false }) {
               width: 20,
               flexShrink: 0,
               textAlign: "right",
+              paddingTop: compact ? 6 : 0,
             }}
           >
             {numbered ? `${index + 1}.` : "\u2022"}
@@ -369,7 +432,7 @@ function ListBlock({ block, onChange, numbered = false }) {
             style={{ ...IL, flex: 1, borderBottom: "none", minHeight: 20 }}
             value={item}
             placeholder={`Item ${index + 1}`}
-            onChange={(val) => updateItem(index, val)}
+            onChange={(value) => updateItem(index, value)}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
@@ -390,7 +453,7 @@ function ListBlock({ block, onChange, numbered = false }) {
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: 2,
+              padding: compact ? "6px 2px" : 2,
               flexShrink: 0,
             }}
           >
@@ -421,8 +484,7 @@ function ListBlock({ block, onChange, numbered = false }) {
   );
 }
 
-function CalloutBlock({ block, onChange }) {
-  const ref = useRef(null);
+function CalloutBlock({ block, onChange, compact = false }) {
   const variants = {
     info: { bg: "#EFF6FF", border: "#BFDBFE", icon: "\u{1F4A1}" },
     tip: { bg: "#F0FDF4", border: "#BBF7D0", icon: "\u2705" },
@@ -430,20 +492,16 @@ function CalloutBlock({ block, onChange }) {
   };
   const variant = variants[block.variant || "info"];
 
-  useEffect(() => {
-    autoGrow(ref.current);
-  }, [block.text]);
-
   return (
     <div
       style={{
         background: variant.bg,
         border: `1px solid ${variant.border}`,
         borderRadius: "0.625rem",
-        padding: "0.875rem 1rem",
+        padding: compact ? "0.875rem" : "0.875rem 1rem",
       }}
     >
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.5rem" }}>
         <span>{variant.icon}</span>
         <select
           value={block.variant || "info"}
@@ -454,6 +512,7 @@ function CalloutBlock({ block, onChange }) {
             background: "transparent",
             color: "#6B7280",
             cursor: "pointer",
+            minWidth: 0,
           }}
         >
           <option value="info">Info</option>
@@ -461,13 +520,25 @@ function CalloutBlock({ block, onChange }) {
           <option value="warning">Warning</option>
         </select>
       </div>
-      <FormatBar />
+      <FormatBar compact={compact} />
       <EditableText
-        style={{ ...TA, fontSize: "0.9rem", color: "#111827", minHeight: 24, background: "transparent", border: "none" }}
+        style={{
+          ...TA,
+          fontSize: "0.9rem",
+          color: "#111827",
+          minHeight: 24,
+          background: "transparent",
+          border: "none",
+        }}
         value={block.text || ""}
         placeholder="Callout text..."
-        onChange={(val) => onChange({ text: val })}
-        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
+        onChange={(value) => onChange({ text: value })}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            document.execCommand("insertLineBreak");
+          }
+        }}
       />
     </div>
   );
@@ -483,7 +554,7 @@ function DividerBlock() {
   );
 }
 
-function AddBlockMenu({ onAdd, label = "Add block" }) {
+function AddBlockMenu({ onAdd, label = "Add block", compact = false }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
@@ -519,23 +590,26 @@ function AddBlockMenu({ onAdd, label = "Add block" }) {
   }, [open]);
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div style={{ position: "relative", display: "inline-block", maxWidth: "100%" }}>
       <button
         ref={buttonRef}
         type="button"
         onClick={() => setOpen((value) => !value)}
         style={{
-          display: "flex",
+          display: "inline-flex",
           alignItems: "center",
-          gap: "0.25rem",
-          padding: "4px 12px",
+          justifyContent: "center",
+          gap: "0.375rem",
+          padding: compact ? "8px 14px" : "4px 12px",
           borderRadius: "9999px",
           border: "1px dashed #D1D5DB",
           background: "white",
-          color: "#9CA3AF",
-          fontSize: "0.75rem",
+          color: "#6B7280",
+          fontSize: compact ? "0.8125rem" : "0.75rem",
           cursor: "pointer",
           transition: "border-color 150ms, color 150ms",
+          minHeight: compact ? 40 : "auto",
+          maxWidth: "100%",
         }}
         onMouseEnter={(event) => {
           event.currentTarget.style.borderColor = "#4F7B44";
@@ -543,10 +617,10 @@ function AddBlockMenu({ onAdd, label = "Add block" }) {
         }}
         onMouseLeave={(event) => {
           event.currentTarget.style.borderColor = "#D1D5DB";
-          event.currentTarget.style.color = "#9CA3AF";
+          event.currentTarget.style.color = "#6B7280";
         }}
       >
-        <Plus size={12} /> {label}
+        <Plus size={13} /> {label}
       </button>
 
       {open && (
@@ -563,9 +637,10 @@ function AddBlockMenu({ onAdd, label = "Add block" }) {
             zIndex: 9999,
             padding: "0.375rem",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: compact ? "1fr" : "1fr 1fr",
             gap: "2px",
-            minWidth: 248,
+            minWidth: compact ? 220 : 248,
+            maxWidth: compact ? "calc(100vw - 48px)" : 320,
             maxHeight: "min(360px, 60vh)",
             overflowY: "auto",
           }}
@@ -582,7 +657,7 @@ function AddBlockMenu({ onAdd, label = "Add block" }) {
                 display: "flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                padding: "0.45rem 0.75rem",
+                padding: compact ? "0.6rem 0.75rem" : "0.45rem 0.75rem",
                 border: "none",
                 borderRadius: "0.5rem",
                 background: "transparent",
@@ -609,28 +684,40 @@ function AddBlockMenu({ onAdd, label = "Add block" }) {
   );
 }
 
-function ConclusionBlock({ block, onChange }) {
+function ConclusionBlock({ block, onChange, compact = false }) {
   return (
-    <div style={{ background: "#4F7B44", borderRadius: "0.75rem", padding: "1.25rem 1.5rem" }}>
-      <FormatBar />
+    <div style={{ background: "#4F7B44", borderRadius: "0.75rem", padding: compact ? "1rem" : "1.25rem 1.5rem" }}>
+      <FormatBar compact={compact} />
       <EditableText
-        style={{ ...TA, fontSize: "1rem", color: "white", minHeight: 28, background: "transparent", border: "none" }}
+        style={{
+          ...TA,
+          fontSize: compact ? "0.95rem" : "1rem",
+          color: "white",
+          minHeight: 28,
+          background: "transparent",
+          border: "none",
+        }}
         value={block.text || ""}
         placeholder="Write your conclusion..."
-        onChange={(val) => onChange({ text: val })}
-        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); } }}
+        onChange={(value) => onChange({ text: value })}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            document.execCommand("insertLineBreak");
+          }
+        }}
       />
     </div>
   );
 }
 
-function Block({ block, index, total, onChange, onDelete, onMove }) {
+function Block({ block, index, total, onChange, onDelete, onMove, compact = false }) {
   const [hovered, setHovered] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false);
   const typeButtonRef = useRef(null);
   const typeMenuRef = useRef(null);
   const meta = BLOCK_META.find((item) => item.type === block.type) || BLOCK_META[0];
-  const controlsVisible = hovered || typeOpen;
+  const controlsVisible = compact || hovered || typeOpen;
 
   useEffect(() => {
     if (!typeOpen) return undefined;
@@ -662,50 +749,66 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
   function renderContent() {
     switch (block.type) {
       case "paragraph":
-        return <ParagraphBlock block={block} onChange={onChange} />;
+        return <ParagraphBlock block={block} onChange={onChange} compact={compact} />;
       case "heading":
-        return <HeadingBlock block={block} onChange={onChange} level={2} />;
+        return <HeadingBlock block={block} onChange={onChange} level={2} compact={compact} />;
       case "subheading":
-        return <HeadingBlock block={block} onChange={onChange} level={3} />;
+        return <HeadingBlock block={block} onChange={onChange} level={3} compact={compact} />;
       case "image":
-        return <ImageBlock block={block} onChange={onChange} />;
+        return <ImageBlock block={block} onChange={onChange} compact={compact} />;
       case "quote":
-        return <QuoteBlock block={block} onChange={onChange} />;
+        return <QuoteBlock block={block} onChange={onChange} compact={compact} />;
       case "bullets":
-        return <ListBlock block={block} onChange={onChange} numbered={false} />;
+        return <ListBlock block={block} onChange={onChange} compact={compact} />;
       case "numbered":
-        return <ListBlock block={block} onChange={onChange} numbered />;
+        return <ListBlock block={block} onChange={onChange} numbered compact={compact} />;
       case "callout":
-        return <CalloutBlock block={block} onChange={onChange} />;
+        return <CalloutBlock block={block} onChange={onChange} compact={compact} />;
       case "divider":
         return <DividerBlock />;
       case "conclusion":
-        return <ConclusionBlock block={block} onChange={onChange} />;
+        return <ConclusionBlock block={block} onChange={onChange} compact={compact} />;
       default:
-        return <ParagraphBlock block={block} onChange={onChange} />;
+        return <ParagraphBlock block={block} onChange={onChange} compact={compact} />;
     }
   }
 
   return (
     <div
-      style={{ position: "relative", marginBottom: "0.35rem", paddingLeft: 116 }}
+      style={{
+        position: "relative",
+        marginBottom: compact ? "0.75rem" : "0.35rem",
+        paddingLeft: compact ? 0 : 116,
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       <div
-        style={{
-          position: "absolute",
-          left: 8,
-          top: 8,
-          width: 100,
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
-          opacity: controlsVisible ? 1 : 0,
-          pointerEvents: controlsVisible ? "auto" : "none",
-          transition: "opacity 150ms ease",
-          zIndex: 100,
-        }}
+        style={
+          compact
+            ? {
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "6px",
+                marginBottom: "0.5rem",
+                opacity: 1,
+                zIndex: 100,
+              }
+            : {
+                position: "absolute",
+                left: 8,
+                top: 8,
+                width: 100,
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                opacity: controlsVisible ? 1 : 0,
+                pointerEvents: controlsVisible ? "auto" : "none",
+                transition: "opacity 150ms ease",
+                zIndex: 100,
+              }
+        }
       >
         <div style={{ position: "relative" }}>
           <button
@@ -714,17 +817,19 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
             title="Change block type"
             onClick={() => setTypeOpen((value) => !value)}
             style={{
-              padding: "3px 5px",
-              borderRadius: 5,
+              padding: compact ? "6px 8px" : "3px 5px",
+              borderRadius: 6,
               border: "1px solid #E5E7EB",
               background: "white",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               color: "#6B7280",
+              minWidth: compact ? 36 : "auto",
             }}
           >
-            <meta.icon size={11} />
+            <meta.icon size={12} />
           </button>
           {typeOpen && (
             <div
@@ -738,7 +843,8 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
                 borderRadius: "0.5rem",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                 zIndex: 9999,
-                minWidth: 160,
+                minWidth: compact ? 180 : 160,
+                maxWidth: compact ? "calc(100vw - 48px)" : 220,
                 padding: "0.25rem",
                 maxHeight: "min(320px, 60vh)",
                 overflowY: "auto",
@@ -757,7 +863,7 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
                     alignItems: "center",
                     gap: "0.5rem",
                     width: "100%",
-                    padding: "0.4rem 0.625rem",
+                    padding: compact ? "0.55rem 0.625rem" : "0.4rem 0.625rem",
                     background: block.type === item.type ? "#F0FDF4" : "transparent",
                     border: "none",
                     borderRadius: "0.375rem",
@@ -780,16 +886,16 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
           onClick={() => onMove("up")}
           disabled={index === 0}
           style={{
-            padding: 3,
+            padding: compact ? 6 : 3,
             border: "1px solid #E5E7EB",
-            borderRadius: 4,
+            borderRadius: 6,
             background: "white",
             cursor: index === 0 ? "not-allowed" : "pointer",
             color: "#9CA3AF",
             opacity: index === 0 ? 0.4 : 1,
           }}
         >
-          <ChevronUp size={11} />
+          <ChevronUp size={12} />
         </button>
 
         <button
@@ -797,31 +903,31 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
           onClick={() => onMove("down")}
           disabled={index === total - 1}
           style={{
-            padding: 3,
+            padding: compact ? 6 : 3,
             border: "1px solid #E5E7EB",
-            borderRadius: 4,
+            borderRadius: 6,
             background: "white",
             cursor: index === total - 1 ? "not-allowed" : "pointer",
             color: "#9CA3AF",
             opacity: index === total - 1 ? 0.4 : 1,
           }}
         >
-          <ChevronDown size={11} />
+          <ChevronDown size={12} />
         </button>
 
         <button
           type="button"
           onClick={onDelete}
           style={{
-            padding: 3,
+            padding: compact ? 6 : 3,
             border: "1px solid #FECACA",
-            borderRadius: 4,
+            borderRadius: 6,
             background: "white",
             cursor: "pointer",
             color: "#EF4444",
           }}
         >
-          <Trash2 size={11} />
+          <Trash2 size={12} />
         </button>
       </div>
 
@@ -829,8 +935,8 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
         style={{
           position: "relative",
           zIndex: controlsVisible ? 10 : 1,
-          padding: "0.625rem 0.75rem",
-          borderRadius: "0.5rem",
+          padding: compact ? "0.875rem" : "0.625rem 0.75rem",
+          borderRadius: "0.75rem",
           border: "1px solid",
           borderColor: controlsVisible ? "#D1FAE5" : "transparent",
           background: controlsVisible ? "#FAFFFE" : "transparent",
@@ -844,6 +950,7 @@ function Block({ block, index, total, onChange, onDelete, onMove }) {
 }
 
 export default function RichEditor({ blocks, onChange }) {
+  const compact = useMediaQuery("(hover: none), (max-width: 1023px)");
   const safeBlocks = Array.isArray(blocks) && blocks.length > 0 ? blocks : [makeBlock("paragraph")];
 
   const update = useCallback(
@@ -890,13 +997,14 @@ export default function RichEditor({ blocks, onChange }) {
           block={block}
           index={index}
           total={safeBlocks.length}
+          compact={compact}
           onChange={(patch) => update(block.id, patch)}
           onDelete={() => remove(block.id)}
           onMove={(direction) => move(block.id, direction)}
         />
       ))}
-      <div style={{ marginTop: "0.75rem", marginLeft: 116 }}>
-        <AddBlockMenu onAdd={addBlock} />
+      <div style={{ marginTop: "0.75rem", marginLeft: compact ? 0 : 116 }}>
+        <AddBlockMenu onAdd={addBlock} compact={compact} />
       </div>
     </div>
   );
