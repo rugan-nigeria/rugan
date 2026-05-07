@@ -24,7 +24,7 @@ const PROGRAMS = [
     title: "Excellence Awards",
     description:
       "Recognising and rewarding outstanding academic performance among rural secondary school girls to motivate excellence and retention.",
-    image: "/images/programs/card-3.jpg",
+    image: '/images/programs/excellence-award/gallery-1.jpg',
   },
   {
     slug: "the-rise-project",
@@ -38,7 +38,7 @@ const PROGRAMS = [
     title: "Rural-to-Global Programme",
     description:
       "Highlighting success stories and providing mentorship to help rural girls dream bigger and access global opportunities.",
-    image: "/images/programs/card-5.jpg",
+    image: "/images/programs/rural-to-global/gallery-5.jpg",
   },
 ];
 

@@ -34,14 +34,14 @@ export default function CTABanner({ title, subtitle, buttons = [], variant = 'ct
         {buttons.length > 0 && (
           <motion.div
             variants={fadeUp}
-            className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4"
+            className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4"
           >
             {buttons.map((btn, i) => {
               const buttonProps = {
                 key: i,
                 variant: btn.variant || 'primary',
                 size: 'lg',
-                className: 'w-full sm:w-auto sm:min-w-[190px]',
+                className: 'w-auto min-w-[190px]',
               }
 
               if (btn.to) {
