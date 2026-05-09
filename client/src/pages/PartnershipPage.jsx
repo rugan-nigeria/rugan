@@ -153,6 +153,7 @@ export default function PartnershipPage() {
     {
       logo: "/images/partners/Ellipse 3.png",
       name: "Grandstand Imagery",
+      imageClassName: "scale-y-[-1]",
     },
   ];
 

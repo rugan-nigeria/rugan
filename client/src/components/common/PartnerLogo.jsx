@@ -11,11 +11,11 @@ import { cn } from '@/lib/cn'
  *   name — organization name
  *   url  — optional link
  */
-export default function PartnerLogo({ logo, name, url, className }) {
+export default function PartnerLogo({ logo, name, url, className, imageClassName }) {
   const content = (
     <div className={cn('flex flex-col items-center gap-4', className)}>
       <div className="w-32 h-32 rounded-full overflow-hidden bg-white shadow-card flex items-center justify-center">
-        <img loading="lazy" src={logo} alt={name} className="w-full h-full object-cover" />
+        <img loading="lazy" src={logo} alt={name} className={cn('w-full h-full object-cover', imageClassName)} />
       </div>
       <p className="text-white font-semibold text-center text-body-sm">{name}</p>
     </div>

@@ -16,7 +16,7 @@ import VolunteerForm from "@/components/forms/VolunteerForm";
 /* ── Who Can Volunteer ── */
 const WHO = [
   { label: "Students & Young Professionals" },
-  { label: "Educators & Outreach" },
+  { label: "Educators for Outreaches" },
   { label: "Community Advocates" },
   { label: "Committed Individuals" },
 ];
