@@ -36,7 +36,7 @@ export default function HomePage() {
       title: "Excellence Awards",
       description:
         "Recognises and rewards outstanding academic performance among rural secondary school girls to motivate excellence.",
-      image: "/images/programs/card-3.jpg",
+      image: '/images/programs/excellence-award/gallery-3.jpg',
       to: "/programmes/excellence-award-project",
     },
     {
@@ -50,7 +50,7 @@ export default function HomePage() {
       title: "Rural-to-Global Programme",
       description:
         "Highlights real-life stories of women who rose from rural backgrounds, while proving mentorship, skill training, and exposure pathways.",
-      image: "/images/programs/card-5.jpg",
+      image: '/images/programs/rural-to-global/gallery-1.jpg',
       to: "/programmes/rural-to-global-programme",
     },
   ];
@@ -153,7 +153,7 @@ export default function HomePage() {
       {/* HERO */}
       <PageHeroBanner
         title={
-          <span className="block max-w-[700px] text-[clamp(1.75rem,8vw,3rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-white sm:leading-[1.08] sm:tracking-[-0.04em]">
+          <span className="block max-w-[700px] text-[clamp(1.75rem,8vw,3rem)] font-semibold leading-[1.14] tracking-[-0.03em] text-white sm:leading-[1.18] sm:tracking-[-0.04em]">
             Empowering Rural Girls <br />
             to Become Tomorrow's <br />
             Leaders
@@ -167,13 +167,13 @@ export default function HomePage() {
         backgroundImage="/images/homepage/Hero.jpg"
         className="min-h-[560px] md:min-h-[620px] lg:min-h-[658px]"
       >
-        <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="flex flex-col items-start gap-4 sm:flex-row">
           <Button
             as={Link}
             to="/donate"
             variant="primary"
             size="lg"
-            className="w-full sm:min-w-[200px] sm:w-auto"
+            className="w-auto min-w-[200px]"
           >
             Make a Donation
           </Button>
@@ -183,7 +183,7 @@ export default function HomePage() {
             to="/volunteers"
             variant="volunteer"
             size="lg"
-            className="w-full sm:min-w-[200px] sm:w-auto"
+            className="w-auto min-w-[200px]"
           >
             Volunteer with Us
           </Button>

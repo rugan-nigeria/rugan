@@ -101,7 +101,7 @@ const PROGRAMS = {
   'rural-to-global-programme': {
     title:           'Rural to Global Programme',
     subtitle:        'Opportunity Access, Skills Development, Mentorship, and Global Citizenship',
-    heroImage:       '/images/programs/rural-to-global/hero.jpg',
+    heroImage:       '/images/programs/rural-to-global/gallery-4.jpg',
     overview:        'The Rural to Global Programme is a transformational initiative designed to bridge the gap between rural disadvantage and global opportunity. It operates through three interconnected pathways: Rural to Global Spotlight, Rural to Global Fellowship, and the Rural to Global Bootcamp. Together, these pathways identify, celebrate, and equip young people from underserved rural communities to overcome structural barriers and access opportunities at national and global levels.',
     activities: [
       'Rural to Global Spotlight features highlighting rural-to-global success stories',
