@@ -64,6 +64,8 @@ function LoadingState() {
   );
 }
 
+import SEO from "@/components/SEO";
+
 export default function BlogPage() {
   const initialCachedPosts = useRef(getCachedBlogPosts(BLOG_PAGE_LIMIT)).current;
   const [posts, setPosts] = useState(initialCachedPosts);
@@ -102,6 +104,7 @@ export default function BlogPage() {
 
   return (
     <>
+      <SEO title="Blog" description="Updates, insights, and inspiring stories from our work in the field." />
       <PageHeroBanner
         title="News & Stories"
         subtitle="Updates, insights, and inspiring stories from our work in the field"

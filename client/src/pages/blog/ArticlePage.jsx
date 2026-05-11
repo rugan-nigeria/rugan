@@ -16,6 +16,7 @@ import { resolveApiAssetUrl } from "@/lib/api";
 import api from "@/lib/api";
 import { formatPostDate, getPostAuthorName, getPostImage } from "@/lib/blog";
 import { fadeIn, fadeUp, staggerContainer } from "@/lib/motion";
+import SEO from "@/components/SEO";
 
 function readingTime(content) {
   if (typeof content === "string") {
@@ -503,19 +504,6 @@ export default function ArticlePage() {
 
   const minutes = article ? readingTime(article.content) : 0;
 
-  useEffect(() => {
-    if (!article?.title) {
-      return undefined;
-    }
-
-    const previousTitle = document.title;
-    document.title = `${article.title} | RUGAN`;
-
-    return () => {
-      document.title = previousTitle;
-    };
-  }, [article]);
-
   if (loading) {
     return (
       <div className="container-rugan section-padding text-center">
@@ -539,6 +527,13 @@ export default function ArticlePage() {
 
   return (
     <>
+      <SEO 
+        title={article.title} 
+        description={article.excerpt || `${article.title} - Read more on RUGAN Blog`} 
+        image={getPostImage(article)} 
+        type="article"
+        author={getPostAuthorName(article)}
+      />
       <section style={{ position: "relative", minHeight: "340px", overflow: "hidden" }}>
         <img
           src={getPostImage(article)}

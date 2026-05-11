@@ -78,10 +78,13 @@ function WhyCard({ icon: Icon, title, description }) {
   );
 }
 
+import SEO from "@/components/SEO";
+
 /* ── Page ── */
 export default function DonationPage() {
   return (
     <>
+      <SEO title="Donate" description="Your donation directly empowers girls and transforms communities. Make a difference today." />
       {/* Hero — primary green, heart icon, centered */}
       <section
         className="py-12 sm:py-14"

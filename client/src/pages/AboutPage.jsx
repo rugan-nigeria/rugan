@@ -425,10 +425,13 @@ function AnimatedTimeline({ items }) {
   );
 }
 
+import SEO from "@/components/SEO";
+
 /* ── Page ── */
 export default function AboutPage() {
   return (
     <>
+      <SEO title="About Us" description="Learn about the history, focus areas, and guiding principles behind RUGAN." />
       {/* Founder Section */}
       <section className="section-padding">
         <div className="container-rugan">

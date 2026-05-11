@@ -5,6 +5,7 @@ import ProgramCard from "../components/common/ProgramCard";
 import CTABanner from "../components/common/CTABanner";
 import ChecklistItem from "../components/common/ChecklistItem";
 import AnimatedCount from "../components/common/AnimatedCount";
+import SEO from "../components/SEO";
 import {
   Target,
   TrendingUp,
@@ -148,6 +149,7 @@ export default function HomePage() {
 
   return (
     <div>
+      <SEO />
       {/* HERO */}
       <PageHeroBanner
         title={

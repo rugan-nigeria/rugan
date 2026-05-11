@@ -362,12 +362,15 @@ function FAQItem({ question, answer, open, onToggle }) {
   );
 }
 
+import SEO from "@/components/SEO";
+
 /* ── Page ── */
 export default function VolunteerPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   return (
     <>
+      <SEO title="Volunteer" description="Join our team of change-makers. Volunteers are essential to RUGAN’s mission, delivering education, mentorship, and hope to girls." />
       {/* Hero */}
       <PageHeroBanner
         title="Join Our Team of Change-Makers"

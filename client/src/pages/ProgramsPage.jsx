@@ -42,9 +42,12 @@ const PROGRAMS = [
   },
 ];
 
+import SEO from "@/components/SEO";
+
 export default function ProgramsPage() {
   return (
     <>
+      <SEO title="Our Programmes" description="Comprehensive initiatives designed to empower girl-children and create lasting change in communities." />
       <PageHeroBanner
         title="Our Programmes"
         subtitle="Comprehensive initiatives designed to empower girl-children and create lasting change in communities"
