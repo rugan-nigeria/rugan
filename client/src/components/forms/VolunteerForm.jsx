@@ -33,10 +33,10 @@ export default function VolunteerForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }} noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
 
       {/* First Name + Last Name */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="form-label">First Name</label>
           <input {...register('firstName')} className="form-input" placeholder="Your first name" />
@@ -50,7 +50,7 @@ export default function VolunteerForm() {
       </div>
 
       {/* Email + WhatsApp */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="form-label">Email Address</label>
           <input {...register('email')} type="email" className="form-input" placeholder="your@email.com" />

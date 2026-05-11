@@ -101,7 +101,7 @@ const PROGRAMS = {
   'rural-to-global-programme': {
     title:           'Rural to Global Programme',
     subtitle:        'Opportunity Access, Skills Development, Mentorship, and Global Citizenship',
-    heroImage:       '/images/programs/rural-to-global/hero.jpg',
+    heroImage:       '/images/programs/rural-to-global/gallery-4.jpg',
     overview:        'The Rural to Global Programme is a transformational initiative designed to bridge the gap between rural disadvantage and global opportunity. It operates through three interconnected pathways: Rural to Global Spotlight, Rural to Global Fellowship, and the Rural to Global Bootcamp. Together, these pathways identify, celebrate, and equip young people from underserved rural communities to overcome structural barriers and access opportunities at national and global levels.',
     activities: [
       'Rural to Global Spotlight features highlighting rural-to-global success stories',
@@ -214,8 +214,9 @@ export default function ProgramDetailPage() {
 
       {/* Programme Overview */}
       <section className="section-padding" style={{ background: '#EBEBEB' }}>
-        <div className="container-rugan" style={{ maxWidth: '780px' }}>
-          <motion.h2
+        <div className="container-rugan">
+          <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+            <motion.h2
             variants={fadeUp}
             initial='hidden'
             whileInView='visible'
@@ -230,7 +231,7 @@ export default function ProgramDetailPage() {
           >
             Programme Overview
           </motion.h2>
-          <motion.p
+            <motion.p
             variants={fadeUp}
             initial='hidden'
             whileInView='visible'
@@ -241,9 +242,10 @@ export default function ProgramDetailPage() {
               lineHeight: 1.75,
               textAlign: 'left',
             }}
-          >
-            {programme.overview}
-          </motion.p>
+            >
+              {programme.overview}
+            </motion.p>
+          </div>
         </div>
       </section>
 
@@ -252,13 +254,7 @@ export default function ProgramDetailPage() {
         <div className="container-rugan">
           <SectionHeader title="Key Activities" />
           <motion.div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, minmax(0, 636px))',
-              gap: '0.875rem',
-              justifyContent: 'center',
-              alignItems: 'stretch',
-            }}
+            className="mx-auto grid max-w-[1272px] grid-cols-1 items-stretch gap-4 md:grid-cols-2"
             variants={staggerContainer}
             initial='hidden'
             whileInView='visible'
@@ -279,13 +275,7 @@ export default function ProgramDetailPage() {
               title="Three Interconnected Pathways"
               subtitle="The Rural to Global Programme operates through three complementary pathways, each targeting different stages of the journey from rural communities to global opportunities."
             />
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '1.25rem',
-              }}
-            >
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-5">
               {programme.pathways.map((pathway, i) => (
                 <PathwayCard key={i} {...pathway} />
               ))}
@@ -298,7 +288,7 @@ export default function ProgramDetailPage() {
       <section className="section-padding" style={{ background: '#E1EDDE' }}>
         <div className="container-rugan">
           <SectionHeader title="Programme Gallery" />
-          <motion.div className="grid grid-cols-2 md:grid-cols-3 gap-4" variants={staggerContainer} initial='hidden' whileInView='visible' viewport={viewportOnce}>
+          <motion.div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3" variants={staggerContainer} initial='hidden' whileInView='visible' viewport={viewportOnce}>
             {programme.gallery.map((img, i) => (
               <motion.div key={i} variants={scaleIn} className="aspect-square rounded-2xl overflow-hidden">
                 <img

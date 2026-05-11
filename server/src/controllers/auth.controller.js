@@ -31,6 +31,18 @@ export async function getMe(req, res) {
   res.json({ success: true, user: req.user })
 }
 
+export async function getUsers(_req, res, next) {
+  try {
+    const users = await User.find({})
+      .sort({ createdAt: -1 })
+      .select('name email role isActive createdAt')
+
+    res.json({ success: true, data: users, total: users.length })
+  } catch (err) {
+    next(err)
+  }
+}
+
 export async function register(req, res, next) {
   try {
     const { name, email, password, role } = req.body
@@ -46,5 +58,40 @@ export async function register(req, res, next) {
     })
   } catch (err) {
     next(err)
+  }
+}
+
+export async function updateUser(req, res, next) {
+  try {
+    const { name, email, password, role, isActive } = req.body;
+    const user = await User.findById(req.params.id);
+    
+    if (!user) throw new AppError('User not found', 404);
+
+    if (email && email !== user.email) {
+      const exists = await User.findOne({ email });
+      if (exists) throw new AppError('Email already in use', 400);
+      user.email = email;
+    }
+
+    if (name) user.name = name;
+    if (role) user.role = role;
+    if (typeof isActive === 'boolean') user.isActive = isActive;
+    if (password) user.password = password; // The pre-save hook handles hashing
+
+    await user.save();
+
+    res.json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+      }
+    });
+  } catch (err) {
+    next(err);
   }
 }

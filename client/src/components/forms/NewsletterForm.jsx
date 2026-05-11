@@ -14,8 +14,8 @@ export default function NewsletterForm() {
       await api.post('/newsletter/subscribe', { email })
       toast.success('Subscribed! Thank you for joining us.')
       setEmail('')
-    } catch {
-      toast.error('Could not subscribe. Please try again.')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Could not subscribe. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -24,14 +24,7 @@ export default function NewsletterForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      style={{
-        display: 'flex',
-        gap: '0.75rem',
-        maxWidth: '480px',
-        margin: '0 auto',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-      }}
+      className="mx-auto flex max-w-[480px] flex-col gap-3 sm:flex-row sm:items-center"
     >
       <input
         type="email"
@@ -41,7 +34,7 @@ export default function NewsletterForm() {
         placeholder="Enter your email"
         style={{
           flex: 1,
-          minWidth: '220px',
+          minWidth: 0,
           padding: '0.75rem 1rem',
           borderRadius: '0.5rem',
           border: '1.5px solid rgba(255,255,255,0.3)',
@@ -56,6 +49,7 @@ export default function NewsletterForm() {
       <button
         type="submit"
         disabled={loading}
+        className="w-full sm:w-auto"
         style={{
           padding: '0.75rem 1.5rem',
           borderRadius: '0.5rem',

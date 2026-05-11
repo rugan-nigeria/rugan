@@ -32,11 +32,39 @@ export default function CTABanner({ title, subtitle, buttons = [], variant = 'ct
         )}
 
         {buttons.length > 0 && (
-          <motion.div variants={fadeUp} className="flex flex-wrap gap-4 justify-center mt-8">
+          <motion.div
+            variants={fadeUp}
+            className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4"
+          >
             {buttons.map((btn, i) => {
-              if (btn.to) return <Button key={i} as={Link} to={btn.to} variant={btn.variant || 'primary'} size="lg">{btn.label}</Button>
-              if (btn.href) return <Button key={i} as="a" href={btn.href} variant={btn.variant || 'primary'} size="lg">{btn.label}</Button>
-              return <Button key={i} variant={btn.variant || 'primary'} size="lg" onClick={btn.onClick}>{btn.label}</Button>
+              const buttonProps = {
+                key: i,
+                variant: btn.variant || 'primary',
+                size: 'lg',
+                className: 'w-auto min-w-[190px]',
+              }
+
+              if (btn.to) {
+                return (
+                  <Button {...buttonProps} as={Link} to={btn.to}>
+                    {btn.label}
+                  </Button>
+                )
+              }
+
+              if (btn.href) {
+                return (
+                  <Button {...buttonProps} as="a" href={btn.href}>
+                    {btn.label}
+                  </Button>
+                )
+              }
+
+              return (
+                <Button {...buttonProps} onClick={btn.onClick}>
+                  {btn.label}
+                </Button>
+              )
             })}
           </motion.div>
         )}

@@ -57,7 +57,6 @@ const SOCIALS = [
 const mutedWhite = { color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" };
 const contactIconStyle = { color: "var(--color-primary)", flexShrink: 0 };
 
-/* ── WhatsApp SVG logo (official brand icon) ── */
 function WhatsAppIcon({ size = 15 }) {
   return (
     <svg
@@ -78,15 +77,14 @@ export default function Footer() {
     <footer className="section-footer">
       <div className="container-rugan py-14 lg:py-16">
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-12 gap-10"
+          className="grid grid-cols-1 gap-10 md:grid-cols-12"
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
         >
-          {/* Brand */}
           <motion.div variants={fadeUp} className="md:col-span-4">
-            <Link to="/" className="inline-flex items-center gap-2 mb-4">
+            <Link to="/" className="mb-4 inline-flex items-center gap-2">
               <img
                 src="/icons/rugan-logo.jpg"
                 alt="RUGAN"
@@ -96,7 +94,7 @@ export default function Footer() {
                   e.target.style.display = "none";
                 }}
               />
-              <span className="font-bold text-lg tracking-tight text-white">
+              <span className="text-lg font-bold tracking-tight text-white">
                 RUGAN
               </span>
             </Link>
@@ -106,9 +104,8 @@ export default function Footer() {
             </p>
           </motion.div>
 
-          {/* Quick Links */}
           <motion.div variants={fadeUp} className="md:col-span-2">
-            <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wide">
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
               Quick Links
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -117,7 +114,7 @@ export default function Footer() {
                   <Link
                     to={link.to}
                     style={mutedWhite}
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -126,37 +123,35 @@ export default function Footer() {
             </ul>
           </motion.div>
 
-          {/* Programmes */}
           <motion.div variants={fadeUp} className="md:col-span-3">
-            <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wide">
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
               Programmes
             </h4>
             <ul className="flex flex-col gap-2.5">
-              {PROGRAMS.map((p) => (
-                <li key={p.to}>
+              {PROGRAMS.map((program) => (
+                <li key={program.to}>
                   <Link
-                    to={p.to}
+                    to={program.to}
                     style={mutedWhite}
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
-                    {p.label}
+                    {program.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </motion.div>
 
-          {/* Contact Us */}
           <motion.div variants={fadeUp} className="md:col-span-3">
-            <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wide">
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
               Contact Us
             </h4>
-            <ul className="flex flex-col gap-3 mb-6">
+            <ul className="mb-6 flex flex-col gap-3">
               <li>
                 <a
                   href="mailto:rugan.ng@gmail.com"
                   style={mutedWhite}
-                  className="flex items-center gap-2.5 hover:text-white transition-colors"
+                  className="flex items-center gap-2.5 transition-colors hover:text-white"
                 >
                   <Mail size={15} style={contactIconStyle} />
                   <span>rugan.ng@gmail.com</span>
@@ -168,7 +163,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={mutedWhite}
-                  className="flex items-center gap-2.5 hover:text-white transition-colors"
+                  className="flex items-center gap-2.5 transition-colors hover:text-white"
                 >
                   <span style={contactIconStyle}>
                     <WhatsAppIcon size={15} />
@@ -178,7 +173,6 @@ export default function Footer() {
               </li>
             </ul>
 
-            {/* Social Icons */}
             <div className="flex items-center gap-2">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
                 <a
@@ -213,18 +207,17 @@ export default function Footer() {
         </motion.div>
       </div>
 
-      {/* Bottom bar */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <div
-          className="container-rugan py-5 flex flex-col sm:flex-row items-center justify-between gap-3"
+          className="container-rugan flex flex-col items-center justify-between gap-3 py-5 sm:flex-row"
           style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem" }}
         >
-          <p>© {new Date().getFullYear()} RUGAN. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} RUGAN. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <Link to="/privacy" className="hover:text-white transition-colors">
+            <Link to="/privacy" className="transition-colors hover:text-white">
               Privacy Policy
             </Link>
-            <Link to="/terms" className="hover:text-white transition-colors">
+            <Link to="/terms" className="transition-colors hover:text-white">
               Terms of Service
             </Link>
           </div>

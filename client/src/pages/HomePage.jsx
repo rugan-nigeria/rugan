@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import ProgramCard from "../components/common/ProgramCard";
 import CTABanner from "../components/common/CTABanner";
 import ChecklistItem from "../components/common/ChecklistItem";
+import AnimatedCount from "../components/common/AnimatedCount";
 import {
   Target,
   TrendingUp,
@@ -17,39 +18,39 @@ import SectionHeader from "../components/ui/SectionHeader";
 export default function HomePage() {
   const programs = [
     {
-      title: "RUGAN IDGC School Tours",
+      title: "RUGAN IDGC School Tours (International Day of the Girl Child)",
       description:
         "Empowerment sessions in rural secondary schools to build confidence, leadership skills, self-belief and personal development.",
       image: "/images/programs/card-1.jpg",
-      to: "/programs/idgc",
+      to: "/programmes/rugan-idgc-school-tours",
     },
     {
       title: "RUGAN Healthy Period Project",
       description:
         "Provides accurate menstrual and body health education, reduces stigma and distribute sanitary pads and essential resources.",
       image: "/images/programs/card-2.jpg",
-      to: "/programs/period",
+      to: "/programmes/rugan-healthy-period-project",
     },
     {
       title: "Excellence Awards",
       description:
-        "Recognizes and rewards outstanding academic performance among rural secondary school girls to motivate excellence.",
-      image: "/images/programs/card-3.jpg",
-      to: "/programs/awards",
+        "Recognises and rewards outstanding academic performance among rural secondary school girls to motivate excellence.",
+      image: '/images/programs/excellence-award/gallery-3.jpg',
+      to: "/programmes/excellence-award-project",
     },
     {
       title: "The RISE Project",
       description:
         "Provide SS3 girls with accurate information and guidance on life after secondary school, including educational vocational and career pathways.",
       image: "/images/programs/card-4.jpg",
-      to: "/programs/rise",
+      to: "/programmes/the-rise-project",
     },
     {
       title: "Rural-to-Global Programme",
       description:
         "Highlights real-life stories of women who rose from rural backgrounds, while proving mentorship, skill training, and exposure pathways.",
-      image: "/images/programs/card-5.jpg",
-      to: "/programs/global",
+      image: '/images/programs/rural-to-global/gallery-1.jpg',
+      to: "/programmes/rural-to-global-programme",
     },
   ];
 
@@ -57,7 +58,7 @@ export default function HomePage() {
     { title: "4,750+", description: "Girls Reached", icon: Users },
     { title: "20+", description: "Communities Served", icon: MapPin },
     { title: "70+", description: "Active Volunteers", icon: Heart },
-    { title: "20+", description: "Program Delivered", icon: Award },
+    { title: "20+", description: "Programmes Delivered", icon: Award },
     { title: "10+", description: "States in Nigeria", icon: Target },
   ];
 
@@ -78,9 +79,9 @@ export default function HomePage() {
     },
     {
       icon: TrendingUp,
-      title: "Our Vission",
+      title: "Our Vision",
       description:
-        "A world where every rural girl has equal access to opportunities, can realize her full potential, and grows into a global leader who shapes her community and the world with confidence and purpose.",
+        "A world where every rural girl has equal access to opportunities, can realise her full potential, and grows into a global leader who shapes her community and the world with confidence and purpose.",
     },
   ];
 
@@ -94,7 +95,7 @@ export default function HomePage() {
 
     return (
       <div
-        className={`rounded-[20px] p-8 flex flex-col gap-5 min-h-[260px] ${
+        className={`flex min-h-[240px] flex-col gap-4 rounded-[20px] p-6 sm:min-h-[260px] sm:gap-5 sm:p-8 ${
           isFilled
             ? "bg-[#4F7B44] shadow-[0_10px_25px_rgba(0,0,0,0.1)]"
             : "bg-white border border-[#E5E7EB] shadow-[0_4px_10px_rgba(0,0,0,0.05)]"
@@ -134,7 +135,11 @@ export default function HomePage() {
           <Icon size={26} className="text-[#4F7B44]" />
         </div>
 
-        <h2 className="text-[32px] font-bold text-[#4F7B44]">{title}</h2>
+        <AnimatedCount
+          as="h2"
+          value={title}
+          className="text-[32px] font-bold text-[#4F7B44]"
+        />
 
         <p className="text-[15px] text-[#6B7280]">{description}</p>
       </div>
@@ -145,18 +150,28 @@ export default function HomePage() {
     <div>
       {/* HERO */}
       <PageHeroBanner
-        title="Empowering Rural Girls to Become Tomorrow's Leaders"
-        subtitle="Breaking down barriers facing rural girl-children through quality education, life skills, mentorship, and practical resources."
+        title={
+          <span className="block max-w-[700px] text-[clamp(1.75rem,8vw,3rem)] font-semibold leading-[1.14] tracking-[-0.03em] text-white sm:leading-[1.18] sm:tracking-[-0.04em]">
+            Empowering Rural Girls <br />
+            to Become Tomorrow's <br />
+            Leaders
+          </span>
+        }
+        subtitle={
+          <span className="block max-w-[42rem] pb-2 pt-4 text-[clamp(1rem,4vw,1.25rem)] font-normal leading-[1.65] tracking-[-0.02em] text-white sm:py-5 sm:leading-[1.7]">
+            Breaking down barriers facing rural girl-children through quality education, life skills, mentorship, and practical resources.
+          </span>
+        }
         backgroundImage="/images/homepage/Hero.jpg"
-        className="min-h-screen"
+        className="min-h-[560px] md:min-h-[620px] lg:min-h-[658px]"
       >
-        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+        <div className="flex flex-col items-start gap-4 sm:flex-row">
           <Button
             as={Link}
             to="/donate"
             variant="primary"
-            size="sm"
-            className="w-full sm:w-auto"
+            size="lg"
+            className="w-auto min-w-[200px]"
           >
             Make a Donation
           </Button>
@@ -165,8 +180,8 @@ export default function HomePage() {
             as={Link}
             to="/volunteers"
             variant="volunteer"
-            size="sm"
-            className="w-full sm:w-auto"
+            size="lg"
+            className="w-auto min-w-[200px]"
           >
             Volunteer with Us
           </Button>
@@ -175,21 +190,23 @@ export default function HomePage() {
 
       {/* CHALLENGES */}
       <section className="section-padding bg-white">
-        <div className="container-rugan flex flex-col lg:flex-row items-center gap-10 lg:gap-12">
-          <div className="flex-1 max-w-xl w-full">
-            <img
-              src="/images/homepage/rural-girls-with-card.png"
-              alt="Girls education and teaching"
-              className="w-full h-[420px] sm:h-[550px] lg:h-[700px] object-cover rounded-2xl border border-[#e5e5e5] shadow-lg"
-            />
+        <div className="container-rugan flex flex-col items-center justify-between gap-6 sm:gap-8 lg:flex-row lg:gap-10">
+          <div className="w-full max-w-[520px] shrink-0">
+            <div className="aspect-[4/5] overflow-hidden rounded-2xl border border-[#E5E5E5] shadow-lg">
+              <img
+                src="/images/homepage/rural-girls-with-card.png"
+                alt="Girls education and teaching"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
 
-          <div className="flex-1 max-w-xl">
-            <h1 className="font-bold text-2xl md:text-3xl mb-4 leading-tight">
+          <div className="w-full max-w-[560px]">
+            <h1 className="mb-4 text-[clamp(1.75rem,3vw,2.25rem)] font-bold leading-tight text-[#111827]">
               Breaking Down Barriers to Education
             </h1>
 
-            <p className="text-[#555] leading-7 mb-6">
+            <p className="mb-8 text-[#555] leading-7">
               Rural girl-children face persistant barriers to education,
               accurate information, mentorship, and economic empowerment.
               Poverty, gender inequality, early marriage, and limited community
@@ -197,32 +214,42 @@ export default function HomePage() {
               building independent, impactful futures.
             </p>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3.5">
               {challenges.map((challenge, i) => (
-                <ChecklistItem key={i} text={challenge} variant="plain" />
+                <ChecklistItem
+                  key={i}
+                  text={challenge}
+                  variant="plain"
+                  iconColor="#FFFFFF"
+                  iconFill="none"
+                  iconWrapperBg="#E07856"
+                />
               ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* PROGRAMS */}
+      {/* PROGRAMMES */}
       <section className="section-padding">
-        <div className="container-rugan text-center max-w-2xl mx-auto px-6">
+        <div className="container-rugan">
           <SectionHeader
             title="Targeted School-Based Programmes"
-            subtitle="RUGAN delivers comprehensive programs that support rural girls at different stages of their life journey, equipping them with knowledge, confidence, and practical support."
+            subtitle="RUGAN delivers comprehensive programmes that support rural girls at different stages of their life journey, equipping them with knowledge, confidence, and practical support."
+            className="mx-auto max-w-2xl"
           />
-        </div>
 
-        <div className="mt-12 max-w-6xl mx-auto px-6 grid gap-6 md:grid-cols-3">
-          {programs.slice(0, 3).map((program, i) => (
-            <ProgramCard key={i} {...program} variant="overlay" />
-          ))}
+          <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-6">
+            {programs.slice(0, 3).map((program) => (
+              <div key={program.title} className="lg:col-span-2">
+                <ProgramCard {...program} variant="overlay" />
+              </div>
+            ))}
 
-          <div className="md:col-span-3 grid gap-6 md:grid-cols-2">
-            {programs.slice(3, 5).map((program, i) => (
-              <ProgramCard key={i} {...program} variant="overlay" />
+            {programs.slice(3, 5).map((program) => (
+              <div key={program.title} className="lg:col-span-3">
+                <ProgramCard {...program} variant="overlay" />
+              </div>
             ))}
           </div>
         </div>
@@ -233,10 +260,22 @@ export default function HomePage() {
         <div className="container-rugan">
           <SectionHeader
             title="Our Impact Across Nigeria"
-            subtitle="Serving rural and underserved communities with targeted programs that create lasting grassroots impact"
+            subtitle="Serving rural and underserved communities with targeted programmes that create lasting grassroots impact"
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mt-10">
+          <div className="lg:hidden">
+            <div className="mx-auto grid max-w-3xl grid-cols-2 gap-4 sm:gap-6">
+              {Impact.slice(0, 4).map((impact, i) => (
+                <StatCard key={i} {...impact} />
+              ))}
+            </div>
+
+            <div className="mx-auto mt-4 w-full max-w-[280px] sm:mt-6">
+              <StatCard {...Impact[4]} />
+            </div>
+          </div>
+
+          <div className="mx-auto hidden max-w-6xl gap-6 lg:grid lg:grid-cols-5">
             {Impact.map((impact, i) => (
               <StatCard key={i} {...impact} />
             ))}
@@ -245,8 +284,8 @@ export default function HomePage() {
       </section>
 
       {/* MISSION */}
-      <section className="section-padding bg-gray-50 px-6">
-        <div className="container-rugan grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <section className="section-padding bg-gray-50">
+        <div className="container-rugan grid grid-cols-1 gap-6 lg:grid-cols-2">
           {Mission.map((item, i) => (
             <IconFeatureCard
               key={i}
@@ -259,13 +298,13 @@ export default function HomePage() {
 
       {/* ACROSS NIGERIA */}
       <section className="section-padding bg-white">
-        <div className="container-rugan flex flex-col lg:flex-row items-center gap-12">
-          <div className="flex-1 max-w-xl">
-            <h1 className="font-bold text-3xl md:text-4xl mb-4">
+        <div className="container-rugan flex flex-col items-center justify-between gap-6 sm:gap-8 lg:flex-row lg:gap-10">
+          <div className="w-full max-w-[560px]">
+            <h1 className="mb-4 text-[clamp(1.75rem,3vw,2.25rem)] font-bold leading-tight text-[#111827]">
               Serving Rural Nigeria
             </h1>
 
-            <p className="text-[#555] leading-7 mb-6">
+            <p className="mb-8 text-[#555] leading-7">
               RUGAN currently serves rural and underserved communities, with a
               focus on rural areas in Nigeria, working directly with
               girl-children, women, families, and community stakeholders to
@@ -273,24 +312,30 @@ export default function HomePage() {
             </p>
 
             <div className="space-y-5">
-              <div className="flex gap-3">
-                <div className="bg-[#E6F4EA] p-2 rounded-lg">
+              <div className="flex gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E6F4EA]">
                   <MapPin size={20} className="text-green-600" />
                 </div>
 
                 <div>
-                  <h3 className="font-semibold">10+ States Reached</h3>
+                  <h3 className="font-semibold">
+                    <AnimatedCount value="10+" className="inline-block" />{" "}
+                    States Reached
+                  </h3>
                   <p className="text-sm text-[#777]">Across rural Nigeria</p>
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <div className="bg-[#E6F4EA] p-2 rounded-lg">
+              <div className="flex gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E6F4EA]">
                   <Users size={20} className="text-green-600" />
                 </div>
 
                 <div>
-                  <h3 className="font-semibold">20+ Communities</h3>
+                  <h3 className="font-semibold">
+                    <AnimatedCount value="20+" className="inline-block" />{" "}
+                    Communities
+                  </h3>
                   <p className="text-sm text-[#777]">
                     Direct grassroots engagement
                   </p>
@@ -299,12 +344,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex-1 max-w-xl w-full h-[350px] sm:h-[450px] lg:h-[500px]">
-            <img
-              src="/images/homepage/group-of-girls.png"
-              alt="Girls education and teaching"
-              className="w-full h-full object-cover rounded-2xl border border-[#e5e5e5] shadow-lg"
-            />
+          <div className="w-full max-w-[520px] shrink-0">
+            <div className="h-[260px] w-full overflow-hidden rounded-2xl border border-[#E5E5E5] shadow-lg sm:h-[320px] lg:h-[430px]">
+              <img
+                src="/images/homepage/group-of-girls.jpg"
+                alt="Girls education and teaching"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>

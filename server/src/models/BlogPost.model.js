@@ -41,6 +41,7 @@ const blogPostSchema = new mongoose.Schema(
       default: "draft",
     },
     publishedAt: { type: Date },
+    newsletterSentAt: { type: Date },
     views: { type: Number, default: 0 },
   },
   { timestamps: true },
@@ -54,16 +55,15 @@ blogPostSchema.pre("validate", function (next) {
 });
 
 blogPostSchema.pre("save", function (next) {
-  if (
-    this.isModified("status") &&
-    this.status === "published" &&
-    !this.publishedAt
-  ) {
+  if (this.status === "published" && !this.publishedAt) {
     this.publishedAt = new Date();
   }
   next();
 });
 
 blogPostSchema.index({ status: 1, publishedAt: -1 });
+blogPostSchema.index({ tags: 1 });
+// Full-text search index for admin search queries
+blogPostSchema.index({ title: "text", excerpt: "text" });
 
 export default mongoose.model("BlogPost", blogPostSchema);

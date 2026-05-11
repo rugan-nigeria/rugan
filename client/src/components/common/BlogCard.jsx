@@ -2,12 +2,13 @@ import { motion } from 'framer-motion'
 import { scaleIn, viewportOnce } from '@/lib/motion'
 import { Link } from 'react-router'
 import { ArrowRight, User, Calendar } from 'lucide-react'
+import OptimizedImage from '@/components/common/OptimizedImage'
 
 /**
  * BlogCard
  * Used on: Blog listing page
  */
-export default function BlogCard({ image, title, excerpt, author, date, to, className = '' }) {
+export default function BlogCard({ image, title, excerpt, author, date, to, tags, className = '' }) {
   return (
     <div
       className={className}
@@ -25,15 +26,12 @@ export default function BlogCard({ image, title, excerpt, author, date, to, clas
       onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none' }}
     >
       {/* Image */}
-      <div style={{ aspectRatio: '16/9', overflow: 'hidden', flexShrink: 0 }}>
-        <img
-          src={image}
-          alt={title}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 500ms ease' }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.04)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)' }}
-        />
-      </div>
+      <OptimizedImage
+        src={image}
+        alt={title}
+        aspectRatio="16/9"
+        style={{ flexShrink: 0 }}
+      />
 
       {/* Content */}
       <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -45,6 +43,17 @@ export default function BlogCard({ image, title, excerpt, author, date, to, clas
         }}>
           {title}
         </h3>
+
+        {/* Tags */}
+        {Array.isArray(tags) && tags.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '0.75rem' }}>
+            {tags.map(tag => (
+              <span key={tag} style={{ padding: '2px 10px', borderRadius: '9999px', background: '#E8F2E6', color: '#3d6235', fontSize: '0.75rem', fontWeight: 500 }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Excerpt grows to fill available space, pushing meta + link to bottom */}
         {excerpt && (
@@ -60,7 +69,7 @@ export default function BlogCard({ image, title, excerpt, author, date, to, clas
 
         {/* Meta */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '1rem',
+          display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap',
           fontSize: '0.8125rem', color: '#9CA3AF',
           marginBottom: '1rem',
         }}>

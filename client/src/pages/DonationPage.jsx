@@ -84,9 +84,9 @@ export default function DonationPage() {
     <>
       {/* Hero — primary green, heart icon, centered */}
       <section
+        className="py-12 sm:py-14"
         style={{
           background: "linear-gradient(to bottom, #4F7B44, #3a5f32)",
-          padding: "3.5rem 0",
           textAlign: "center",
         }}
       >
@@ -143,11 +143,7 @@ export default function DonationPage() {
             subtitle="Your contribution directly enables:"
           />
           <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "1.25rem",
-            }}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -175,13 +171,15 @@ export default function DonationPage() {
         className="section-padding"
         style={{ background: "#F0FDF4" }}
       >
-        <div className="container-rugan" style={{ maxWidth: "848px" }}>
+        <div className="container-rugan">
           <div
             style={{
+              maxWidth: "848px",
+              margin: "0 auto",
               background: "#E1EDDE",
               border: "1px solid #F3E8FF",
               borderRadius: "1rem",
-              padding: "2rem",
+              padding: "clamp(1.25rem, 4vw, 2rem)",
             }}
           >
             {/* Header — centered */}
@@ -207,14 +205,7 @@ export default function DonationPage() {
             </div>
 
             {/* Bank Name + Account Name */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1rem",
-                marginBottom: "1rem",
-              }}
-            >
+            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
                 style={{
                   background: "white",
@@ -239,7 +230,7 @@ export default function DonationPage() {
                     color: "#111827",
                   }}
                 >
-                  First Bank of Nigeria
+                  Moniepoint MFB
                 </p>
               </div>
               <div
@@ -266,7 +257,7 @@ export default function DonationPage() {
                     color: "#111827",
                   }}
                 >
-                  RUGAN NGO
+                  The Rural Girl Child Advancement Network
                 </p>
               </div>
             </div>
@@ -298,7 +289,7 @@ export default function DonationPage() {
                   letterSpacing: "0.05em",
                 }}
               >
-                2281542767
+                8143158700
               </p>
             </div>
 

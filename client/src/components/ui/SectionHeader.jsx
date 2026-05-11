@@ -8,7 +8,7 @@ export default function SectionHeader({ title, subtitle, align = 'center', theme
   return (
     <motion.div
       className={className}
-      style={{ textAlign, marginBottom: '3rem' }}
+      style={{ textAlign, marginBottom: 'clamp(2rem, 6vw, 3rem)' }}
       variants={staggerContainer}
       initial="hidden"
       whileInView="visible"

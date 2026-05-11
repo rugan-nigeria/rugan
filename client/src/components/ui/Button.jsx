@@ -36,7 +36,7 @@ export default function Button({
 
   return (
     <Tag
-      className={cn('btn', variants[variant], sizes[size], className)}
+      className={cn('btn leading-tight text-center', variants[variant], sizes[size], className)}
       {...props}
     >
       {children}

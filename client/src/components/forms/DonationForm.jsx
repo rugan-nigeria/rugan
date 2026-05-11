@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { CreditCard, Building2, AlertTriangle, X, Loader2 } from "lucide-react";
+import { CreditCard, Building2, AlertTriangle, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+
+import api from "@/lib/api";
 
 const PRESET_AMOUNTS = [5000, 10000, 25000, 50000, 100000];
 const PAYMENT_METHODS = [
@@ -32,45 +35,45 @@ export default function DonationForm() {
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [customAmount, setCustomAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [donorName, setDonorName] = useState("");
+  const [donorEmail, setDonorEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   const isCustom = selectedAmount === "custom";
   const finalAmount = isCustom ? customAmount : selectedAmount;
-  const canProceed = finalAmount && paymentMethod;
+  const emailRequired = paymentMethod === "card";
+  const hasValidEmail = /\S+@\S+\.\S+/.test(donorEmail.trim());
+  const canProceed =
+    finalAmount &&
+    paymentMethod &&
+    (!emailRequired || hasValidEmail);
 
   const handleSubmit = async () => {
     if (!canProceed) return;
     setLoading(true);
 
     try {
-      const response = await fetch("/api/donations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: Number(finalAmount),
-          frequency,
-          paymentMethod,
-          donorName: "", // Can add a name field later
-          donorEmail: "", // Can add email field
-        }),
+      const response = await api.post("/donations", {
+        amount: Number(finalAmount),
+        frequency,
+        paymentMethod,
+        donorName: donorName.trim(),
+        donorEmail: donorEmail.trim(),
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         if (paymentMethod === "card") {
           window.location.href = data.data.authorization_url;
         } else {
-          alert(
-            "Donation recorded. Please transfer to the account details shown below.",
-          );
+          toast.success("Donation recorded. Please transfer to the account details shown below.");
         }
       } else {
-        alert("Error: " + data.message);
+        toast.error(data.message || "Could not record donation.");
       }
     } catch (error) {
-      alert("Network error. Please try again.");
+      toast.error(error.response?.data?.message || "Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -78,14 +81,8 @@ export default function DonationForm() {
 
   return (
     <div
-      style={{
-        background: "white",
-        borderRadius: "1rem",
-        boxShadow: "0 2px 20px rgba(0,0,0,0.08)",
-        padding: "2rem",
-        maxWidth: "580px",
-        margin: "0 auto",
-      }}
+      className="mx-auto max-w-[580px] rounded-2xl bg-white p-5 sm:p-8"
+      style={{ boxShadow: "0 2px 20px rgba(0,0,0,0.08)" }}
     >
       <h2
         style={{
@@ -111,16 +108,11 @@ export default function DonationForm() {
         >
           Donation Frequency
         </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "0.75rem",
-          }}
-        >
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {FREQUENCY_OPTIONS.map((opt) => (
             <button
               key={opt.id}
+              type="button"
               onClick={() => setFrequency(opt.id)}
               style={{
                 padding: "0.875rem 1rem",
@@ -166,16 +158,11 @@ export default function DonationForm() {
         >
           Donation Amount (₦)
         </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "0.625rem",
-          }}
-        >
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {PRESET_AMOUNTS.map((amount) => (
             <button
               key={amount}
+              type="button"
               onClick={() => setSelectedAmount(amount)}
               style={{
                 padding: "0.75rem 0.5rem",
@@ -197,6 +184,7 @@ export default function DonationForm() {
             </button>
           ))}
           <button
+            type="button"
             onClick={() => setSelectedAmount("custom")}
             style={{
               padding: "0.75rem 0.5rem",
@@ -245,6 +233,7 @@ export default function DonationForm() {
           {PAYMENT_METHODS.map(({ id, label, sub, icon: Icon }) => (
             <button
               key={id}
+              type="button"
               onClick={() => {
                 setPaymentMethod(id);
                 if (id === "transfer") {
@@ -287,6 +276,51 @@ export default function DonationForm() {
         </div>
       </div>
 
+      <div style={{ marginBottom: "1.5rem" }}>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <p
+              style={{
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                color: "#374151",
+                marginBottom: "0.625rem",
+              }}
+            >
+              Full Name
+            </p>
+            <input
+              type="text"
+              value={donorName}
+              onChange={(e) => setDonorName(e.target.value)}
+              className="form-input"
+              placeholder="Your name"
+            />
+          </div>
+
+          <div>
+            <p
+              style={{
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                color: "#374151",
+                marginBottom: "0.625rem",
+              }}
+            >
+              Email Address {emailRequired ? "*" : ""}
+            </p>
+            <input
+              type="email"
+              value={donorEmail}
+              onChange={(e) => setDonorEmail(e.target.value)}
+              className="form-input"
+              placeholder="you@example.com"
+              required={emailRequired}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* CTA */}
       {!canProceed ? (
         <div
@@ -303,7 +337,9 @@ export default function DonationForm() {
           }}
         >
           <AlertTriangle size={15} />
-          Select an amount to continue
+          {emailRequired
+            ? "Select an amount and enter a valid email to continue"
+            : "Select an amount to continue"}
         </div>
       ) : (
         <button
