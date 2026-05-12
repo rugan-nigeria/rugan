@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
 import PageHeroBanner from "@/components/common/PageHeroBanner";
+import SEO from "@/components/SEO";
 
 export default function LegalPageTemplate({
   title,
@@ -14,6 +15,7 @@ export default function LegalPageTemplate({
 }) {
   return (
     <>
+      <SEO title={title} description={intro} />
       <PageHeroBanner title={title} subtitle={subtitle} centerText />
 
       <section className="section-padding" style={{ background: "#FAFAFA" }}>

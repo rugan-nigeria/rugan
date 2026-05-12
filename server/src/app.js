@@ -19,6 +19,7 @@ import { notFound } from "./middleware/notFound.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
+import sitemapRoutes from "./routes/sitemap.routes.js";
 import volunteerRoutes from "./routes/volunteer.routes.js";
 import partnershipRoutes from "./routes/partnership.routes.js";
 import donationRoutes from "./routes/donation.routes.js";
@@ -131,7 +132,7 @@ app.use("/api/newsletter", formLimiter, newsletterRoutes);
 app.use("/api/contact", formLimiter, contactRoutes);
 app.use("/api/upload", limiter, uploadRoutes);
 app.use("/api/analytics", limiter, analyticsRoutes);
-
+app.use("/sitemap.xml", sitemapRoutes);
 // ── Health check (no rate limit) ─────────────────────────
 app.get("/api/health", (_req, res) =>
   res.json({

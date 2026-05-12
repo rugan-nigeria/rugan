@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
 import { Linkedin, Mail } from "lucide-react";
+import SEO from "@/components/SEO";
 import SectionHeader from "@/components/ui/SectionHeader";
 
 const TEAM = [
@@ -257,6 +258,11 @@ export default function TeamPage() {
 
   return (
     <>
+      <SEO
+        title="Our Team"
+        description="Meet the RUGAN leadership and programme team driving rural girl-child empowerment through education, mentorship, and community transformation."
+        keywords="RUGAN team, NGO leaders, girl child empowerment, education advocacy, nonprofit leadership"
+      />
       <section
         className="py-12 sm:py-16"
         style={{

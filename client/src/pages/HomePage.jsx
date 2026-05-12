@@ -6,14 +6,7 @@ import CTABanner from "../components/common/CTABanner";
 import ChecklistItem from "../components/common/ChecklistItem";
 import AnimatedCount from "../components/common/AnimatedCount";
 import SEO from "../components/SEO";
-import {
-  Target,
-  TrendingUp,
-  Users,
-  MapPin,
-  Heart,
-  Award,
-} from "lucide-react";
+import { Target, TrendingUp, Users, MapPin, Heart, Award } from "lucide-react";
 import SectionHeader from "../components/ui/SectionHeader";
 
 export default function HomePage() {
@@ -36,7 +29,7 @@ export default function HomePage() {
       title: "Excellence Awards",
       description:
         "Recognises and rewards outstanding academic performance among rural secondary school girls to motivate excellence.",
-      image: '/images/programs/excellence-award/gallery-3.jpg',
+      image: "/images/programs/excellence-award/gallery-3.jpg",
       to: "/programmes/excellence-award-project",
     },
     {
@@ -50,7 +43,7 @@ export default function HomePage() {
       title: "Rural-to-Global Programme",
       description:
         "Highlights real-life stories of women who rose from rural backgrounds, while proving mentorship, skill training, and exposure pathways.",
-      image: '/images/programs/rural-to-global/gallery-1.jpg',
+      image: "/images/programs/rural-to-global/gallery-1.jpg",
       to: "/programmes/rural-to-global-programme",
     },
   ];
@@ -149,7 +142,11 @@ export default function HomePage() {
 
   return (
     <div>
-      <SEO />
+      <SEO
+        title="Empowering Rural Girl-Children in Nigeria"
+        description="RUGAN empowers rural girl-children through education, mentorship, menstrual health support, and leadership development across underserved communities."
+        keywords="RUGAN, rural girl empowerment, girls education Nigeria, menstrual health education, girls mentorship"
+      />
       {/* HERO */}
       <PageHeroBanner
         title={
@@ -161,7 +158,8 @@ export default function HomePage() {
         }
         subtitle={
           <span className="block max-w-[42rem] pb-2 pt-4 text-[clamp(1rem,4vw,1.25rem)] font-normal leading-[1.65] tracking-[-0.02em] text-white sm:py-5 sm:leading-[1.7]">
-            Breaking down barriers facing rural girl-children through quality education, life skills, mentorship, and practical resources.
+            Breaking down barriers facing rural girl-children through quality
+            education, life skills, mentorship, and practical resources.
           </span>
         }
         backgroundImage="/images/homepage/Hero.jpg"

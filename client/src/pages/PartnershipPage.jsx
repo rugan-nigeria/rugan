@@ -15,6 +15,7 @@ import {
 
 import PartnershipForm from "../components/forms/PartnershipForm";
 import PartnerLogo from "../components/common/PartnerLogo";
+import SEO from "@/components/SEO";
 import SectionHeader from "../components/ui/SectionHeader";
 
 function DetailGroup({
@@ -76,7 +77,14 @@ function DetailGroup({
   );
 }
 
-function PartnershipItems({ title, description, icon: Icon, details, open, onToggle }) {
+function PartnershipItems({
+  title,
+  description,
+  icon: Icon,
+  details,
+  open,
+  onToggle,
+}) {
   return (
     <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-card">
       <div
@@ -84,7 +92,6 @@ function PartnershipItems({ title, description, icon: Icon, details, open, onTog
           !open ? "hover:bg-[#EAF4EE]" : ""
         }`}
       >
-
         <button
           type="button"
           onClick={onToggle}
@@ -352,6 +359,11 @@ export default function PartnershipPage() {
 
   return (
     <>
+      <SEO
+        title="Partner With RUGAN"
+        description="Partner with RUGAN to support rural girl-child empowerment initiatives, CSR collaborations, and sustainable community impact across Nigeria."
+        keywords="partner with RUGAN, NGO partnership, CSR Nigeria, rural girls empowerment, nonprofit collaboration"
+      />
       {/* HERO */}
       <section
         style={{
@@ -433,7 +445,7 @@ export default function PartnershipPage() {
           </div>
         </div>
       </section>
-      
+
       {/* OUR PARTNERS */}
       <section
         className="section-padding"

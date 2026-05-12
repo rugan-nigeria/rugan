@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -12,7 +12,11 @@
     <title>RUGAN | Empowering Rural Girls</title>
 
     <!-- Preconnect to the production API to reduce first-request latency. -->
-    <link rel="preconnect" href="https://rugan-server.onrender.com" crossorigin />
+    <link
+      rel="preconnect"
+      href="https://rugan-server.onrender.com"
+      crossorigin
+    />
     <link rel="dns-prefetch" href="https://api.brevo.com" />
 
     <!-- Static fallback metadata. Individual article pages are overridden server-side. -->
@@ -24,8 +28,17 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://rugan.org" />
-    <meta property="og:image" content="https://rugan.org/images/homepage/Hero.jpg" />
-    <meta property="og:image:alt" content="RUGAN empowering rural girls in Nigeria" />
+    <meta
+      property="og:image"
+      content="https://rugan.org/images/homepage/Hero.jpg"
+    />
+    <meta
+      property="og:image:alt"
+      content="RUGAN empowering rural girls in Nigeria"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="RUGAN | Empowering Rural Girls" />
@@ -33,7 +46,38 @@
       name="twitter:description"
       content="RUGAN empowers rural girl-children through education, mentorship, and advocacy."
     />
-    <meta name="twitter:image" content="https://rugan.org/images/homepage/Hero.jpg" />
+    <meta
+      name="twitter:image"
+      content="https://rugan.org/images/homepage/Hero.jpg"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="RUGAN empowering rural girls in Nigeria"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <link rel="canonical" href="https://rugan.org" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "NonprofitOrganization",
+            "name": "RUGAN",
+            "url": "https://rugan.org",
+            "logo": "https://rugan.org/icons/rugan-logo.jpg",
+            "description": "RUGAN empowers rural girl-children through education, mentorship, and advocacy."
+          },
+          {
+            "@type": "WebSite",
+            "url": "https://rugan.org",
+            "name": "RUGAN | Empowering Rural Girls",
+            "description": "RUGAN empowers rural girl-children through education, mentorship, and advocacy."
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,17 @@
+# RUGAN NGO - robots.txt
+# Instruct crawlers for public pages and sitemap discovery
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin/login
+Disallow: /node_modules/
+Disallow: /*.json$
+
+Sitemap: https://rugan.org/sitemap.xml
+
+User-agent: Googlebot
+Disallow:
+
+User-agent: Bingbot
+Disallow:
