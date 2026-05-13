@@ -84,7 +84,10 @@ import SEO from "@/components/SEO";
 export default function DonationPage() {
   return (
     <>
-      <SEO title="Donate" description="Your donation directly empowers girls and transforms communities. Make a difference today." />
+      <SEO
+        title="Donate"
+        description="Your donation directly empowers girls and transforms communities. Make a difference today."
+      />
       {/* Hero — primary green, heart icon, centered */}
       <section
         className="py-12 sm:py-14"
@@ -308,10 +311,10 @@ export default function DonationPage() {
               <p style={{ fontSize: "0.875rem", color: "#6B7280" }}>
                 Please send proof of payment to{" "}
                 <a
-                  href="mailto:rugan.ng@gmail.com"
+                  href="mailto:info@rugan.org"
                   style={{ color: "var(--color-primary)", fontWeight: 500 }}
                 >
-                  rugan.ng@gmail.com
+                  info@rugan.org
                 </a>
               </p>
             </div>

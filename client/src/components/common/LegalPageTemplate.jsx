@@ -102,10 +102,10 @@ export default function LegalPageTemplate({
                   >
                     {contactText}{" "}
                     <a
-                      href="mailto:rugan.ng@gmail.com"
+                      href="mailto:info@rugan.org"
                       style={{ color: "var(--color-primary)", fontWeight: 600 }}
                     >
-                      rugan.ng@gmail.com
+                      info@rugan.org
                     </a>
                     .
                   </p>

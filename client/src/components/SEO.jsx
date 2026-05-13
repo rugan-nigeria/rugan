@@ -12,13 +12,17 @@ export default function SEO({
   const siteName = "RUGAN";
   const siteUrl = "https://rugan.org";
   const defaultDescription =
-    "RUGAN empowers rural girl-children through education, mentorship, and advocacy.";
+    "RUGAN (Rural Girl-Child Advancement Network) is a non-profit organization dedicated to empowering rural girl-children through education, mentorship, and advocacy. We strive to create a world where every girl has the opportunity to reach her full potential, regardless of her background or circumstances.";
   const defaultImage = `${siteUrl}/images/homepage/Hero.jpg`;
 
   const pageTitle = title
     ? `${title} | ${siteName}`
     : `${siteName} | Empowering Rural Girls`;
   const pageDescription = description || defaultDescription;
+  const pageDescriptionTrimmed =
+    pageDescription.length > 200
+      ? `${pageDescription.slice(0, 197).trimEnd()}…`
+      : pageDescription;
   const pageUrl = url ? `${siteUrl}${url}` : siteUrl;
   const pageImage = image || defaultImage;
   const jsonLd = {
@@ -44,7 +48,7 @@ export default function SEO({
     <Helmet>
       {/* Standard Meta Tags */}
       <title>{pageTitle}</title>
-      <meta name="description" content={pageDescription} />
+      <meta name="description" content={pageDescriptionTrimmed} />
       <meta name="robots" content="index, follow" />
       <meta name="googlebot" content="index, follow" />
       {keywords && <meta name="keywords" content={keywords} />}
@@ -58,12 +62,26 @@ export default function SEO({
       <meta property="og:locale" content="en_US" />
       <meta property="og:type" content={type} />
       <meta property="og:title" content={pageTitle} />
-      <meta property="og:description" content={pageDescription} />
+      <meta property="og:description" content={pageDescriptionTrimmed} />
       <meta property="og:url" content={pageUrl} />
       <meta property="og:image" content={pageImage} />
       <meta property="og:image:alt" content={pageTitle} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
+      {type === "article" && author && (
+        <meta property="article:author" content={author} />
+      )}
+      {type === "article" && keywords
+        ? keywords
+            .split(",")
+            .map((tag) => (
+              <meta
+                key={tag.trim()}
+                property="article:tag"
+                content={tag.trim()}
+              />
+            ))
+        : null}
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />

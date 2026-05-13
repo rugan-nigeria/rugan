@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
-import { Facebook, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
+import { Facebook, Youtube, Instagram, Linkedin, Mail } from "lucide-react";
 
 const QUICK_LINKS = [
   { label: "About Us", to: "/about" },
@@ -38,9 +38,9 @@ const SOCIALS = [
     label: "Facebook",
   },
   {
-    icon: Twitter,
-    href: "https://www.facebook.com/share/1E1x2wHhog/?mibextid=wwXIfr",
-    label: "Twitter",
+    icon: Youtube,
+    href: "https://www.youtube.com/@therugannigeria",
+    label: "YouTube",
   },
   {
     icon: Instagram,
@@ -88,7 +88,7 @@ export default function Footer() {
               <img
                 src="/icons/rugan-logo.jpg"
                 alt="RUGAN"
-                className="h-8 w-auto"
+                className="h-10 w-19"
                 style={{ borderRadius: "9px" }}
                 onError={(e) => {
                   e.target.style.display = "none";
@@ -149,12 +149,12 @@ export default function Footer() {
             <ul className="mb-6 flex flex-col gap-3">
               <li>
                 <a
-                  href="mailto:rugan.ng@gmail.com"
+                  href="mailto:info@rugan.org"
                   style={mutedWhite}
                   className="flex items-center gap-2.5 transition-colors hover:text-white"
                 >
                   <Mail size={15} style={contactIconStyle} />
-                  <span>rugan.ng@gmail.com</span>
+                  <span>info@rugan.org</span>
                 </a>
               </li>
               <li>
