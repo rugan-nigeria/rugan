@@ -5,6 +5,15 @@ import BlogPost from "../models/BlogPost.model.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /**
  * Middleware to inject dynamic Open Graph tags for blog posts.
  * This is essential for social media cards (WhatsApp, Twitter, etc.)
@@ -59,11 +68,17 @@ export async function injectBlogMeta(req, res, next) {
     // 1. Update <title>
     html = html.replace(/<title>.*?<\/title>/, `<title>${title} | RUGAN</title>`);
 
-    // 2. Add OG and Twitter tags before </head>
+    // 2. Strip existing OG/Twitter tags to prevent duplicates
+    html = html.replace(/<meta\s+property="og:[^"]+"\s+content="[^"]*"\s*\/?>/gi, "");
+    html = html.replace(/<meta\s+name="twitter:[^"]+"\s+content="[^"]*"\s*\/?>/gi, "");
+    html = html.replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/gi, "");
+
+    // 3. Add OG and Twitter tags before </head>
     const metaTags = `
     <!-- Social Media Meta Tags (Injected) -->
-    <meta property="og:title" content="${title}" />
-    <meta property="og:description" content="${description}" />
+    <meta name="description" content="${escapeHtml(description)}" />
+    <meta property="og:title" content="${escapeHtml(title)}" />
+    <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:image" content="${absoluteImageUrl}" />
     ${absoluteImageUrl.startsWith("https") ? `<meta property="og:image:secure_url" content="${absoluteImageUrl}" />` : ""}
     <meta property="og:image:width" content="1200" />
@@ -73,8 +88,8 @@ export async function injectBlogMeta(req, res, next) {
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="RUGAN" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${title}" />
-    <meta name="twitter:description" content="${description}" />
+    <meta name="twitter:title" content="${escapeHtml(title)}" />
+    <meta name="twitter:description" content="${escapeHtml(description)}" />
     <meta name="twitter:image" content="${absoluteImageUrl}" />
     `;
 
