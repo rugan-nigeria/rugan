@@ -6,17 +6,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.rugan.org"
-        }
-      ],
-      "destination": "https://rugan.org/$1",
-      "permanent": true
-    },
-    {
       "source": "/programs",
       "destination": "/programmes",
       "permanent": true
