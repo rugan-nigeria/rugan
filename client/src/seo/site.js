@@ -7,9 +7,9 @@ export const DEFAULT_IMAGE_PATH = "/images/homepage/Hero.jpg";
 export const DEFAULT_IMAGE_ALT =
   "RUGAN empowering rural girls through education and community programmes in Nigeria";
 export const DEFAULT_DESCRIPTION =
-  "RUGAN empowers rural girl-children in Nigeria through education, menstrual health support, mentorship, advocacy, and leadership development.";
+  "The Rural Girl-Child Advancement Network (RUGAN) empowers rural girls in Nigeria through quality education, menstrual health dignity, mentorship, advocacy, and leadership development.";
 export const ORGANIZATION_DESCRIPTION =
-  "RUGAN is a Nigerian nonprofit organization advancing rural girl-child education, menstrual health dignity, mentorship, and leadership opportunities across underserved communities.";
+  "The Rural Girl-Child Advancement Network (RUGAN) is a Nigerian nonprofit dedicated to advancing education, menstrual health, and leadership opportunities for rural girls in underserved communities.";
 export const ORGANIZATION_FOUNDING_DATE = "2022-11-01";
 export const ORGANIZATION_EMAIL = "info@rugan.org";
 export const ORGANIZATION_TELEPHONE = "+2348143158700";
