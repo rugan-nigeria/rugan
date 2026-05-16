@@ -67,7 +67,7 @@ export function buildSeoPayload({
       ? title
       : title
         ? `${title} | ${SITE_NAME}`
-        : `${SITE_LEGAL_NAME} (${SITE_NAME}) | Empowering Rural Girls`;
+        : `${SITE_NAME} | Empowering Rural Girls`;
 
   const pageDescription = truncateDescription(description || DEFAULT_DESCRIPTION);
   const pageImage = toAbsoluteImage(image || DEFAULT_IMAGE_PATH);

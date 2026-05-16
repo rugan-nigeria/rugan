@@ -149,7 +149,7 @@ app.get("/blog/:slug", injectBlogMeta);
 
 // ── Static Files ──────────────────────────────────────────
 // Serve static files from the client build folder
-app.use(express.static(path.resolve(__dirname, "../../client/dist")));
+app.use(express.static(path.resolve(__dirname, "../../client/dist"), { redirect: false }));
 // Serve uploads folder
 app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
 
