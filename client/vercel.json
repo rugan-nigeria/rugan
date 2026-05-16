@@ -101,7 +101,7 @@
       "destination": "/api/blog/:slug"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
