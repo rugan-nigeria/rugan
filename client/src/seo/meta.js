@@ -2,6 +2,7 @@ import {
   DEFAULT_DESCRIPTION,
   DEFAULT_IMAGE_ALT,
   DEFAULT_IMAGE_PATH,
+  SITE_LEGAL_NAME,
   SITE_LOCALE,
   SITE_NAME,
   SITE_URL,
@@ -66,7 +67,7 @@ export function buildSeoPayload({
       ? title
       : title
         ? `${title} | ${SITE_NAME}`
-        : `${SITE_NAME} | Empowering Rural Girls`;
+        : `${SITE_LEGAL_NAME} (${SITE_NAME}) | Empowering Rural Girls`;
 
   const pageDescription = truncateDescription(description || DEFAULT_DESCRIPTION);
   const pageImage = toAbsoluteImage(image || DEFAULT_IMAGE_PATH);
