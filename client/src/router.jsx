@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, useLocation } from "react-router";
+import { createBrowserRouter, Navigate, useLocation, useParams } from "react-router";
 import { lazy, Suspense } from "react";
 
 import RootLayout from "@/components/layout/RootLayout";
@@ -84,6 +84,11 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+function ProgrammesAliasRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={slug ? `/programmes/${slug}` : "/programmes"} replace />;
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -95,6 +100,8 @@ const router = createBrowserRouter([
       { path: "team",                  element: <Lazy><TeamPage /></Lazy> },
       { path: "programmes",            element: <Lazy><ProgramsPage /></Lazy> },
       { path: "programmes/:slug",      element: <Lazy><ProgramDetailPage /></Lazy> },
+      { path: "programs",              element: <ProgrammesAliasRedirect /> },
+      { path: "programs/:slug",        element: <ProgrammesAliasRedirect /> },
       { path: "impact",               element: <Lazy><ImpactPage /></Lazy> },
       { path: "volunteers",            element: <Lazy><VolunteerPage /></Lazy> },
       { path: "partnership",           element: <Lazy><PartnershipPage /></Lazy> },
@@ -102,6 +109,7 @@ const router = createBrowserRouter([
       { path: "blog/:slug",            element: <Lazy><ArticlePage /></Lazy> },
       { path: "donate",                element: <Lazy><DonationPage /></Lazy> },
       { path: "donation/success",      element: <Lazy><DonationSuccessPage /></Lazy> },
+      { path: "donate/success",        element: <Navigate to="/donation/success" replace /> },
       { path: "privacy",               element: <Lazy><PrivacyPolicyPage /></Lazy> },
       { path: "terms",                 element: <Lazy><TermsPage /></Lazy> },
       {

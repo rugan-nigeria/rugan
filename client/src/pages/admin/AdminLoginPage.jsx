@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from "react-router";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
+import SEO from "@/components/SEO";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 
@@ -46,6 +47,14 @@ export default function AdminLoginPage() {
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
+      <SEO
+        title="Admin Login"
+        description="Secure administrator sign-in for RUGAN content and operations."
+        path="/admin/login"
+        noindex
+        nofollow
+        pageType="WebPage"
+      />
       <div
         style={{
           position: "fixed",

@@ -87,6 +87,12 @@ export default function DonationPage() {
       <SEO
         title="Donate"
         description="Your donation directly empowers girls and transforms communities. Make a difference today."
+        path="/donate"
+        pageType="CheckoutPage"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Donate", path: "/donate" },
+        ]}
       />
       {/* Hero — primary green, heart icon, centered */}
       <section

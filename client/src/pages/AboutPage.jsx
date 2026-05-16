@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
+import { Link } from "react-router";
 import { motion } from "framer-motion";
 import {
   fadeUp,
@@ -431,7 +432,26 @@ import SEO from "@/components/SEO";
 export default function AboutPage() {
   return (
     <>
-      <SEO title="About Us" description="Learn about the history, focus areas, and guiding principles behind RUGAN." />
+      <SEO
+        title="About Us"
+        description="Learn about the history, focus areas, and guiding principles behind RUGAN."
+        path="/about"
+        pageType="AboutPage"
+        image="/images/about/founder.jpg"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "About Us", path: "/about" },
+        ]}
+        person={{
+          name: "Fidel Bethel Nnadi",
+          description:
+            "Founder and Executive Director of RUGAN, a social worker advancing rural girl-child empowerment through education, mentorship, and dignity-centered advocacy.",
+          image: "/images/about/founder.jpg",
+          url: "https://rugan.org/team",
+          sameAs: ["https://www.linkedin.com/in/fidelnnadi"],
+          jobTitle: "Founder and Executive Director",
+        }}
+      />
       {/* Founder Section */}
       <section className="section-padding">
         <div className="container-rugan">
@@ -450,6 +470,8 @@ export default function AboutPage() {
               <img
                 src="/images/about/founder.jpg"
                 alt="Fidel Nnadi"
+                loading="eager"
+                decoding="async"
                 className="w-full h-full object-cover object-top"
               />
             </motion.div>
@@ -503,8 +525,8 @@ export default function AboutPage() {
                   leadership skills, and independence.
                 </p>
               </div>
-              <a
-                href="/team"
+              <Link
+                to="/team"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -524,7 +546,7 @@ export default function AboutPage() {
                 }}
               >
                 View Full Team →
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>

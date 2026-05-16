@@ -6,6 +6,8 @@ import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import { ensureAdminUser } from "./config/admin.js";
 import { connectDB } from "./config/db.js";
@@ -16,6 +18,7 @@ import {
 } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
+import { injectBlogMeta } from "./middleware/metaInjection.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
@@ -29,6 +32,7 @@ import uploadRoutes from "./routes/upload.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let initializationPromise = null;
 
 validateEnvironment();
@@ -133,6 +137,18 @@ app.use("/api/contact", formLimiter, contactRoutes);
 app.use("/api/upload", limiter, uploadRoutes);
 app.use("/api/analytics", limiter, analyticsRoutes);
 app.use("/sitemap.xml", sitemapRoutes);
+
+// ── SEO Meta Injection (for social crawlers) ─────────────
+// This matches blog post URLs and serves index.html with injected tags
+app.get("/blog/:slug", injectBlogMeta);
+
+// ── Static Files ──────────────────────────────────────────
+// Serve static files from the client build folder
+app.use(express.static(path.resolve(__dirname, "../../client/dist")));
+// Serve uploads folder
+app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
+
+
 // ── Health check (no rate limit) ─────────────────────────
 app.get("/api/health", (_req, res) =>
   res.json({

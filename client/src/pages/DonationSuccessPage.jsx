@@ -10,6 +10,10 @@ export default function DonationSuccessPage() {
       <SEO
         title="Donation Confirmed"
         description="Thank you for supporting RUGAN. Your contribution will help empower girls, provide menstrual health supplies, and strengthen rural communities."
+        path="/donation/success"
+        noindex
+        nofollow
+        pageType="WebPage"
       />
       {/* Hero */}
       <section

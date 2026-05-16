@@ -100,13 +100,26 @@ export default function Navbar() {
         scrolled ? "shadow-md" : "shadow-sm",
       )}
     >
-      <nav className="container-rugan flex h-16 items-center justify-between lg:h-[4.5rem]">
+      <nav
+        className="container-rugan flex h-16 items-center justify-between lg:h-[4.5rem]"
+        aria-label="Primary"
+      >
         <motion.div
           initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Link to="/" className="flex shrink-0 items-center gap-2">
+          <Link
+            to="/"
+            onClick={(e) => {
+              if (pathname === "/") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+            className="flex shrink-0 items-center gap-2"
+            aria-label="RUGAN home"
+          >
             <img
               src="/icons/rugan-logo2.jpg"
               alt="RUGAN"
@@ -146,7 +159,9 @@ export default function Navbar() {
                       base,
                       "flex items-center gap-1",
                       parentActive ? active : cn(idle, hover),
-                    )}
+                    )} 
+                    aria-haspopup="true"
+                    aria-expanded={dropdownOpen === link.label}
                   >
                     {link.label}
                     <ChevronDown

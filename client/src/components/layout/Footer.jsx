@@ -84,7 +84,11 @@ export default function Footer() {
           viewport={viewportOnce}
         >
           <motion.div variants={fadeUp} className="md:col-span-4">
-            <Link to="/" className="mb-4 inline-flex items-center gap-2">
+            <Link
+              to="/"
+              className="mb-4 inline-flex items-center gap-2"
+              aria-label="RUGAN home"
+            >
               <img
                 src="/icons/rugan-logo.jpg"
                 alt="RUGAN"
@@ -108,38 +112,42 @@ export default function Footer() {
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
               Quick Links
             </h4>
-            <ul className="flex flex-col gap-2.5">
-              {QUICK_LINKS.map((link) => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    style={mutedWhite}
-                    className="transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <nav aria-label="Footer quick links">
+              <ul className="flex flex-col gap-2.5">
+                {QUICK_LINKS.map((link) => (
+                  <li key={link.to}>
+                    <Link
+                      to={link.to}
+                      style={mutedWhite}
+                      className="transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </motion.div>
 
           <motion.div variants={fadeUp} className="md:col-span-3">
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
               Programmes
             </h4>
-            <ul className="flex flex-col gap-2.5">
-              {PROGRAMS.map((program) => (
-                <li key={program.to}>
-                  <Link
-                    to={program.to}
-                    style={mutedWhite}
-                    className="transition-colors hover:text-white"
-                  >
-                    {program.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <nav aria-label="Footer programmes">
+              <ul className="flex flex-col gap-2.5">
+                {PROGRAMS.map((program) => (
+                  <li key={program.to}>
+                    <Link
+                      to={program.to}
+                      style={mutedWhite}
+                      className="transition-colors hover:text-white"
+                    >
+                      {program.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </motion.div>
 
           <motion.div variants={fadeUp} className="md:col-span-3">
@@ -173,7 +181,7 @@ export default function Footer() {
               </li>
             </ul>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" aria-label="Social profiles">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/generate-sitemap.mjs",
-    "build": "vite build",
+    "build": "node scripts/build.mjs",
+    "postbuild": "node scripts/generate-route-shells.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "generate-sitemap": "node scripts/generate-sitemap.mjs"

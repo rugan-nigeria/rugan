@@ -1,18 +1,17 @@
-import { defineConfig } from "vite";
+import { build } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 
-const srcDir = fileURLToPath(new URL("./src", import.meta.url));
+const srcDir = fileURLToPath(new URL("../src", import.meta.url));
 
-export default defineConfig({
+await build({
+  configFile: false,
   plugins: [react()],
-
   resolve: {
     alias: {
       "@": srcDir,
     },
   },
-
   server: {
     port: 5173,
     proxy: {
@@ -22,14 +21,10 @@ export default defineConfig({
       },
     },
   },
-
   build: {
-    // Warn when chunks exceed 400kb
     chunkSizeWarningLimit: 400,
-
     rollupOptions: {
       output: {
-        // Split vendor libs into separate cached chunks
         manualChunks: {
           "vendor-react": ["react", "react-dom", "react-router"],
           "vendor-motion": ["framer-motion"],
@@ -39,7 +34,6 @@ export default defineConfig({
         },
       },
     },
-
     sourcemap: false,
     minify: "esbuild",
     target: "es2020",

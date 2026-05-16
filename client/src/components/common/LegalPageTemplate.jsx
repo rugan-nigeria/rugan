@@ -10,13 +10,30 @@ export default function LegalPageTemplate({
   updatedAt,
   intro,
   sections,
+  path,
   contactTitle = "Questions?",
   contactText,
 }) {
+  const breadcrumbs = [
+    { name: "Home", path: "/" },
+    { name: title, path: path || "/" },
+  ];
+
   return (
     <>
-      <SEO title={title} description={intro} />
-      <PageHeroBanner title={title} subtitle={subtitle} centerText />
+      <SEO
+        title={title}
+        description={intro}
+        path={path}
+        pageType="WebPage"
+        breadcrumbs={breadcrumbs}
+      />
+      <PageHeroBanner
+        title={title}
+        subtitle={subtitle}
+        breadcrumbs={breadcrumbs}
+        centerText
+      />
 
       <section className="section-padding" style={{ background: "#FAFAFA" }}>
         <div className="container-rugan">

@@ -262,6 +262,21 @@ export default function TeamPage() {
         title="Our Team"
         description="Meet the RUGAN leadership and programme team driving rural girl-child empowerment through education, mentorship, and community transformation."
         keywords="RUGAN team, NGO leaders, girl child empowerment, education advocacy, nonprofit leadership"
+        path="/team"
+        image="/images/team/fidel.jpg"
+        pageType="AboutPage"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Our Team", path: "/team" },
+        ]}
+        persons={TEAM.map((member) => ({
+          name: member.name,
+          description: member.bio,
+          image: member.image,
+          url: "https://rugan.org/team",
+          sameAs: member.linkedin ? [member.linkedin] : [],
+          jobTitle: member.role,
+        }))}
       />
       <section
         className="py-12 sm:py-16"

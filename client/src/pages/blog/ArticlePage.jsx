@@ -649,10 +649,22 @@ export default function ArticlePage() {
           article.excerpt || `${article.title} - Read more on RUGAN Blog`
         }
         image={getPostImage(article)}
-        type="article"
         author={getPostAuthorName(article)}
-        keywords={article.tags?.join(", ")}
-        url={location.pathname}
+        path={location.pathname}
+        pageType="ArticlePage"
+        keywords={article.tags || []}
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Blog", path: "/blog" },
+          { name: article.title, path: location.pathname },
+        ]}
+        article={{
+          authorName: getPostAuthorName(article),
+          publishedTime: article.publishedAt || article.createdAt,
+          modifiedTime: article.updatedAt || article.publishedAt || article.createdAt,
+          section: "Blog",
+          keywords: article.tags || [],
+        }}
       />
       <section
         style={{ position: "relative", minHeight: "340px", overflow: "hidden" }}
@@ -660,6 +672,9 @@ export default function ArticlePage() {
         <img
           src={getPostImage(article)}
           alt={article.title}
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
           style={{
             position: "absolute",
             inset: 0,
@@ -688,6 +703,8 @@ export default function ArticlePage() {
           initial="hidden"
           animate="visible"
         >
+
+
           <motion.div variants={fadeIn}>
             <button
               onClick={() => navigate("/blog")}
