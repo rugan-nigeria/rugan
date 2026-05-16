@@ -19,7 +19,7 @@ import {
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
 import { injectBlogMeta } from "./middleware/metaInjection.js";
-import { injectBaseMeta } from "./middleware/baseMetaInjection.js";
+// import { injectBaseMeta } from "./middleware/baseMetaInjection.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
@@ -144,8 +144,8 @@ app.use("/sitemap.xml", sitemapRoutes);
 app.get("/blog/:slug", injectBlogMeta);
 
 // Handle base pages (Home, About, etc.)
-const basePages = ["/about", "/team", "/programmes", "/impact", "/volunteers", "/partnership", "/blog", "/donate"];
-app.get(basePages, injectBaseMeta);
+// const basePages = ["/about", "/team", "/programmes", "/impact", "/volunteers", "/partnership", "/blog", "/donate"];
+// app.get(basePages, injectBaseMeta);
 
 // ── Static Files ──────────────────────────────────────────
 // Serve static files from the client build folder
