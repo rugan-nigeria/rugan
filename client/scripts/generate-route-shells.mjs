@@ -158,7 +158,8 @@ function toOutputPath(pathname) {
   }
 
   const segments = pathname.replace(/^\/+/, "").split("/");
-  return path.join(distDir, ...segments, "index.html");
+  const lastSegment = segments.pop();
+  return path.join(distDir, ...segments, `${lastSegment}.html`);
 }
 
 async function writeRouteFile(baseHtml, entry) {
