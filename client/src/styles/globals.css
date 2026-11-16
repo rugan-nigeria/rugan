@@ -36,7 +36,7 @@
   --color-border:         #E5E7EB;   /* gray-200 equivalent */
   --color-bg-light:       #F9FAFB;   /* subtle section background */
   --color-bg-green-tint:  #f0f7ee;   /* very light green section bg */
-  --color-body-text-mobile:      #474B52     /* c */
+  --color-body-text-mobile: #474B52;
 
   /* Typography */
   --font-sans:   'Inter', system-ui, sans-serif;
@@ -86,8 +86,23 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-  scroll-behavior: smooth;
 }
+
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+/* Lenis smooth scrolling — recommended base styles */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-sans);
@@ -207,8 +222,12 @@ input, textarea, select, button {
   font-family: var(--font-sans);
   cursor: pointer;
   border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   transition: background-color var(--transition), color var(--transition),
-              border-color var(--transition), box-shadow var(--transition);
+              border-color var(--transition), box-shadow var(--transition-smooth),
+              transform var(--transition-smooth);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -216,6 +235,33 @@ input, textarea, select, button {
 .btn:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 3px;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 80ms;
+}
+
+/* A soft band of light sweeps across solid buttons on hover */
+.btn-primary::after,
+.btn-green::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.btn-primary:hover:not(:disabled)::after,
+.btn-green:hover:not(:disabled)::after {
+  transform: translateX(120%);
 }
 
 .btn:disabled {
@@ -233,6 +279,7 @@ input, textarea, select, button {
 .btn-primary:hover:not(:disabled) {
   background-color: var(--color-btn-orange-dark);
   border-color: var(--color-btn-orange-dark);
+  box-shadow: 0 10px 24px -6px rgba(214, 103, 15, 0.55);
 }
 
 /* Solid green */
@@ -245,6 +292,7 @@ input, textarea, select, button {
 .btn-green:hover:not(:disabled) {
   background-color: var(--color-primary-dark);
   border-color: var(--color-primary-dark);
+  box-shadow: 0 10px 24px -6px rgba(79, 123, 68, 0.5);
 }
 
 /* Outlined green */
@@ -306,11 +354,21 @@ input, textarea, select, button {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  transition: box-shadow var(--transition);
+  transition: box-shadow var(--transition-premium), transform var(--transition-premium);
 }
 
 .card-hover:hover {
   box-shadow: var(--shadow-card-hover);
+  transform: translateY(-6px);
+}
+
+/* Images inside a hovered card ease into a slow zoom */
+.zoom-media img {
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease, filter 300ms ease !important;
+}
+.card-hover:hover .zoom-media img,
+.group:hover .zoom-media img {
+  transform: scale(1.07);
 }
 
 
@@ -515,3 +573,71 @@ select.form-input {
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
+
+
+/* ─── 14. Motion Helpers ────────────────────────────────────────────────── */
+
+/* Link underline that draws in from the left on hover */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 400ms cubic-bezier(0.16, 1, 0.3, 1), color var(--transition);
+  padding-bottom: 2px;
+}
+.link-underline:hover,
+.link-underline:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* Endless marquee strip */
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 40s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+.marquee-set {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2rem;
+  padding-right: 2rem;
+  white-space: nowrap;
+}
+.marquee-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background-color: var(--color-btn-orange);
+  flex-shrink: 0;
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  .btn:hover:not(:disabled),
+  .card-hover:hover { transform: none; }
+  .btn-primary::after,
+  .btn-green::after { display: none; }
+  .card-hover:hover .zoom-media img,
+  .group:hover .zoom-media img { transform: none; }
+}

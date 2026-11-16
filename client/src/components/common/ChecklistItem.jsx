@@ -3,6 +3,21 @@ import { fadeUp, viewportOnce } from '@/lib/motion'
 import { CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
+// Plain items animate when their parent list (a motion container) reveals.
+const slideIn = {
+  hidden: { opacity: 0, x: -24 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
+}
+
+const iconPop = {
+  hidden: { scale: 0, rotate: -90 },
+  visible: {
+    scale: 1,
+    rotate: 0,
+    transition: { type: 'spring', stiffness: 420, damping: 16, delay: 0.12 },
+  },
+}
+
 /**
  * ChecklistItem
  * variant: 'card' | 'plain'
@@ -17,7 +32,8 @@ export default function ChecklistItem({
 }) {
   const isPlain = variant === 'plain'
   const icon = (
-    <span
+    <motion.span
+      variants={isPlain ? iconPop : undefined}
       style={{
         flexShrink: 0,
         marginTop: isPlain ? 0 : '1px',
@@ -36,15 +52,19 @@ export default function ChecklistItem({
         fill={iconFill}
         strokeWidth={2}
       />
-    </span>
+    </motion.span>
   )
 
   if (isPlain) {
     return (
-      <li className={cn('flex items-center gap-2.5', className)} style={{ fontSize: '0.875rem', color: '#374151' }}>
+      <motion.li
+        variants={slideIn}
+        className={cn('flex items-center gap-2.5', className)}
+        style={{ fontSize: '0.875rem', color: '#374151' }}
+      >
         {icon}
         <span>{text}</span>
-      </li>
+      </motion.li>
     )
   }
 

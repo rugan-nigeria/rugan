@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 import { preloadBlogResources } from "@/lib/blogCache";
 import { cn } from "@/lib/cn";
+import ScrollProgress from "@/components/motion/ScrollProgress";
 
 const NAV_LINKS = [
   { label: "Home", to: "/" },
@@ -27,7 +28,18 @@ const base =
   "block px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200";
 const idle = "text-gray-700";
 const hover = "hover:bg-[#F0FDF4] hover:text-[#4F7B44]";
-const active = "bg-[#F0FDF4] text-[#4F7B44]";
+const active = "text-[#4F7B44]";
+
+// Shared green pill that glides between desktop links as the route changes.
+function ActivePill() {
+  return (
+    <motion.span
+      layoutId="nav-active-pill"
+      className="absolute inset-0 -z-10 rounded-lg bg-[#F0FDF4]"
+      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+    />
+  );
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -96,8 +108,10 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full bg-white transition-shadow duration-300",
-        scrolled ? "shadow-md" : "shadow-sm",
+        "sticky top-0 z-50 w-full transition-[background-color,box-shadow] duration-300",
+        scrolled
+          ? "bg-white/90 shadow-[0_6px_24px_rgba(16,24,40,0.08)] backdrop-blur-md"
+          : "bg-white shadow-sm",
       )}
     >
       <nav
@@ -114,7 +128,11 @@ export default function Navbar() {
             onClick={(e) => {
               if (pathname === "/") {
                 e.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                if (window.lenis) {
+                  window.lenis.scrollTo(0);
+                } else {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
               }
             }}
             className="flex shrink-0 items-center gap-2"
@@ -157,12 +175,13 @@ export default function Navbar() {
                     onMouseLeave={closeDropdown}
                     className={cn(
                       base,
-                      "flex items-center gap-1",
+                      "relative isolate flex items-center gap-1",
                       parentActive ? active : cn(idle, hover),
-                    )} 
+                    )}
                     aria-haspopup="true"
                     aria-expanded={dropdownOpen === link.label}
                   >
+                    {parentActive && <ActivePill />}
                     {link.label}
                     <ChevronDown
                       size={14}
@@ -173,9 +192,14 @@ export default function Navbar() {
                     />
                   </button>
 
+                  <AnimatePresence>
                   {dropdownOpen === link.label && (
-                    <div
-                      className="absolute left-0 top-full min-w-[160px] rounded-xl bg-white py-2"
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                      className="absolute left-0 top-full min-w-[160px] origin-top-left overflow-hidden rounded-xl bg-white py-2"
                       style={{
                         boxShadow: "var(--shadow-card-hover)",
                         border: "1px solid #F3F4F6",
@@ -201,8 +225,9 @@ export default function Navbar() {
                           {child.label}
                         </NavLink>
                       ))}
-                    </div>
+                    </motion.div>
                   )}
+                  </AnimatePresence>
                 </li>
               );
             }
@@ -215,10 +240,15 @@ export default function Navbar() {
                   onMouseEnter={() => handleNavIntent(link.to)}
                   onFocus={() => handleNavIntent(link.to)}
                   className={({ isActive: linkIsActive }) =>
-                    cn(base, linkIsActive ? active : cn(idle, hover))
+                    cn(base, "relative isolate", linkIsActive ? active : cn(idle, hover))
                   }
                 >
-                  {link.label}
+                  {({ isActive: linkIsActive }) => (
+                    <>
+                      {linkIsActive && <ActivePill />}
+                      {link.label}
+                    </>
+                  )}
                 </NavLink>
               </li>
             );
@@ -257,6 +287,8 @@ export default function Navbar() {
           </button>
         </motion.div>
       </nav>
+
+      <ScrollProgress />
 
       <AnimatePresence>
         {isOpen && (

@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import { MotionConfig, motion } from "framer-motion";
 import { Outlet, useLocation } from "react-router";
 import { preloadBlogResources } from "@/lib/blogCache";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
@@ -52,6 +53,12 @@ function ScrollToTop() {
 
 export default function RootLayout() {
   useLenisScroll();
+  const { pathname } = useLocation();
+  // Skip the route fade on first paint so the landing page shows instantly.
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    isFirstRender.current = false;
+  }, []);
 
   useEffect(() => {
     const schedule =
@@ -74,7 +81,7 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-[#111827]"
@@ -85,9 +92,16 @@ export default function RootLayout() {
       <AnalyticsTracker />
       <Navbar />
       <main id="main-content">
-        <Outlet />
+        <motion.div
+          key={pathname}
+          initial={isFirstRender.current ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <Outlet />
+        </motion.div>
       </main>
       <Footer />
-    </>
+    </MotionConfig>
   );
 }

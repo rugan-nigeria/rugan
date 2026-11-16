@@ -11,7 +11,7 @@ import OptimizedImage from '@/components/common/OptimizedImage'
 export default function BlogCard({ image, title, excerpt, author, date, to, tags, className = '' }) {
   return (
     <div
-      className={className}
+      className={`group ${className}`}
       style={{
         border: '1px solid #E5E7EB',
         borderRadius: '1rem',
@@ -20,16 +20,25 @@ export default function BlogCard({ image, title, excerpt, author, date, to, tags
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        transition: 'box-shadow 200ms ease',
+        transition: 'box-shadow 400ms ease, transform 500ms cubic-bezier(0.16, 1, 0.3, 1)',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.10)' }}
-      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none' }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 18px 40px -14px rgba(16,24,40,0.22)'
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          e.currentTarget.style.transform = 'translateY(-6px)'
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transform = 'none'
+      }}
     >
       {/* Image */}
       <OptimizedImage
         src={image}
         alt={title}
         aspectRatio="16/9"
+        className="zoom-media"
         style={{ flexShrink: 0 }}
       />
 

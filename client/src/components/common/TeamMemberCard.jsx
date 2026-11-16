@@ -42,7 +42,7 @@ export default function TeamMemberCard({
   return (
     <div className={cn("card-hover flex flex-col", className)}>
       {/* Photo */}
-      <div className="aspect-[4/3] overflow-hidden">
+      <div className="zoom-media aspect-[4/3] overflow-hidden">
         <img
           src={image}
           alt={name}

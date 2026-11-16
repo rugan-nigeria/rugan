@@ -119,7 +119,7 @@ export default function Footer() {
                     <Link
                       to={link.to}
                       style={mutedWhite}
-                      className="transition-colors hover:text-white"
+                      className="link-underline transition-colors hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -140,7 +140,7 @@ export default function Footer() {
                     <Link
                       to={program.to}
                       style={mutedWhite}
-                      className="transition-colors hover:text-white"
+                      className="link-underline transition-colors hover:text-white"
                     >
                       {program.label}
                     </Link>
@@ -189,6 +189,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer me"
                   aria-label={label}
+                  className="hover:-translate-y-1"
                   style={{
                     width: "2.25rem",
                     height: "2.25rem",
@@ -198,7 +199,7 @@ export default function Footer() {
                     alignItems: "center",
                     justifyContent: "center",
                     color: "white",
-                    transition: "background 200ms ease",
+                    transition: "background 200ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = "var(--color-primary)";
@@ -222,10 +223,10 @@ export default function Footer() {
         >
           <p>&copy; {new Date().getFullYear()} RUGAN. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <Link to="/privacy" className="transition-colors hover:text-white">
+            <Link to="/privacy" className="link-underline transition-colors hover:text-white">
               Privacy Policy
             </Link>
-            <Link to="/terms" className="transition-colors hover:text-white">
+            <Link to="/terms" className="link-underline transition-colors hover:text-white">
               Terms of Service
             </Link>
           </div>

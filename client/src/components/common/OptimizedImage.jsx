@@ -77,7 +77,7 @@ export default function OptimizedImage({
         alt={alt}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
-        fetchpriority={priority ? "high" : "auto"}
+        fetchPriority={priority ? "high" : "auto"}
         style={imgStyle}
         onLoad={() => {
           setLoaded(true);

@@ -1,8 +1,14 @@
+import { useRef } from "react";
 import { Link } from "react-router";
 import { ChevronLeft } from "lucide-react";
-import { motion } from "framer-motion";
-import { fadeUp, fadeIn, staggerContainer } from "@/lib/motion";
-
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
+import { fadeUp, fadeIn } from "@/lib/motion";
+import RevealText from "@/components/motion/RevealText";
 
 export default function PageHeroBanner({
   title,
@@ -16,21 +22,45 @@ export default function PageHeroBanner({
   className = "",
   imagePriority = true,
 }) {
+  const sectionRef = useRef(null);
+  const reduceMotion = useReducedMotion();
+
+  // As the hero scrolls away, the photo sinks slower than the page and the
+  // copy lifts and fades, giving the banner a sense of depth.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -70]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  const titleIsText = typeof title === "string";
+
   return (
     <section
+      ref={sectionRef}
       className={`page-hero relative overflow-hidden ${className}`}
       style={!backgroundImage ? { backgroundColor: "#17311a" } : undefined}
     >
       {backgroundImage ? (
-        <img
-          src={backgroundImage}
-          alt=""
+        <motion.div
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover"
-          loading={imagePriority ? "eager" : "lazy"}
-          decoding="async"
-          fetchpriority={imagePriority ? "high" : "auto"}
-        />
+          className="absolute inset-0"
+          style={{ y: reduceMotion ? 0 : imageY }}
+        >
+          <motion.img
+            src={backgroundImage}
+            alt=""
+            className="h-full w-full object-cover"
+            loading={imagePriority ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={imagePriority ? "high" : "auto"}
+            initial={{ scale: 1.18 }}
+            animate={{ scale: 1.04 }}
+            transition={{ duration: 2.6, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </motion.div>
       ) : null}
 
       <div
@@ -40,33 +70,39 @@ export default function PageHeroBanner({
 
       <motion.div
         className="page-hero-content container-rugan relative z-10"
-        variants={staggerContainer}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.12,
+              // let the word-by-word title land before the copy follows
+              delayChildren: titleIsText ? 0.45 : 0.05,
+            },
+          },
+        }}
         initial="hidden"
         animate="visible"
+        style={
+          reduceMotion ? undefined : { y: contentY, opacity: contentOpacity }
+        }
       >
-
-
         {backLink ? (
           <motion.div variants={fadeIn}>
             <Link
               to={backLink.to}
-              className="mb-4 inline-flex items-center gap-1 transition-colors"
-              style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.875rem" }}
-              onMouseEnter={(event) => {
-                event.currentTarget.style.color = "white";
-              }}
-              onMouseLeave={(event) => {
-                event.currentTarget.style.color = "rgba(255,255,255,0.75)";
-              }}
+              className="group mb-4 inline-flex items-center gap-1 text-sm text-white/75 transition-colors hover:text-white"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft
+                size={16}
+                className="transition-transform duration-300 group-hover:-translate-x-1"
+              />
               {backLink.label}
             </Link>
           </motion.div>
         ) : null}
 
         <motion.h1
-          variants={fadeUp}
+          variants={titleIsText ? undefined : fadeUp}
           style={{
             fontSize: "clamp(1.625rem, 7vw, 2.5rem)",
             fontWeight: 900,
@@ -78,7 +114,11 @@ export default function PageHeroBanner({
             margin: centerText ? "0 auto" : undefined,
           }}
         >
-          {title}
+          {titleIsText ? (
+            <RevealText text={title} trigger="mount" delay={0.15} />
+          ) : (
+            title
+          )}
         </motion.h1>
 
         {subtitle ? (

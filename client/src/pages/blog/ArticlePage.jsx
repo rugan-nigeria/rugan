@@ -674,7 +674,7 @@ export default function ArticlePage() {
           alt={article.title}
           loading="eager"
           decoding="async"
-          fetchpriority="high"
+          fetchPriority="high"
           style={{
             position: "absolute",
             inset: 0,
