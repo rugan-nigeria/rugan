@@ -4,23 +4,7 @@ import { preloadBlogResources } from "@/lib/blogCache";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-
-function runWithoutSmoothScroll(callback) {
-  const html = document.documentElement;
-  const body = document.body;
-  const previousHtmlBehavior = html.style.scrollBehavior;
-  const previousBodyBehavior = body.style.scrollBehavior;
-
-  html.style.scrollBehavior = "auto";
-  body.style.scrollBehavior = "auto";
-
-  callback();
-
-  requestAnimationFrame(() => {
-    html.style.scrollBehavior = previousHtmlBehavior;
-    body.style.scrollBehavior = previousBodyBehavior;
-  });
-}
+import { useLenisScroll } from "@/hooks/useLenisScroll";
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -39,26 +23,36 @@ function ScrollToTop() {
   }, []);
 
   useLayoutEffect(() => {
-    runWithoutSmoothScroll(() => {
-      if (hash) {
-        const element = document.querySelector(hash);
-        if (element) {
-          element.scrollIntoView({ block: "start" });
-          return;
-        }
-      }
+    const lenis = window.lenis;
 
+    if (hash) {
+      const element = document.querySelector(hash);
+      if (element) {
+        if (lenis) {
+          lenis.scrollTo(element);
+        } else {
+          element.scrollIntoView({ block: "start" });
+        }
+        return;
+      }
+    }
+
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    } else {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
       document.scrollingElement?.scrollTo?.({ top: 0, left: 0, behavior: "instant" });
-    });
+    }
   }, [pathname, hash]);
 
   return null;
 }
 
 export default function RootLayout() {
+  useLenisScroll();
+
   useEffect(() => {
     const schedule =
       typeof window.requestIdleCallback === "function"
