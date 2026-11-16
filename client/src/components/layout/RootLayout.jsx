@@ -30,7 +30,7 @@ function ScrollToTop() {
       const element = document.querySelector(hash);
       if (element) {
         if (lenis) {
-          lenis.scrollTo(element);
+          lenis.scrollTo(element, { force: true });
         } else {
           element.scrollIntoView({ block: "start" });
         }
@@ -39,7 +39,7 @@ function ScrollToTop() {
     }
 
     if (lenis) {
-      lenis.scrollTo(0, { immediate: true });
+      lenis.scrollTo(0, { immediate: true, force: true });
     } else {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       document.documentElement.scrollTop = 0;

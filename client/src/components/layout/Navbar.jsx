@@ -64,9 +64,12 @@ export default function Navbar() {
 
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      // Lenis drives scrolling itself, so pause it too while the menu is open.
+      window.lenis?.stop();
     }
 
     return () => {
+      window.lenis?.start();
       document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
@@ -108,12 +111,20 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full transition-[background-color,box-shadow] duration-300",
-        scrolled
-          ? "bg-white/90 shadow-[0_6px_24px_rgba(16,24,40,0.08)] backdrop-blur-md"
-          : "bg-white shadow-sm",
+        "sticky top-0 z-50 w-full transition-shadow duration-300",
+        scrolled ? "shadow-[0_6px_24px_rgba(16,24,40,0.08)]" : "shadow-sm",
       )}
     >
+      {/* The frosted background lives on its own layer: a backdrop-filter on
+          the header itself would trap the fixed mobile menu inside the header. */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          "absolute inset-0 -z-10 transition-colors duration-300",
+          scrolled ? "bg-white/90 backdrop-blur-md" : "bg-white",
+        )}
+      />
+
       <nav
         className="container-rugan flex h-16 items-center justify-between lg:h-[4.5rem]"
         aria-label="Primary"
@@ -129,7 +140,7 @@ export default function Navbar() {
               if (pathname === "/") {
                 e.preventDefault();
                 if (window.lenis) {
-                  window.lenis.scrollTo(0);
+                  window.lenis.scrollTo(0, { force: true });
                 } else {
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }
@@ -313,7 +324,8 @@ export default function Navbar() {
             >
               <div className="flex h-full flex-col overflow-hidden bg-[linear-gradient(to_bottom,#F8FBF8_0%,#FFFFFF_42%,#FAFAFA_100%)]">
                 <motion.ul
-                  className="flex-1 overflow-y-auto px-4 pb-4 pt-4"
+                  className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-4"
+                  data-lenis-prevent
                   initial="hidden"
                   animate="visible"
                   exit="hidden"
