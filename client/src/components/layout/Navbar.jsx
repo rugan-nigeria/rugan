@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 import { preloadBlogResources } from "@/lib/blogCache";
 import { cn } from "@/lib/cn";
-import ScrollProgress from "@/components/motion/ScrollProgress";
 
 const NAV_LINKS = [
   { label: "Home", to: "/" },
@@ -210,7 +209,7 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.98 }}
                       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute left-0 top-full min-w-[160px] origin-top-left overflow-hidden rounded-xl bg-white py-2"
+                      className="absolute left-0 top-full z-50 min-w-[160px] origin-top-left overflow-hidden rounded-xl bg-white py-2"
                       style={{
                         boxShadow: "var(--shadow-card-hover)",
                         border: "1px solid #F3F4F6",
@@ -298,8 +297,6 @@ export default function Navbar() {
           </button>
         </motion.div>
       </nav>
-
-      <ScrollProgress />
 
       <AnimatePresence>
         {isOpen && (
